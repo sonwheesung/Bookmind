@@ -47,7 +47,8 @@
 
 - Expo SDK 54 · RN 0.81.5 · React 19.1.0 · TS `strict` · expo-router 6 (Idea Repository 조합 승계)
 - 🔴 **Metro 포트 8091 명시**(`package.json` scripts). 지정 안 하면 8081로 모여 My Word와 충돌
-- `theme/` 토큰 · 팔레트 (⚠ 미결정 F 폰트를 여기서 정한다)
+- `theme/` 토큰 · 팔레트. 🔴 **폰트는 시스템 폰트다**(결정 #13) — `assets/fonts/` 를 만들지 않고,
+  타이포 토큰은 **굵기·크기·행간만** 정의한다. `expo-font` 도 설치하지 않는다
 - `locales/en.json`·`ko.json` + i18next + `check:i18n` 가드
 - `components/Screen` — 🔴 **모든 화면이 이걸로 감싼다**(세이프에어리어·키보드 가림을 한 곳에서, 조각 승계)
 - `.claude/skills/` 이식 (`common/.claude/skills`에서)

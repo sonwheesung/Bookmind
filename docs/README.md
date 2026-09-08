@@ -14,7 +14,7 @@
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **12건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-G] \|" CLAUDE.md`) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **13건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **6건**(세는 법: `grep -c "^\| [A-G] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite 11테이블) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 | ✅ 2026-09-08 |
@@ -54,7 +54,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 영역 | 상태 | 비고 |
 |---|---|---|
 | Expo 부트 (SDK 54 · expo-router · TS strict · **Metro 8091**) | ❌ | Phase 0. 🔴 포트 미지정 시 8081로 모여 My Word와 충돌 |
-| 테마 토큰 · 폰트 | ❌ | Phase 0. ⚠ 미결정 F(폰트) |
+| 테마 토큰 · 타이포 | ❌ | Phase 0. 🔴 **시스템 폰트**(결정 #13) — `assets/fonts/` 없음. 사용자가 저장하는 책 문장의 언어를 우리가 못 정하므로 번들 폰트는 두부(□)를 만든다 |
 | i18n 골격 (`en`·`ko`) + `check:i18n` | ❌ | Phase 0. 🔴 첫날에 세운다 |
 | 로컬 DB v1 (11테이블) | ❌ | Phase 1 · [`DATABASE.md`](./DATABASE.md) |
 | 빠른 저장 (직접 입력 · 붙여넣기) | ❌ | Phase 2. 🔴 필수 입력은 `content` 하나 |
