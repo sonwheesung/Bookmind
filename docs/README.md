@@ -46,16 +46,16 @@
 
 ## 2. 구현 현황
 
-**2026-09-08 문서 체계 수립. 코드는 아직 0줄이다.** 아래 표가 착수 순서의 기준이 된다.
+**2026-09-08 문서 체계 수립 + Phase 0 완료.** 아래 표가 착수 순서의 기준이 된다.
 Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ### 앱
 
 | 영역 | 상태 | 비고 |
 |---|---|---|
-| Expo 부트 (SDK 54 · expo-router · TS strict · **Metro 8091**) | ❌ | Phase 0. 🔴 포트 미지정 시 8081로 모여 My Word와 충돌 |
-| 테마 토큰 · 타이포 | ❌ | Phase 0. 🔴 **시스템 폰트**(결정 #13) — `assets/fonts/` 없음. 사용자가 저장하는 책 문장의 언어를 우리가 못 정하므로 번들 폰트는 두부(□)를 만든다 |
-| i18n 골격 (`en`·`ko`) + `check:i18n` | ❌ | Phase 0. 🔴 첫날에 세운다 |
+| Expo 부트 (SDK 54 · expo-router · TS strict · **Metro 8091**) | ✅ | Phase 0. 🔴 포트 미지정 시 8081로 모여 My Word와 충돌 |
+| 테마 토큰 · 타이포 | ✅ | Phase 0. 🔴 **시스템 폰트**(결정 #13) — `assets/fonts/` 없음. 사용자가 저장하는 책 문장의 언어를 우리가 못 정하므로 번들 폰트는 두부(□)를 만든다 |
+| i18n 골격 (`en`·`ko`) + `check:i18n` | ✅ | Phase 0. 🔴 첫날에 세운다 |
 | 로컬 DB v1 (12테이블) | ❌ | Phase 1 · [`DATABASE.md`](./DATABASE.md) |
 | 빠른 저장 (직접 입력 · 붙여넣기) | ❌ | Phase 2. 🔴 필수 입력은 `content` 하나 |
 | 책 등록 · 목록 · 상세 | ❌ | Phase 2 |
@@ -100,36 +100,53 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 > 🔴 **여기가 검증 명령의 유일한 권위 목록이다.** 다른 문서나 스킬에 복사하지 않는다 —
 > 복사하면 드리프트해서 새 가드가 누락된다. **새 가드를 만들면 여기에 추가하는 것까지가 완료다.**
 
-⚠ **아직 하나도 존재하지 않는다** — Phase 0에서 만든다. 아래는 만들 목록이다.
+✅ **Phase 0 에서 만들었다(2026-09-08).** 한 방 실행은 `npm run verify`.
 
 ```bash
 npm install
+npm run verify        # ← 커밋 전 이것 하나. 아래 넷을 순서대로 돌린다
 
-# 커밋 전 필수 (Phase 0부터)
-npx tsc --noEmit               # 타입 체크 · any 금지
-npm run lint                   # expo lint
-npx prettier --check .         # 포맷 (형제 승계: printWidth 110)
-npm run check:i18n             # en·ko 키 누락/잉여 · 보간 일치 · 비한국어 파일 한글 잔존
+npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
+npm run lint          # expo lint
+npm run check:i18n    # ① 키 누락 ② 잉여 ③ 보간 일치 ④ 비한국어 파일 한글 잔존
+npm run check:chars   # 🔴 제어문자 — CR 은 grep 이 못 봐서 바이트로 읽는다(아래 §)
+npm run check:docs    # 문서에 박힌 개수 ⇄ 실제 세기 대조
 
+npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
+```
+
+🔴 **가드 셋 전부에 `SELF-TEST` 가 내장돼 있다.** 매 실행마다 판정 함수가 살아 있는지 먼저 증명하고,
+실패하면 **exit 2** 로 죽는다(검사 실패는 exit 1). 형제가 19일간 초록이었던 사고(§ 아래)가
+"변이가 안 잡힌다"가 아니라 **"아무것도 안 본다"** 였기 때문이다.
+
+**변이 주입 실측(2026-09-08 · 6종 전부 FAIL 발화 확인)**
+
+| 변이 | 결과 |
+|---|---|
+| ko 키 삭제 | `① 누락 ko: review.reveal` ✅ |
+| 보간 `{{count}}` → `{{n}}` | `③ 보간 en={count} ko={n}` ✅ |
+| en 값에 한글 | `④ 한글 en: common.done` ✅ |
+| 파일에 `0x08` 주입 | `1건, offset 12 (0x08)` ✅ |
+| 문서 개수 조작(12→11) | `문서 11 ≠ 실제 12` ✅ |
+| 🔴 **앵커 제거**(문구 변경) | `앵커를 못 찾았다` ✅ — 조용히 통과하지 않는다 |
+
+**앞으로 붙는 것**
+
+```bash
 # Phase 8부터
 npm run check:shared           # 앱 ⇄ 서버 공유 타입 드리프트 (AI 스키마)
-
 # Phase 10부터
 npm run check:release-env      # 🔴 로컬 릴리스 빌드에 개발용 env 가 박히는 것 방지
-
-# 문서 (Phase 1부터)
-npm run check:docs             # 문서에 박힌 개수 ⇄ 실제 세기 대조
-
-# 🔴 제어문자 스윕 — CR 을 뺀 축만. grep 은 CR 을 못 본다(아래 §)
-grep -rlP '[\x00-\x08\x0b\x0c\x0e-\x1f]' \
-  --include='*.md' --include='*.mjs' --include='*.ts' --include='*.tsx' \
-  --include='*.sh' --include='*.py' \
-  --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.expo .
-# 정상이면 0건. 걸리면 정규식에 든 것부터 본다
-
-# 🔴 CR 축은 바이트 판독기로만 잡힌다 — Phase 0 에서 만든다
-npm run check:chars            # ❌ 미작성. 규칙은 아래 § · 참조 구현은 idea_repository/scripts/check-chars.mjs
 ```
+
+**번들 컴파일 확인**(구현 완료 선언 전 필수) — Metro 기동 상태에서
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" \
+  "http://localhost:8091/node_modules/expo-router/entry.bundle?platform=android&dev=true"
+```
+2026-09-08 실측: **200 · 1.66MB · 40초**(`--no-dev --minify`).
+⚠ 200 만으로는 부족하다 — **번들 안에 우리 문자열이 실제로 들어갔는지** 함께 본다.
+minify 가 한글을 `\uXXXX` 로 이스케이프하므로 리터럴 grep 은 **MISS 가 나온다**(그것 때문에 한 번 오진했다).
 
 ### 🔴 제어문자가 정규식을 조용히 무력화한다 (2026-09-08 · 전 프로젝트 공유)
 

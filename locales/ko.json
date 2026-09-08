@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "Re:Read",
+    "tagline": "읽고, 기억하고, 살아내기"
+  },
+  "home": {
+    "today": {
+      "title": "오늘",
+      "reviewCount": "기억할 내용 {{count}}개",
+      "empty": "오늘 복습할 것이 없습니다."
+    },
+    "recent": {
+      "title": "최근 저장",
+      "empty": "아직 저장한 것이 없습니다."
+    }
+  },
+  "knowledge": {
+    "save": {
+      "action": "저장",
+      "placeholder": "무엇을 발견하셨나요?",
+      "hint": "문장 하나면 충분합니다. 나머지는 전부 선택입니다."
+    }
+  },
+  "review": {
+    "reveal": "공개하기",
+    "prompt": "먼저 떠올려 보세요.",
+    "rating": {
+      "again": "잊었다",
+      "hard": "애매하다",
+      "good": "기억났다",
+      "easy": "쉬웠다"
+    }
+  },
+  "settings": {
+    "title": "설정",
+    "language": {
+      "title": "언어",
+      "system": "기기 언어"
+    }
+  },
+  "ai": {
+    "notice": {
+      "proxy": "AI 분석을 위해 원문·내 생각·책 제목·페이지·언어 정보가 Re:Read 서버를 거쳐 AI 제공자에게 전달됩니다. Re:Read 서버는 이 내용을 저장하지 않습니다 — 사용량 카운터만 남습니다."
+    }
+  },
+  "common": {
+    "cancel": "취소",
+    "delete": "삭제",
+    "done": "완료"
+  }
+}

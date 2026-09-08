@@ -4,7 +4,7 @@
 > 설계 정본은 [`../CLAUDE.md`](../CLAUDE.md), 구현 현황의 정본은 [`README.md`](./README.md) §2.
 > 🔴 Phase 를 닫을 때 **`README.md` 구현 현황표를 같이 갱신**하는 것까지가 완료다.
 
-작성일: 2026-09-08 · 현재 위치: **Phase 0 착수 전**
+작성일: 2026-09-08 · 현재 위치: **Phase 1 착수 전**(Phase 0 완료 2026-09-08)
 
 ---
 
@@ -12,7 +12,7 @@
 
 | Phase | 내용 | 상태 |
 |---|---|---|
-| 0 | 스캐폴드 · 토큰 · i18n 골격 | ❌ |
+| 0 | 스캐폴드 · 토큰 · i18n 골격 | ✅ **2026-09-08** |
 | 1 | 로컬 DB v1 | ❌ |
 | 2 | 책 · 빠른 저장 · 지식 카드 · 내 생각 · 태그 | ❌ |
 | 3 | 복습 v1 (FSRS · 기본 복습 · 오늘의 복습 · 홈) | ❌ |
@@ -53,13 +53,34 @@
 - `components/Screen` — 🔴 **모든 화면이 이걸로 감싼다**(세이프에어리어·키보드 가림을 한 곳에서, 조각 승계)
 - `.claude/skills/` 이식 (`common/.claude/skills`에서)
 
-**완료 기준**
+**완료 기준** — ✅ **2026-09-08 실측**
+
 ```
-[ ] npx tsc --noEmit 통과
-[ ] npm run lint 통과
-[ ] npm run check:i18n 통과 + 🔴 변이 주입으로 이빨 확인(키 삭제·보간 변경·한글 잔존 3종)
-[ ] 에뮬레이터에서 화면 1개 렌더 · 콘솔 에러 0
-[ ] common/DEV_ALLOCATION.md 에 Re:Read 행 존재
+[x] npx tsc --noEmit 통과                      strict + noUncheckedIndexedAccess · 에러 0
+[x] npm run lint 통과                          expo lint · 경고 0
+[x] npx prettier --check . 통과                코드만(마크다운은 .prettierignore)
+[x] npm run check:i18n 통과 + 변이 주입         🔴 6종 전부 FAIL 발화(README §3 표)
+[x] npm run check:chars 통과                    SELF-TEST 8케이스
+[x] npm run check:docs 통과                     5개 대조 · 🔴 앵커 제거도 잡는다
+[x] npx expo install --check                   "Dependencies are up to date"
+[x] 번들 컴파일                                 200 · 1.66MB · 40초 · en/ko 문자열 실재 확인
+[x] 🔴 번들에 폰트 참조 0건                     결정 #13 이 코드에서도 지켜지는지 확인
+[x] common/DEV_ALLOCATION.md 에 Re:Read 행 존재
+[ ] ⏸ 에뮬레이터에서 화면 1개 렌더 · 콘솔 에러 0
+```
+
+⏸ **에뮬레이터 렌더만 못 했다** — AVD `reread`(5574)가 아직 없고, 새 정책상 외장 `D:` 에 만들어야 해서
+**콜드 부팅이 259초**다(`common/EMULATOR_POOL.md` §0). 지금은 화면이 하나뿐이라 값이 작다.
+🔴 **Phase 2(화면 여러 개)를 닫기 전에는 반드시 한다** — 번들 컴파일이 200이어도
+런타임 렌더 실패(폰트·SafeArea·Provider 누락)는 안 잡힌다. 그건 다른 축이다.
+
+**실제로 만든 것**
+```
+app/_layout.tsx · app/index.tsx        expo-router · SafeAreaProvider · ThemeProvider
+components/Screen.tsx                  🔴 모든 화면이 이걸로 감싼다
+theme/tokens.ts · theme/index.tsx      🔴 fontFamily 없음(결정 #13) · 라이트/다크
+lib/i18n.ts · locales/{en,ko}.json     기본 en · 23키 · 기기 언어 감지
+scripts/check-{i18n,chars,docs}.mjs    🔴 셋 다 SELF-TEST 내장(exit 2)
 ```
 
 ---

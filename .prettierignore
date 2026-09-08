@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+android/
+ios/
+package-lock.json
+
+# 🔴 마크다운은 prettier 대상이 아니다.
+# 표·의도한 줄바꿈·인용 블록을 재포맷하면 문서가 읽기 나빠지고,
+# diff 가 통째로 뒤집혀 "무엇이 바뀌었나"를 못 본다.
+# 문서 규율은 docs/DOC_DISCIPLINE.md 가, 정합은 check:docs 가 본다.
+*.md

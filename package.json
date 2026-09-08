@@ -1,0 +1,49 @@
+{
+  "name": "reread",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "expo start --port 8091",
+    "android": "expo run:android --port 8091",
+    "web": "expo start --web --port 8091",
+    "typecheck": "tsc --noEmit",
+    "lint": "expo lint",
+    "format:check": "prettier --check .",
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:chars": "node scripts/check-chars.mjs",
+    "check:docs": "node scripts/check-docs.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs"
+  },
+  "dependencies": {
+    "expo": "~54.0.35",
+    "expo-constants": "~18.0.13",
+    "expo-linking": "~8.0.12",
+    "expo-localization": "~17.0.9",
+    "expo-router": "~6.0.24",
+    "expo-splash-screen": "~31.0.13",
+    "expo-status-bar": "~3.0.9",
+    "expo-system-ui": "~6.0.9",
+    "i18next": "^26.3.6",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-i18next": "^17.0.11",
+    "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "react-native-web": "~0.21.0",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "eslint": "^9.25.0",
+    "eslint-config-expo": "~10.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "~5.9.2"
+  }
+}

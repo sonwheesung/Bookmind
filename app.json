@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Re:Read",
+    "slug": "reread",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "reread",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.vivacegames.reread",
+      "versionCode": 1,
+      "edgeToEdgeEnabled": true
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vivacegames.reread"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "Re:Read",
+    "tagline": "Read it. Remember it. Live it."
+  },
+  "home": {
+    "today": {
+      "title": "Today",
+      "reviewCount": "{{count}} to remember",
+      "empty": "Nothing due today."
+    },
+    "recent": {
+      "title": "Recently saved",
+      "empty": "Nothing saved yet."
+    }
+  },
+  "knowledge": {
+    "save": {
+      "action": "Save",
+      "placeholder": "What did you find?",
+      "hint": "The passage is all you need. Everything else is optional."
+    }
+  },
+  "review": {
+    "reveal": "Reveal",
+    "prompt": "Try to recall it first.",
+    "rating": {
+      "again": "Forgot",
+      "hard": "Fuzzy",
+      "good": "Got it",
+      "easy": "Easy"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": {
+      "title": "Language",
+      "system": "Device language"
+    }
+  },
+  "ai": {
+    "notice": {
+      "proxy": "For AI analysis, the passage, your note, the book title, page and language are sent through the Re:Read server to the AI provider. The Re:Read server does not store them — it keeps only usage counters."
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "done": "Done"
+  }
+}
