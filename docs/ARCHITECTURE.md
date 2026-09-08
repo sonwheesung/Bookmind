@@ -13,8 +13,8 @@
 | 서버 경계 설계 | ✅ 2026-09-08 | 실물 조사(common_server 스키마 · 조각 서버 스키마) 근거 포함 |
 | common_server `reread` 등록 | ❌ | `CLAUDE.md` §15 |
 | common_server SDK 복사 | ❌ | |
-| Re:Read 서버 `server/` 생성 | ❌ | Phase 5 |
-| AI 프록시 라우트 | ❌ | Phase 5 |
+| Re:Read 서버 `server/` 생성 | ❌ | Phase 8 |
+| AI 프록시 라우트 | ❌ | Phase 8 |
 | 백업 금고 | ❌ | v1.1 |
 | 커뮤니티 | 🚫 | 3차. 설계만 §7 |
 
@@ -145,7 +145,7 @@ Re:Read의 주력은 **지식 카드 1건 분석**이라 기간 축이 아니다
 
 - 🔴 **Re:Read 서버는 `subjects`를 FK로 걸지 않는다.** 다른 DB다. `subject_id`를 외래 식별자로만 든다.
 - 구독 여부의 진실은 common_server 엔타이틀먼트다. 매 요청 조회하지 않도록 **짧은 캐시**를 둔다
-  (조각 방식 승계 — 캐시 TTL은 Phase 7에서 실측 후 확정).
+  (조각 방식 승계 — 캐시 TTL은 Phase 10에서 실측 후 확정).
 - 🔴 **common_server는 Expand-only 규약**이다 — 기존 컬럼을 바꾸거나 지우지 않고 덧붙인다.
 
 ---
@@ -252,7 +252,7 @@ ai_analyses · recall_questions 로컬 저장
 | 네트워크 전체 | 위 전부 | **앱의 핵심 경험 전부** |
 
 🔴 **오프라인에서 저장·복습·실천이 완전히 동작해야 한다.** 이게 로컬 정본을 택한 이유이고,
-Phase 6 검증에 "비행기 모드 전 화면 통과"를 넣는 근거다.
+Phase 3·11 검증에 "비행기 모드 전 화면 통과"를 넣는 근거다.
 
 ---
 

@@ -10,7 +10,7 @@
 
 | 영역 | 상태 | 비고 |
 |---|---|---|
-| 스키마 v1 설계 | ✅ 2026-09-08 | 11테이블 (세는 법: `grep -c "^### " docs/DATABASE.md` 의 §2 하위) |
+| 스키마 v1 설계 | ✅ 2026-09-08 | **12테이블** (세는 법: `sed -n '/^## 2. 스키마/,/^## 3./p' docs/DATABASE.md \| grep -c "^### "`) |
 | 마이그레이션 러너 | ❌ | Phase 1 |
 | 테이블 생성 | ❌ | Phase 1 |
 | 시드(기본 태그 등) | 🚫 | 시드 없음 — 사용자가 만든다 |
@@ -190,15 +190,13 @@ FSRS 카드 상태. **지식당 1행**(PK = `knowledge_id`).
 
 ⚠ UNIQUE `(practice_id, date)` — 하루에 두 번 체크되지 않게.
 
-### tags · knowledge_tags
+### tags
 
-| tags | | |
-|---|---|---|
-| `id` TEXT PK · `name` TEXT (UNIQUE, 대소문자 무시) · `created_at` |
+`id` TEXT PK · `name` TEXT (UNIQUE, 대소문자 무시) · `created_at`
 
-| knowledge_tags | | |
-|---|---|---|
-| `knowledge_id` TEXT · `tag_id` TEXT · PK `(knowledge_id, tag_id)` |
+### knowledge_tags
+
+`knowledge_id` TEXT · `tag_id` TEXT · PK `(knowledge_id, tag_id)`
 
 ⚠ 지식 삭제 시 **고아 태그를 정리**한다(참조 0이면 삭제) — Idea Repository 승계.
 
