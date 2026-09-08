@@ -1,0 +1,41 @@
+# ---- Node / Expo ----
+node_modules/
+.expo/
+.expo-shared/
+dist/
+web-build/
+*.tsbuildinfo
+
+# ---- 네이티브 (CNG 산출물 — 커밋하지 않는다) ----
+android/
+ios/
+
+# ---- 환경변수 · 비밀 ----
+.env
+.env.local
+.env.*.local
+credentials/
+*.jks
+*.keystore
+keystore.properties
+
+# ---- 빌드 산출물 ----
+*.aab
+*.apk
+build/
+.gradle/
+
+# ---- 서버 ----
+server/.next/
+server/.vercel/
+server/node_modules/
+
+# ---- OS / 에디터 ----
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# ---- 작업 부산물 ----
+.emulator-claims/
