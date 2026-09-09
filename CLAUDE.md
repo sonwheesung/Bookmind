@@ -8,6 +8,7 @@
 > 사업자·연락처·스토어 정보의 단일 출처는 `C:\project\common\BUSINESS_INFO.md` (**커밋 금지 파일**).
 > 포트·에뮬레이터 할당의 단일 출처는 `C:\project\common\DEV_ALLOCATION.md`.
 > 커밋 규약은 `C:\project\common\COMMIT_CONVENTION.md`, 문서 체계는 `C:\project\common\DOC_SYSTEM.md`.
+> 한국어 문장 규칙은 `C:\project\common\KOREAN_WRITING.md` (**새로 쓰는 글에 적용한다**).
 
 작성일: 2026-09-08 · 원본 기획서("Re:Read — Read it. Remember it. Live it.")를 프로젝트 문서 체계로 옮긴 것.
 기획서 원문은 [`docs/ORIGINAL_BRIEF.md`](./docs/ORIGINAL_BRIEF.md)에 보존돼 있고 **정본이 아니다**.

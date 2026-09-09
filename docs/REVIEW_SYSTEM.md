@@ -321,6 +321,31 @@ res/values/colors.xml notification_icon_color
 
 ⚠ `app.json`의 plugins 항목만 보고 "설정했다"고 판단하면 안 된다. **실제 파일 존재를 확인한다.**
 
+#### 🔴 6.3.1 실측 — 함정이 실재했다 (2026-09-09)
+
+`app.json` 의 `plugins` 에 `expo-notifications` 를 넣고 `npx expo prebuild --platform android` 를 돌려
+**생성된 파일을 직접 셌다.** 결과는 셋 다 0건이다.
+
+| §6.3 이 요구한 것 | 실측 |
+|---|---|
+| `AndroidManifest.xml` 의 `default_notification_icon` · `_color` | 🔴 **0건** |
+| `res/drawable-*/notification_icon.png` | 🔴 **0건**(폴더는 있고 그 파일만 없다) |
+| `res/values/colors.xml` 의 `notification_icon_color` | 🔴 **없다**(`splashscreen_background`·`colorPrimary` 만) |
+
+🔴 **원인은 `prebuild` 를 안 돌린 것이 아니었다.** 돌렸는데도 안 생긴다 —
+플러그인을 **옵션 없이** 넣으면 만들지 않고, `icon`·`color` 를 줘야 그때 생성한다.
+
+```jsonc
+// 이렇게 써야 리소스가 생긴다
+["expo-notifications", { "icon": "./assets/notification-icon.png", "color": "#3A5A73" }]
+```
+
+⏸ **그래서 여기서 막힌다: 그 아이콘 파일이 없다.** 앱 아이콘도 아직 없어서(`app.json` 에 `icon` 필드가
+없고 `ic_launcher` 는 Expo 기본값) **알림 아이콘만 따로 만드는 것은 두 번 일이다.**
+→ 알림 아이콘(24dp 흰 실루엣)은 **앱 아이콘 결정과 함께** 간다.
+
+⚠ `android/` 는 확인 뒤 지웠다. CNG 산출물이라 남기면 `app.json` 과 어긋난 채 다음 세션을 속인다.
+
 ### 6.4 실측 — Expo Go 에서 어디까지 되나 (2026-09-09 · AVD `reread` · Android 15)
 
 착수 전에 재기로 한 것을 쟀다. **결론: 로컬 알림은 Expo Go 에서 그대로 된다.**

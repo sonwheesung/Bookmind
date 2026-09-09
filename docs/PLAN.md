@@ -271,8 +271,10 @@ doply 테스터는 **비공개 테스트 요건을 채우려고 설치할 뿐 �
 [x] 켜고 끄면 예약이 생기고 사라진다        dumpsys alarm 으로 7건 → 0건 확인
 [x] 🔧 예약이 두 배가 되던 결함              §6.5 — 화면으로는 안 보였다. dumpsys 가 잡았다
 [x] 복습 0건인 날 알림이 안 온다             만기가 없으면 예약 자체를 안 한다(가드가 잰다)
-[ ] AndroidManifest 에 default_notification_icon · _color 존재 (grep 으로 확인)
-[ ] drawable-*/notification_icon.png 5종 존재
+[~] AndroidManifest 에 default_notification_icon · _color 존재   🔴 2026-09-09 실측: **0건**.
+                                                                prebuild 를 돌려도 안 생긴다 —
+                                                                플러그인에 icon·color 를 줘야 만든다(§6.3.1)
+[~] drawable-*/notification_icon.png 5종 존재                    🔴 실측: 0건. ⏸ 아이콘 파일이 없다
 [ ] 🔴 실기기 다일차: 연속 3일 이상 정시 도달 (에뮬레이터로 대체 불가)
 [ ] 재부팅 후 재예약됨
 [ ] 앱 강제 종료 후에도 도달 (기기별 결과를 기록 — 안 오는 기기가 있으면 그것도 사실이다)

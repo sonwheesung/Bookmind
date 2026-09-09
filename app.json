@@ -20,7 +20,7 @@
       "bundler": "metro",
       "output": "static"
     },
-    "plugins": ["expo-router", "expo-sqlite"],
+    "plugins": ["expo-router", "expo-sqlite", "expo-notifications"],
     "experiments": {
       "typedRoutes": true
     }
