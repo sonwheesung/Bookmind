@@ -222,6 +222,32 @@ function checkFsrs() {
   check(typeof good.log.elapsed_days === 'number', 'elapsed_days 가 없다');
   check(typeof good.log.scheduled_days === 'number', 'scheduled_days 가 없다');
 
+  // 🔴🔴 반복 노출 — 간격이 **자라는가**. 이 검사가 없어서 결함이 통과했다(2026-09-09)
+  //     [기억났다]만 누르는 사용자의 카드가 learning 에서 졸업하지 못하고 10분에 고정돼 있었다.
+  //     원인은 ts-fsrs 의 learning_steps 를 우리 표가 안 들고 다닌 것(마이그레이션 v3 로 고침).
+  //     ⚠ 한 시점의 단조성(again<hard<good<easy)만 재면 이 결함은 **영원히 초록이다.**
+  {
+    let row = newSchedule('k-loop', '2026-09-10T00:00:00.000Z');
+    let at2 = new Date('2026-09-10T00:00:00.000Z');
+    const gaps = [];
+    let reachedReview = false;
+    for (let i = 0; i < 6; i++) {
+      gaps.push(intervalDays(row, 'good', at2));
+      const next = applyRating(row, 'good', at2);
+      row = { knowledge_id: 'k-loop', ...next.schedule };
+      at2 = new Date(next.schedule.due_at);
+      if (row.state === 'review') reachedReview = true;
+    }
+    check(reachedReview, '🔴 [기억났다]를 여섯 번 눌러도 learning 에서 졸업하지 못한다');
+    check(
+      gaps[gaps.length - 1] > gaps[0] * 10,
+      `🔴 간격이 안 자란다 — 첫 ${gaps[0].toFixed(4)}일 → 마지막 ${gaps[gaps.length - 1].toFixed(1)}일`,
+    );
+    for (let i = 1; i < gaps.length; i++) {
+      check(gaps[i] >= gaps[i - 1], `간격이 뒤로 갔다: ${i}번째 ${gaps[i]} < ${gaps[i - 1]}`);
+    }
+  }
+
   // 🔴 잊었다 → lapses 가 는다. 복습한 카드에서만 의미가 있다
   const reviewed = { ...fresh, ...applyRating(fresh, 'easy', at).schedule };
   const later = new Date('2026-09-20T00:00:00.000Z');
@@ -245,5 +271,5 @@ if (bad.length > 0) {
   process.exit(1);
 }
 console.log(
-  `check:review OK — FSRS 4등급 순서 · 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
+  `check:review OK — FSRS 4등급 순서·간격 성장 · 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
 );

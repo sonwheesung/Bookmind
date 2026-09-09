@@ -26,6 +26,7 @@ export function scheduleNewCard(knowledgeId: string, savedAt: Date = new Date())
     reps: row.reps,
     lapses: row.lapses,
     last_reviewed_at: row.last_reviewed_at,
+    learning_steps: row.learning_steps,
   });
 }
 

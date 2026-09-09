@@ -219,6 +219,19 @@ ALTER TABLE books ADD COLUMN total_pages INTEGER;
 ALTER TABLE books ADD COLUMN read_pages  INTEGER;
 `;
 
-export const MIGRATIONS: readonly string[] = [V1, V2];
+/**
+ * v3 — FSRS 학습 단계 보존 (2026-09-09 · 🔴 결함 수정).
+ *
+ * 🔴 `ts-fsrs` 의 카드에는 **지금 몇 번째 학습 단계인가**(`learning_steps`)가 들어 있는데
+ *    우리 표에 그 칸이 없어서 매 복습마다 0 으로 리셋됐다. 증상: [기억났다]만 누르면
+ *    카드가 `learning` 에서 **영원히 졸업하지 못하고 간격이 10분에 고정**된다 —
+ *    "잊을 때쯤 다시 만난다"(기둥 7)가 반대로 도는 상태였다.
+ * ⚠ 기존 행은 0 으로 시작한다. 되돌릴 값이 없으므로 그게 맞다(Expand-only).
+ */
+const V3 = `
+ALTER TABLE review_schedules ADD COLUMN learning_steps INTEGER NOT NULL DEFAULT 0;
+`;
+
+export const MIGRATIONS: readonly string[] = [V1, V2, V3];
 
 /** 시드 없음 — 태그·카테고리를 우리가 정하지 않는다(`docs/PLAN.md` Phase 1). */

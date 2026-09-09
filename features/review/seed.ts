@@ -62,6 +62,7 @@ export function seedDueCards(opts: SeedOptions): string[] {
       reps: 0,
       lapses: 0,
       last_reviewed_at: null,
+      learning_steps: 0,
     });
 
     // 단서가 있는 쪽은 생각을 붙인다(§3.1 1순위 단서)

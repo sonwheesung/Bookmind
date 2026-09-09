@@ -27,6 +27,11 @@ export interface ScheduleRow {
   readonly reps: number;
   readonly lapses: number;
   readonly last_reviewed_at: string | null;
+  /**
+   * 🔴 지금 몇 번째 학습 단계인가(`ts-fsrs` 내부 상태).
+   * 이 값을 안 들고 다니면 매번 0 으로 리셋돼 카드가 `learning` 에서 졸업하지 못한다(v3 에서 고쳤다).
+   */
+  readonly learning_steps: number;
 }
 
 export interface RatingResult {
@@ -71,6 +76,7 @@ function toCard(row: ScheduleRow): Card {
     difficulty: row.difficulty,
     reps: row.reps,
     lapses: row.lapses,
+    learning_steps: row.learning_steps,
     state: TO_STATE[row.state],
     ...(row.last_reviewed_at === null ? {} : { last_review: new Date(row.last_reviewed_at) }),
   };
@@ -88,6 +94,7 @@ export function newSchedule(knowledgeId: string, dueAt: string): ScheduleRow {
     reps: 0,
     lapses: 0,
     last_reviewed_at: null,
+    learning_steps: 0,
   };
 }
 
@@ -111,6 +118,7 @@ export function applyRating(row: ScheduleRow, rating: ReviewRating, now: Date): 
       reps: card.reps,
       lapses: card.lapses,
       last_reviewed_at: now.toISOString(),
+      learning_steps: card.learning_steps,
     },
     log: {
       rating,
