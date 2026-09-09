@@ -10,7 +10,7 @@
 
 ## 1. 문서 목록
 
-**15개** (세는 법: `ls docs/*.md | wc -l`)
+**16개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
@@ -27,6 +27,7 @@
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
 | [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 · 가드 7축 | ✅ 2026-09-09 **구현·실측 완료** |
+| [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 | ✅ 2026-09-09 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -39,7 +40,6 @@
 | `VAULT_SYSTEM.md` (암호화 백업 금고) | Phase 12 (v1.1) — 조각 `server/` 복사 승계 | ❌ |
 | `LEGAL_SYSTEM.md` | Phase 11 — 처리방침 · 약관 · Play 데이터 보안 | ❌ |
 | `STORE_LISTING.md` | Phase 11 | ❌ |
-| `BUILD.md` | 첫 릴리스 빌드 | ❌ |
 | `OTA_SYSTEM.md` | OTA 도입 시 | ❌ |
 | `POLISH_BACKLOG.md` | 첫 "이건 아닌데 지금은 넘어간다" | ❌ |
 | `COMMUNITY_SYSTEM.md` | 3차 | 🚫 |
@@ -373,6 +373,37 @@ git check-ignore -q secrets/x.json && echo OK || echo 뚫림
 `.env.production`(`.env` 는 막고 있었는데 `.env.*` 가 아니었다). 물려 보기 전에는 목록이 충분해 **보였다.**
 
 ⚠ 저작권 축도 본다(독서 앱이라 열려 있다). 저장소에 든 "책 문장"은 예시 한 줄과 **제목·저자명**뿐이었다.
+
+### 3.2 🔴 "Metro 가 200 을 준다" 는 **번들을 줄 수 있다는 뜻이 아니다** (2026-09-09)
+
+실기기에 dev build 를 올린 날, 앱이 스플래시에서 안 넘어갔다. 네 조합을 시도하며 **엉뚱한 데를 팠다** —
+`adb reverse` · LAN 주소 · 재설치 · 딥링크. 원인은 그중 어느 것도 아니었다.
+
+```
+curl http://127.0.0.1:8091/status        →  200      ← 내가 "Metro OK" 라고 판단한 근거
+metro.log 안                              →  Failed to construct transformer:
+                                             Error: Failed to start watch mode.
+```
+
+🔴 **포트는 열려 있고 상태 질의에는 답하는데, 파일 감시자가 죽어 번들을 만들 수가 없었다.**
+`status` 200 은 *"프로세스가 살아 있다"* 까지만 말한다. 그걸 *"쓸 수 있다"* 로 읽은 것이 내 실수였다.
+
+**그래서 이제 이렇게 잰다** — 살아 있는지가 아니라 **일을 하는지**를 묻는다.
+
+```bash
+# 🚫 이것만 보고 판단하지 않는다
+curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8091/status
+
+# ✅ 실제로 번들을 요청해 본다. 그리고 로그에서 watch 오류가 0건인지 함께 본다
+grep -c "Failed to start watch mode" <metro 로그>
+```
+
+⚠ **그리고 첫 번들은 이 PC 에서 4분 가까이 걸린다**(실측 232초). 메모리가 빠듯할 때 더 느리다.
+40~50초 보고 "안 된다"고 판단하면 **되는 것을 안 된다고 적게 된다.** 실제로 그렇게 두 번 오판했다.
+🟢 워커를 줄이면(`--max-workers 2`) 감시자 시작 실패가 재현되지 않았다.
+
+★ 오늘 같은 모양을 여러 번 만났다 — **"확인했다" 와 "확인할 수 있는 상태였다" 는 다르다.**
+가드의 대조군(§3.1), `check:chars` 의 바이트 판독, 그리고 이 Metro 건이 전부 같은 축이다.
 
 ---
 
