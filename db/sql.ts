@@ -128,6 +128,18 @@ export function buildSelect(table: TableName, opts: SelectOptions = {}): Sql {
   return { text, params };
 }
 
+/**
+ * COUNT — 화면의 집계는 **저장하지 않고 매번 센다**(§4 · `KNOWLEDGE_SYSTEM.md` §4.2).
+ * 🔴 `buildSelect` 와 같은 필터를 타므로 지운 것은 안 세어진다.
+ */
+export function buildCount(
+  table: TableName,
+  opts: Omit<SelectOptions, 'columns' | 'orderBy' | 'limit'> = {},
+): Sql {
+  const base = buildSelect(table, { ...opts, columns: ['*'] });
+  return { text: base.text.replace('SELECT * FROM', 'SELECT COUNT(*) AS n FROM'), params: base.params };
+}
+
 /** UPDATE — `updated_at` 을 빌더가 갱신하고, tombstone 된 행은 고치지 않는다. */
 export function buildUpdate(
   table: TableName,

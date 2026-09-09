@@ -3,6 +3,15 @@
     "name": "Re:Read",
     "tagline": "Read it. Remember it. Live it."
   },
+  "common": {
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "done": "Done",
+    "save": "Save",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove"
+  },
   "home": {
     "today": {
       "title": "Today",
@@ -12,6 +21,11 @@
     "recent": {
       "title": "Recently saved",
       "empty": "Nothing saved yet."
+    },
+    "cta": "Save a passage",
+    "stats": {
+      "books": "Books · {{count}}",
+      "knowledge": "Passages · {{count}}"
     }
   },
   "knowledge": {
@@ -19,6 +33,76 @@
       "action": "Save",
       "placeholder": "What did you find?",
       "hint": "The passage is all you need. Everything else is optional."
+    },
+    "new": {
+      "title": "New passage"
+    },
+    "field": {
+      "passage": "Passage",
+      "book": "Book",
+      "page": "Page",
+      "thought": "My thought",
+      "tags": "Tags",
+      "tagsHint": "Separate with commas"
+    },
+    "book": {
+      "none": "No book"
+    },
+    "list": {
+      "title": "Passages",
+      "empty": "Nothing saved yet."
+    },
+    "detail": {
+      "title": "Passage"
+    },
+    "thoughts": {
+      "title": "My thoughts",
+      "empty": "Nothing written yet. You do not have to.",
+      "placeholder": "What does this mean to you?",
+      "add": "Add thought"
+    },
+    "tags": {
+      "title": "Tags",
+      "empty": "No tags.",
+      "placeholder": "Add a tag"
+    },
+    "delete": {
+      "title": "Delete this passage?",
+      "body": "Thoughts and tags go with it. Practices stay."
+    }
+  },
+  "books": {
+    "list": {
+      "title": "Books",
+      "empty": "No books yet. A passage does not need one."
+    },
+    "new": {
+      "title": "Add book",
+      "action": "Add"
+    },
+    "field": {
+      "title": "Title",
+      "author": "Author",
+      "status": "Status"
+    },
+    "status": {
+      "wish": "Want to read",
+      "reading": "Reading",
+      "done": "Finished"
+    },
+    "detail": {
+      "counts": {
+        "knowledge": "Passages {{count}}",
+        "thoughts": "Thoughts {{count}}",
+        "reviews": "Reviews {{count}}",
+        "practices": "Practices {{count}}"
+      },
+      "passages": "From this book",
+      "empty": "Nothing saved from this book yet."
+    },
+    "delete": {
+      "title": "Delete this book?",
+      "body": "{{count}} saved passages stay. Only the book link is removed."
     }
   },
   "review": {
@@ -42,10 +126,5 @@
     "notice": {
       "proxy": "For AI analysis, the passage, your note, the book title, page and language are sent through the Re:Read server to the AI provider. The Re:Read server does not store them — it keeps only usage counters."
     }
-  },
-  "common": {
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "done": "Done"
   }
 }

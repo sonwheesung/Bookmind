@@ -14,7 +14,10 @@ import { deleteBookSteps, deleteKnowledgeSteps, deletePracticeSteps } from './ca
 import { runMigrations, type SqlDriver } from './migrate.ts';
 import { type TableName } from './schema.ts';
 import {
+  buildCount,
   buildInsert,
+  buildRevive,
+  buildReviveWhere,
   buildSelect,
   buildSoftDelete,
   buildUpdate,
@@ -103,6 +106,27 @@ export function selectAll<T>(table: TableName, opts: SelectOptions = {}): T[] {
 export function selectOne<T>(table: TableName, opts: SelectOptions = {}): T | undefined {
   const sql = buildSelect(table, { ...opts, limit: 1 });
   return getDb().getFirstSync<T>(sql.text, sql.params as SQLite.SQLiteBindParams) ?? undefined;
+}
+
+/** 🔴 파생값은 저장하지 않고 매번 센다(`DATABASE.md` §4 · `KNOWLEDGE_SYSTEM.md` §4.2). */
+export function count(
+  table: TableName,
+  opts: Omit<SelectOptions, 'columns' | 'orderBy' | 'limit'> = {},
+): number {
+  const sql = buildCount(table, opts);
+  const row = getDb().getFirstSync<{ n: number }>(sql.text, sql.params as SQLite.SQLiteBindParams);
+  return row?.n ?? 0;
+}
+
+/** tombstone 되살리기 — UNIQUE 와 부딪히는 자리(§1.4). 되살린 행 수를 돌려준다. */
+export function revive(table: TableName, key: Readonly<Record<string, unknown>>): number {
+  const sql = buildRevive(table, key, nowIso());
+  return getDb().runSync(sql.text, sql.params as SQLite.SQLiteBindParams).changes;
+}
+
+export function reviveWhere(table: TableName, where: string, params: readonly unknown[]): number {
+  const sql = buildReviveWhere(table, where, params, nowIso());
+  return getDb().runSync(sql.text, sql.params as SQLite.SQLiteBindParams).changes;
 }
 
 /** 삭제 규칙(§3)은 전부 `db/cascade.ts` 가 정하고, 여기서는 한 트랜잭션으로 돌리기만 한다. */

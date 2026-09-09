@@ -57,9 +57,9 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 테마 토큰 · 타이포 | ✅ | Phase 0. 🔴 **시스템 폰트**(결정 #13) — `assets/fonts/` 없음. 사용자가 저장하는 책 문장의 언어를 우리가 못 정하므로 번들 폰트는 두부(□)를 만든다 |
 | i18n 골격 (`en`·`ko`) + `check:i18n` | ✅ | Phase 0. 🔴 첫날에 세운다 |
 | 로컬 DB v1 (12테이블) | ✅ | Phase 1(2026-09-09). 러너 · UUID/tombstone 헬퍼 · 삭제 규칙 · `check:db` 가 실물 SQLite 에 세워 잰다 · [`DATABASE.md`](./DATABASE.md) §6 |
-| 빠른 저장 (직접 입력 · 붙여넣기) | ❌ | Phase 2. 🔴 필수 입력은 `content` 하나 |
-| 책 등록 · 목록 · 상세 | ❌ | Phase 2 |
-| 지식 카드 · 내 생각(1:N) · 태그 | ❌ | Phase 2 |
+| 빠른 저장 (직접 입력 · 붙여넣기) | ✅ | Phase 2(2026-09-09). 🔴 필수 입력은 `content` 하나 — 홈에서 1탭 |
+| 책 등록 · 목록 · 상세 | ✅ | Phase 2(2026-09-09). 파생 집계 4종 · 🔴 삭제해도 지식은 남는다 |
+| 지식 카드 · 내 생각(1:N) · 태그 | ✅ | Phase 2(2026-09-09). 에뮬 E2E 로 CRUD 전 구간 확인 |
 | 복습 v1 — FSRS · 기본 복습 · 오늘의 복습 · 홈 | ❌ | Phase 3. 🔴 AI 없이 성립하는지의 시험대 |
 | 로컬 알림 | ❌ | Phase 4. 🔴 **실기기 다일차 검증이 완료 기준** |
 | OCR | ❌ | Phase 5. ⚠ 미결정 C · 🔴 온디바이스 |
@@ -115,6 +115,11 @@ npm run check:db      # 🔴 로컬 스키마·삭제 규칙 — 실물 SQLite(n
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
+
+⚠ **`typecheck` 는 생성된 라우트 타입에 기댄다**(`app.json` `typedRoutes: true` → `.expo/types/router.d.ts`).
+`.expo/` 는 gitignore 라 **새로 받은 저장소에서는 그 파일이 없다** — 그 상태로 typecheck 를 돌리면
+`router.push('/books')` 같은 줄이 전부 빨갛게 뜬다. **코드가 깨진 것이 아니다.**
+→ `npx expo start` 를 한 번 띄우면(또는 `npx expo export`) 재생성된다. Expo CLI 에 typegen 단독 명령이 없다(SDK 54 실측).
 
 🔴 **가드 셋 전부에 `SELF-TEST` 가 내장돼 있다.** 매 실행마다 판정 함수가 살아 있는지 먼저 증명하고,
 실패하면 **exit 2** 로 죽는다(검사 실패는 exit 1). 형제가 19일간 초록이었던 사고(§ 아래)가

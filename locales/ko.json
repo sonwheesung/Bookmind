@@ -1,34 +1,118 @@
 {
   "app": {
     "name": "Re:Read",
-    "tagline": "읽고, 기억하고, 살아내기"
+    "tagline": "읽고, 기억하고, 살아낸다."
+  },
+  "common": {
+    "cancel": "취소",
+    "delete": "삭제",
+    "done": "완료",
+    "save": "저장",
+    "edit": "수정",
+    "add": "추가",
+    "remove": "떼기"
   },
   "home": {
     "today": {
       "title": "오늘",
-      "reviewCount": "기억할 내용 {{count}}개",
+      "reviewCount": "떠올릴 것 {{count}}개",
       "empty": "오늘 복습할 것이 없습니다."
     },
     "recent": {
       "title": "최근 저장",
       "empty": "아직 저장한 것이 없습니다."
+    },
+    "cta": "문장 저장하기",
+    "stats": {
+      "books": "책 · {{count}}",
+      "knowledge": "문장 · {{count}}"
     }
   },
   "knowledge": {
     "save": {
       "action": "저장",
-      "placeholder": "무엇을 발견하셨나요?",
-      "hint": "문장 하나면 충분합니다. 나머지는 전부 선택입니다."
+      "placeholder": "무엇을 발견했나요?",
+      "hint": "원문만 있으면 됩니다. 나머지는 전부 선택입니다."
+    },
+    "new": {
+      "title": "새 문장"
+    },
+    "field": {
+      "passage": "원문",
+      "book": "책",
+      "page": "페이지",
+      "thought": "내 생각",
+      "tags": "태그",
+      "tagsHint": "쉼표로 구분합니다"
+    },
+    "book": {
+      "none": "책 없음"
+    },
+    "list": {
+      "title": "문장",
+      "empty": "아직 저장한 것이 없습니다."
+    },
+    "detail": {
+      "title": "문장"
+    },
+    "thoughts": {
+      "title": "내 생각",
+      "empty": "아직 쓴 것이 없습니다. 안 써도 됩니다.",
+      "placeholder": "이 문장이 나에게 무엇이었나요?",
+      "add": "생각 남기기"
+    },
+    "tags": {
+      "title": "태그",
+      "empty": "태그가 없습니다.",
+      "placeholder": "태그 추가"
+    },
+    "delete": {
+      "title": "이 문장을 지울까요?",
+      "body": "내 생각과 태그가 함께 사라집니다. 실천은 남습니다."
+    }
+  },
+  "books": {
+    "list": {
+      "title": "책",
+      "empty": "아직 책이 없습니다. 문장 저장에 책은 필요 없습니다."
+    },
+    "new": {
+      "title": "책 등록",
+      "action": "등록"
+    },
+    "field": {
+      "title": "제목",
+      "author": "저자",
+      "status": "상태"
+    },
+    "status": {
+      "wish": "읽고 싶음",
+      "reading": "읽는 중",
+      "done": "완료"
+    },
+    "detail": {
+      "counts": {
+        "knowledge": "문장 {{count}}",
+        "thoughts": "생각 {{count}}",
+        "reviews": "복습 {{count}}",
+        "practices": "실천 {{count}}"
+      },
+      "passages": "이 책에서 나온 문장",
+      "empty": "이 책에서 저장한 문장이 아직 없습니다."
+    },
+    "delete": {
+      "title": "이 책을 지울까요?",
+      "body": "저장한 문장 {{count}}개는 그대로 남습니다. 책 연결만 끊깁니다."
     }
   },
   "review": {
-    "reveal": "공개하기",
+    "reveal": "원문 보기",
     "prompt": "먼저 떠올려 보세요.",
     "rating": {
       "again": "잊었다",
       "hard": "애매하다",
       "good": "기억났다",
-      "easy": "쉬웠다"
+      "easy": "쉽다"
     }
   },
   "settings": {
@@ -40,12 +124,7 @@
   },
   "ai": {
     "notice": {
-      "proxy": "AI 분석을 위해 원문·내 생각·책 제목·페이지·언어 정보가 Re:Read 서버를 거쳐 AI 제공자에게 전달됩니다. Re:Read 서버는 이 내용을 저장하지 않습니다 — 사용량 카운터만 남습니다."
+      "proxy": "AI 분석을 위해 해당 지식의 원문 · 내 생각 · 책 제목 · 페이지 · 언어 정보가 Re:Read 서버를 거쳐 AI 제공자에게 전달됩니다. Re:Read 서버는 이 내용을 저장하지 않습니다 — 사용량 집계만 남습니다."
     }
-  },
-  "common": {
-    "cancel": "취소",
-    "delete": "삭제",
-    "done": "완료"
   }
 }

@@ -1,53 +1,91 @@
+import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { countBooks } from '@/features/books/repo';
+import { countKnowledge, listKnowledge } from '@/features/knowledge/repo';
+import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
 
 /**
- * 홈 — "오늘 무엇을 하면 되는가" (`docs/KNOWLEDGE_SYSTEM.md` §7).
- * 🔴 홈은 책장이 아니다. Phase 3 에서 오늘의 복습이 여기 맨 위에 온다.
+ * 홈 — "오늘 무엇을 하면 되는가"(`docs/KNOWLEDGE_SYSTEM.md` §7).
  *
- * Phase 0 에서는 토큰·i18n·Screen 이 실제로 도는지만 보여준다.
+ * 🔴 홈은 책장이 아니다. 그리고 저장은 **1탭 거리**여야 한다(§1.2) —
+ *    그래서 저장 버튼이 목록보다 위에 있고, 책을 거치지 않는다.
+ * ⏸ 맨 위의 "오늘의 복습"은 Phase 3 에서 실제 큐가 들어온다.
  */
 export default function Home() {
   const { t } = useTranslation();
   const { palette, spacing, typography } = useTheme();
 
-  return (
-    <Screen>
-      <View style={[styles.header, { marginBottom: spacing.xl }]}>
-        <Text style={[typography.title, { color: palette.text }]}>{t('app.name')}</Text>
-        <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
-          {t('app.tagline')}
-        </Text>
-      </View>
+  const { data } = useDbQuery(() => ({
+    recent: listKnowledge(3),
+    books: countBooks(),
+    knowledge: countKnowledge(),
+  }));
 
-      <View
+  return (
+    <Screen scroll>
+      <Header title={t('app.name')} />
+      <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.xl }]}>
+        {t('app.tagline')}
+      </Text>
+
+      <Button label={t('home.cta')} onPress={() => router.push('/knowledge/new')} />
+      <Text
         style={[
-          styles.card,
-          {
-            backgroundColor: palette.surface,
-            borderColor: palette.border,
-            borderRadius: 10,
-            padding: spacing.lg,
-          },
+          typography.caption,
+          { color: palette.textMuted, marginTop: spacing.sm, marginBottom: spacing.xl },
         ]}
       >
+        {t('knowledge.save.hint')}
+      </Text>
+
+      <Card>
         <Text style={[typography.label, { color: palette.textMuted }]}>{t('home.today.title')}</Text>
         <Text style={[typography.body, { color: palette.text, marginTop: spacing.sm }]}>
           {t('home.today.empty')}
         </Text>
+      </Card>
+
+      <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
+        <Button
+          label={t('home.stats.books', { count: data.books })}
+          variant="ghost"
+          onPress={() => router.push('/books')}
+          style={styles.grow}
+        />
+        <Button
+          label={t('home.stats.knowledge', { count: data.knowledge })}
+          variant="ghost"
+          onPress={() => router.push('/knowledge')}
+          style={styles.grow}
+        />
       </View>
 
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xl }]}>
-        {t('knowledge.save.hint')}
+      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+        {t('home.recent.title')}
       </Text>
+      {data.recent.length === 0 ? (
+        <Text style={[typography.body, { color: palette.textMuted }]}>{t('home.recent.empty')}</Text>
+      ) : (
+        data.recent.map((k) => (
+          <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
+            <Text style={[typography.thought, { color: palette.text }]} numberOfLines={3}>
+              {k.content}
+            </Text>
+          </Card>
+        ))
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { paddingTop: 8 },
-  card: { borderWidth: 1 },
+  row: { flexDirection: 'row' },
+  grow: { flex: 1 },
 });
