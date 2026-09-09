@@ -8,7 +8,7 @@ import { count, deleteKnowledge, insert, revive, selectAll, selectOne, softDelet
 import { getBook } from '@/features/books/repo';
 import { scheduleNewCard } from '@/features/review/repo';
 import { ensureTag } from '@/features/tags/repo';
-import type { KnowledgeRow, SourceType, ThoughtRow } from '@/features/types';
+import type { KnowledgeRow, SourceType } from '@/features/types';
 
 export interface SaveInput {
   content: string;
@@ -110,13 +110,8 @@ export function removeKnowledge(id: string): void {
 // ── 내 생각 (1:N) ────────────────────────────────────────────────────
 // 🔴 여러 개 쌓이는 것이 제품 컨셉이다(기획서 §3). 덮어쓰지 않는다.
 
-export function thoughtsOf(knowledgeId: string): ThoughtRow[] {
-  return selectAll<ThoughtRow>('thoughts', {
-    where: 'knowledge_id = ?',
-    params: [knowledgeId],
-    orderBy: 'created_at DESC',
-  });
-}
+// 🔴 정의는 `features/knowledge/thoughts.ts` 로 옮겼다(순환 import 를 끊으려고). 여기서는 다시 내보내기만 한다
+export { thoughtsOf } from '@/features/knowledge/thoughts';
 
 export function addThought(knowledgeId: string, body: string): string | null {
   const text = body.trim();

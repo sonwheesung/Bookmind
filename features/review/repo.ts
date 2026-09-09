@@ -6,7 +6,7 @@
  */
 import { getDb, insert, nowIso, selectAll, selectOne, update } from '@/db';
 import { getBook } from '@/features/books/repo';
-import { thoughtsOf } from '@/features/knowledge/repo';
+import { thoughtsOf } from '@/features/knowledge/thoughts';
 import { tagsOf } from '@/features/tags/repo';
 import type { KnowledgeRow } from '@/features/types';
 import { pickCue, type Cue } from '@/features/review/cue';
