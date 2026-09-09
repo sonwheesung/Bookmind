@@ -7,8 +7,15 @@
  *
  * 🔴 SELF-TEST 가 먼저다(exit 2). 검사 실패는 exit 1.
  */
+import { DatabaseSync } from 'node:sqlite';
+import { randomUUID } from 'node:crypto';
+
+import { runMigrations } from '../db/migrate.ts';
+import { buildInsert } from '../db/sql.ts';
+import { deleteKnowledgeSteps } from '../db/cascade.ts';
 import { pickCue, CUE_HEAD_CHARS } from '../features/review/cue.ts';
 import { DAILY_LIMIT, endOfLocalDay, firstDueAt, takeDue } from '../features/review/queue.ts';
+import { dueQuery } from '../features/review/sql.ts';
 
 // ── 🔴 SELF-TEST — 판정 함수가 살아 있는가 ───────────────────────────
 function selfTest() {
@@ -119,13 +126,91 @@ function checkQueue() {
   check(takeDue([]).length === 0, '빈 큐에서 뭔가 나왔다');
 }
 
+// ── 큐 질의를 실물 SQLite 에 세워서 잰다 ──────────────────────────────
+function openDb() {
+  const db = new DatabaseSync(':memory:');
+  db.exec('PRAGMA foreign_keys = ON');
+  const driver = {
+    exec: (q) => db.exec(q),
+    get: (q, p = []) => db.prepare(q).get(...p),
+    run: (q, p = []) => db.prepare(q).run(...p),
+  };
+  runMigrations(driver);
+  return { db, driver };
+}
+
+const NOW = '2026-09-09T00:00:00.000Z';
+const PAST = '2026-09-01T00:00:00.000Z';
+
+function addCard(driver, dueAt) {
+  const id = randomUUID();
+  const stamp = { id, now: NOW };
+  const k = buildInsert(
+    'knowledge',
+    { book_id: null, content: '큐 확인용', page: null, source_type: 'manual', lang: null },
+    stamp,
+  );
+  driver.run(k.text, k.params);
+  const r = buildInsert(
+    'review_schedules',
+    {
+      knowledge_id: id,
+      due_at: dueAt,
+      state: 'new',
+      stability: 0,
+      difficulty: 0,
+      reps: 0,
+      lapses: 0,
+      last_reviewed_at: null,
+    },
+    { id: randomUUID(), now: NOW },
+  );
+  driver.run(r.text, r.params);
+  return id;
+}
+
+function checkDueQuery() {
+  const { db, driver } = openDb();
+  const endOfDay = '2026-09-10T00:00:00.000Z';
+
+  const due = addCard(driver, PAST);
+  const later = addCard(driver, '2026-12-01T00:00:00.000Z');
+  const doomed = addCard(driver, PAST);
+
+  const run = (sql) => db.prepare(sql.text).all(...sql.params);
+
+  let rows = run(dueQuery(endOfDay));
+  check(rows.length === 2, `기한이 지난 2장이어야 하는데 ${rows.length}장이다`);
+  check(!rows.some((r) => r.knowledge_id === later), '아직 기한이 안 된 카드가 큐에 들어왔다');
+
+  // 🔴 Phase 3 완료 기준 — 지운 지식이 큐에 나타나지 않는다
+  for (const step of deleteKnowledgeSteps(doomed, NOW)) driver.run(step.text, step.params);
+  rows = run(dueQuery(endOfDay));
+  check(rows.length === 1, `지운 뒤 1장이어야 하는데 ${rows.length}장이다`);
+  check(rows[0]?.knowledge_id === due, '남은 카드가 다르다');
+
+  // 🔴 두 겹 방어 — 예약 행이 살아남은 상태에서도 지식이 죽었으면 안 뜬다
+  const orphan = addCard(driver, PAST);
+  driver.run('UPDATE knowledge SET deleted_at = ? WHERE id = ?', [NOW, orphan]);
+  rows = run(dueQuery(endOfDay));
+  check(
+    !rows.some((r) => r.knowledge_id === orphan),
+    '🔴 예약만 살아 있는 카드가 큐에 떴다 — 지운 지식이 복습에 되살아난다',
+  );
+
+  db.close();
+}
+
 selfTest();
 checkCue();
 checkQueue();
+checkDueQuery();
 
 if (bad.length > 0) {
   console.error(`check:review FAIL (${bad.length})`);
   for (const m of bad) console.error('  ' + m);
   process.exit(1);
 }
-console.log(`check:review OK — 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · SELF-TEST 3종`);
+console.log(
+  `check:review OK — 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
+);
