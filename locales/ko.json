@@ -15,7 +15,6 @@
   "home": {
     "today": {
       "title": "오늘의 복습",
-      "reviewCount": "떠올릴 것 {{count}}개",
       "empty": "오늘 다시 만날 문장이 없습니다.",
       "count": "문장 {{count}}개"
     },
@@ -32,8 +31,8 @@
   "knowledge": {
     "save": {
       "action": "저장",
-      "placeholder": "무엇을 발견했나요?",
-      "hint": "원문만 있으면 됩니다. 나머지는 전부 선택입니다."
+      "placeholder": "남기고 싶은 문장",
+      "hint": "원문만 있으면 충분합니다. 나머지는 선택입니다."
     },
     "new": {
       "title": "새 문장"
@@ -58,15 +57,14 @@
     },
     "thoughts": {
       "title": "내 생각",
-      "empty": "아직 쓴 것이 없습니다. 안 써도 됩니다.",
-      "placeholder": "이 문장이 나에게 무엇이었나요?",
+      "empty": "아직 남긴 생각이 없습니다.",
+      "placeholder": "이 문장이 나에게 무엇이었을까요?",
       "add": "생각 남기기",
-      "removeTitle": "이 생각을 뗄까요?",
+      "removeTitle": "이 생각을 삭제할까요?",
       "removeBody": "문장은 그대로 남습니다."
     },
     "tags": {
       "title": "태그",
-      "empty": "태그가 없습니다.",
       "placeholder": "태그 추가",
       "already": "이미 붙어 있는 태그입니다."
     },
@@ -78,11 +76,11 @@
   "books": {
     "list": {
       "title": "책",
-      "empty": "아직 책이 없습니다. 문장 저장에 책은 필요 없습니다."
+      "empty": "아직 등록한 책이 없습니다. 문장은 책 없이도 저장할 수 있습니다."
     },
     "new": {
-      "title": "책 등록",
-      "action": "등록"
+      "title": "책 추가",
+      "action": "추가"
     },
     "field": {
       "title": "제목",
@@ -94,7 +92,7 @@
     "status": {
       "wish": "읽고 싶음",
       "reading": "읽는 중",
-      "done": "완료"
+      "done": "다 읽음"
     },
     "detail": {
       "counts": {
@@ -103,37 +101,37 @@
         "reviews": "복습 {{count}}",
         "practices": "실천 {{count}}"
       },
-      "passages": "이 책에서 나온 문장",
+      "passages": "이 책에서 저장한 문장",
       "empty": "이 책에서 저장한 문장이 아직 없습니다.",
       "progress": "{{read}} / {{total}}쪽"
     },
     "delete": {
       "title": "이 책을 지울까요?",
-      "body": "저장한 문장 {{count}}개는 그대로 남습니다. 책 연결만 끊깁니다."
+      "body": "저장한 문장 {{count}}개는 그대로 남습니다. 이 책과의 연결만 끊깁니다."
     }
   },
   "review": {
     "reveal": "원문 보기",
-    "prompt": "먼저 떠올려 보세요.",
+    "prompt": "잠시 떠올려 보세요.",
     "rating": {
-      "again": "잊었다",
-      "hard": "애매하다",
-      "good": "기억났다",
-      "easy": "쉽다"
+      "again": "안 떠올랐다",
+      "hard": "겨우 떠올랐다",
+      "good": "떠올랐다",
+      "easy": "바로 떠올랐다"
     },
     "title": "오늘의 복습",
     "start": "오늘의 복습 시작",
-    "count": "떠올릴 것 {{count}}개",
-    "empty": "오늘 복습할 것이 없습니다.",
-    "done": "오늘 몫은 끝났습니다.",
+    "count": "다시 만날 문장 {{count}}개",
+    "empty": "오늘 다시 만날 문장이 없습니다.",
+    "done": "오늘은 여기까지입니다.",
     "savedOn": "{{date}}에 저장했습니다",
     "cue": {
       "thought": "내 생각",
-      "source": "출처",
+      "source": "책",
       "tags": "태그",
       "head": "이렇게 시작합니다"
     },
-    "answer": "떠오른 것을 적어 보세요 (선택)",
+    "answer": "떠오른 내용 (선택)",
     "backHome": "홈으로",
     "howRecalled": "어떻게 떠올랐나요?"
   },
@@ -146,7 +144,7 @@
   },
   "ai": {
     "notice": {
-      "proxy": "AI 분석을 위해 해당 지식의 원문 · 내 생각 · 책 제목 · 페이지 · 언어 정보가 Re:Read 서버를 거쳐 AI 제공자에게 전달됩니다. Re:Read 서버는 이 내용을 저장하지 않습니다 — 사용량 집계만 남습니다."
+      "proxy": "AI 분석을 위해 원문 · 내 생각 · 책 제목 · 페이지 · 언어 정보가 Re:Read 서버를 거쳐 AI 제공자에게 전달됩니다. Re:Read 서버에는 이 내용이 저장되지 않으며, 사용량 집계만 남습니다."
     }
   }
 }

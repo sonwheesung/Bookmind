@@ -8,6 +8,7 @@
  *   ③ 보간 일치  같은 키의 {{변수}} 집합이 언어 간 동일한가
  *   ④ 잔존 한글  비한국어 파일에 한글이 남아 있는가
  *   ⑤ 없는 키    화면이 부르는 `t('...')` 가 리소스에 실제로 있는가 (2026-09-09 신설)
+ *   ⑥ 죽은 키    리소스에 있는데 화면이 아무도 안 부르는 키 (2026-09-09 신설)
  *
  * 🔴 그리고 **양성 대조(SELF-TEST)** 를 먼저 돌린다.
  *    형제 idea_repository/scripts/check-i18n.mjs 가 2026-08-20 부터 19일간 초록이었는데
@@ -48,6 +49,25 @@ const INTERP = /\{\{\s*([A-Za-z0-9_]+)\s*\}\}/g;
  *    그래서 이 검사는 **완전 탐지가 아니라 하한**이다.
  */
 const T_CALL = /\bt\(\s*'([A-Za-z0-9_.]+)'/g;
+
+/**
+ * 🔴 ⑥ 축이 왜 생겼나 (2026-09-09): 디자인 패스에서 화면 두 곳을 걷어냈는데
+ *    `home.today.reviewCount` · `knowledge.tags.empty` 가 리소스에 그대로 남았다.
+ *    ①~⑤ 는 **전부 통과했다** — 두 언어에 대칭으로 있고, 아무도 안 부르니 ⑤ 에도 안 걸린다.
+ *    죽은 키는 화면을 안 깨뜨리는 대신 **다음 번역가에게 일을 시킨다**(15개 언어로 가면 15배다).
+ *
+ * ⚠ 템플릿 리터럴은 정적으로 못 푸니 **앞머리만** 딴다 —
+ *    `` t(`books.status.${s}`) `` → 접두사 `books.status.` 아래 키는 전부 쓰인 것으로 친다.
+ */
+const T_TPL = /\bt\(\s*`([A-Za-z0-9_.]*)\$\{/g;
+
+/**
+ * ⏸ 아직 화면이 없는 키 — **이유를 적어야 통과한다.**
+ * 🔴 이 목록은 스스로 썩지 않는다: 여기 적힌 키가 실제로 쓰이기 시작하거나 리소스에서 사라지면
+ *    가드가 *"목록에서 빼라"* 로 FAIL 한다. 예외를 적어 두고 잊는 흔한 사고를 그렇게 막는다.
+ */
+const PLANNED = new Map([['ai.notice.proxy', 'AI 고지문 — Phase 8 에서 화면에 붙는다(결정 #14 의 대가)']]);
+
 const SRC_DIRS = ['app', 'components', 'features', 'lib', 'hooks'];
 
 function sourceFiles(dir, out = []) {
@@ -68,15 +88,19 @@ function sourceFiles(dir, out = []) {
 
 function usedKeys() {
   const found = new Map();
+  const prefixes = new Set();
   for (const dir of SRC_DIRS) {
     for (const f of sourceFiles(dir)) {
       const text = readFileSync(join(ROOT, f), 'utf8');
       for (const m of text.matchAll(T_CALL)) {
         if (!found.has(m[1])) found.set(m[1], f);
       }
+      for (const m of text.matchAll(T_TPL)) {
+        if (m[1] !== '') prefixes.add(m[1]);
+      }
     }
   }
-  return found;
+  return { found, prefixes };
 }
 const HANGUL = /[가-힣ㄱ-ㆎ]/;
 
@@ -106,6 +130,11 @@ function selfTest() {
   ].map((m) => m[1]);
   if (probeKeys.length !== 2 || probeKeys[0] !== 'a.b.c') {
     console.error('SELF-TEST FAIL: t() 스캐너가 키를 못 모은다 →', probeKeys);
+    process.exit(2);
+  }
+  const probeTpl = [...'const s = t(`x.y.${v}`); t(`${v}`);'.matchAll(T_TPL)].map((m) => m[1]);
+  if (probeTpl.length !== 2 || probeTpl[0] !== 'x.y.') {
+    console.error('SELF-TEST FAIL: 템플릿 접두사 스캐너가 죽었다 →', probeTpl);
     process.exit(2);
   }
   const f = flatten({ a: { b: 'x' } });
@@ -163,7 +192,7 @@ for (const [lang, map] of Object.entries(maps)) {
 }
 
 // ⑤ 화면이 부르는 키가 리소스에 있는가
-const used = usedKeys();
+const { found: used, prefixes } = usedKeys();
 if (used.size === 0) {
   console.error('FAIL: 소스에서 t() 를 하나도 못 찾았다 — 스캐너가 죽었다');
   process.exit(1);
@@ -172,11 +201,24 @@ for (const [key, file] of used) {
   if (!(key in maps[BASE])) note(`⑤ 없는 키  ${key} (${file})`);
 }
 
+// ⑥ 리소스에 있는데 아무도 안 부르는 키
+for (const key of baseKeys) {
+  if (used.has(key)) continue;
+  if ([...prefixes].some((p) => key.startsWith(p))) continue;
+  if (PLANNED.has(key)) continue;
+  note(`⑥ 죽은 키  ${key} — 화면에서 안 쓴다. 지우거나, 쓰는 화면을 붙여라`);
+}
+// ⑥-b 예외 목록이 늙지 않게 — 쓰이기 시작했거나 사라진 키는 목록에서 빼라
+for (const [key, why] of PLANNED) {
+  if (!(key in maps[BASE])) note(`⑥ 예외 낡음  ${key} 가 리소스에 없다 — PLANNED 에서 빼라 (${why})`);
+  else if (used.has(key)) note(`⑥ 예외 낡음  ${key} 를 이제 화면이 쓴다 — PLANNED 에서 빼라`);
+}
+
 if (fail.length) {
   console.error(`check:i18n FAIL (${fail.length})`);
   for (const m of fail) console.error('  ' + m);
   process.exit(1);
 }
 console.log(
-  `check:i18n OK — ${files.length}개 언어 · ${baseKeys.length}키 · 화면이 쓰는 키 ${used.size}개 실재 · SELF-TEST 통과`,
+  `check:i18n OK — ${files.length}개 언어 · ${baseKeys.length}키 · 화면이 쓰는 키 ${used.size}개 실재 · 죽은 키 0(⏸ 예정 ${PLANNED.size}) · SELF-TEST 통과`,
 );

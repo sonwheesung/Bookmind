@@ -15,7 +15,6 @@
   "home": {
     "today": {
       "title": "Today's review",
-      "reviewCount": "{{count}} to remember",
       "empty": "No passages to revisit today.",
       "count": "{{count}} passages"
     },
@@ -32,7 +31,7 @@
   "knowledge": {
     "save": {
       "action": "Save",
-      "placeholder": "What did you find?",
+      "placeholder": "A passage worth keeping",
       "hint": "The passage is all you need. Everything else is optional."
     },
     "new": {
@@ -58,15 +57,14 @@
     },
     "thoughts": {
       "title": "My thoughts",
-      "empty": "Nothing written yet. You do not have to.",
-      "placeholder": "What does this mean to you?",
-      "add": "Add thought",
+      "empty": "No thought added yet. You don't have to add one.",
+      "placeholder": "What did this passage mean to you?",
+      "add": "Add a thought",
       "removeTitle": "Remove this thought?",
-      "removeBody": "The passage stays."
+      "removeBody": "The passage will stay."
     },
     "tags": {
       "title": "Tags",
-      "empty": "No tags.",
       "placeholder": "Add a tag",
       "already": "Already added."
     },
@@ -78,7 +76,7 @@
   "books": {
     "list": {
       "title": "Books",
-      "empty": "No books yet. A passage does not need one."
+      "empty": "No books yet. You can save passages without a book."
     },
     "new": {
       "title": "Add book",
@@ -103,37 +101,37 @@
         "reviews": "Reviews {{count}}",
         "practices": "Practices {{count}}"
       },
-      "passages": "From this book",
+      "passages": "Saved from this book",
       "empty": "Nothing saved from this book yet.",
       "progress": "{{read}} / {{total}} pages"
     },
     "delete": {
       "title": "Delete this book?",
-      "body": "{{count}} saved passages stay. Only the book link is removed."
+      "body": "Your {{count}} saved passages will stay. Only their link to this book will be removed."
     }
   },
   "review": {
-    "reveal": "Reveal",
-    "prompt": "Try to recall it first.",
+    "reveal": "See the passage",
+    "prompt": "Take a moment to recall it.",
     "rating": {
-      "again": "Forgot",
-      "hard": "Fuzzy",
-      "good": "Got it",
-      "easy": "Easy"
+      "again": "I couldn't recall it",
+      "hard": "It barely came back",
+      "good": "It came back",
+      "easy": "It came back right away"
     },
     "title": "Today’s review",
     "start": "Start review",
-    "count": "{{count}} to remember",
-    "empty": "Nothing due today.",
-    "done": "Done for today.",
+    "count": "{{count}} passages to revisit",
+    "empty": "No passages to revisit today.",
+    "done": "That's all for today.",
     "savedOn": "Saved on {{date}}",
     "cue": {
       "thought": "Your thought",
-      "source": "From",
+      "source": "Book",
       "tags": "Tags",
       "head": "It starts like this"
     },
-    "answer": "Write what came to mind (optional)",
+    "answer": "What came to mind (optional)",
     "backHome": "Back to home",
     "howRecalled": "How did it come back?"
   },
@@ -146,7 +144,7 @@
   },
   "ai": {
     "notice": {
-      "proxy": "For AI analysis, the passage, your note, the book title, page and language are sent through the Re:Read server to the AI provider. The Re:Read server does not store them — it keeps only usage counters."
+      "proxy": "For AI analysis, the passage, your thought, book title, page and language are sent through the Re:Read server to the AI provider. Re:Read does not store this content; only usage counts are retained."
     }
   }
 }
