@@ -3,11 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { countBooks } from '@/features/books/repo';
-import { countKnowledge, listKnowledge } from '@/features/knowledge/repo';
+import { countKnowledge, listRecent } from '@/features/knowledge/repo';
 import { dueCount } from '@/features/review/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
@@ -15,20 +14,30 @@ import { useTheme } from '@/theme';
 /**
  * 홈 — "오늘 무엇을 하면 되는가"(`docs/KNOWLEDGE_SYSTEM.md` §7).
  *
- * 🔴 홈은 책장이 아니다. 그리고 저장은 **1탭 거리**여야 한다(§1.2) —
- *    그래서 저장 버튼이 목록보다 위에 있고, 책을 거치지 않는다.
- * ⏸ 맨 위의 "오늘의 복습"은 Phase 3 에서 실제 큐가 들어온다.
+ * 🔴 **2026-09-09 개편**(`docs/DESIGN_REVIEW.md` §3). 고친 것은 요소 수가 아니라 **위계**다.
+ *    이전에는 블록 9개가 전부 같은 무게였고 둥근 테두리 상자가 6개라
+ *    무엇이 버튼이고 무엇이 내용인지 구분이 안 됐다. 지금은 네 영역이다:
+ *    Header / Today / Recent / Meta.
+ *
+ * 🔴 **화면에 accent 는 언제나 정확히 하나다.** 복습할 것이 있으면 복습 버튼이,
+ *    없으면 저장 버튼이 그 하나가 된다. 색을 없애는 게 아니라 옮긴다.
+ *    ⚠ 저장 버튼의 **위치와 크기는 그대로**라 기둥 7("다시 열었을 때의 핵심 행동은 복습")도 안 깨지고,
+ *    저장이 1탭 거리라는 기둥 1도 그대로다.
  */
 export default function Home() {
   const { t } = useTranslation();
   const { palette, spacing, typography } = useTheme();
 
   const { data } = useDbQuery(() => ({
-    recent: listKnowledge(3),
+    recent: listRecent(3),
     books: countBooks(),
     knowledge: countKnowledge(),
     due: dueCount(),
   }));
+
+  const hasDue = data.due > 0;
+  const divider = { height: StyleSheet.hairlineWidth, backgroundColor: palette.border };
+  const meta = [typography.caption, { color: palette.textMuted }];
 
   return (
     <Screen scroll>
@@ -45,81 +54,99 @@ export default function Home() {
           </Pressable>
         }
       />
-      <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.xl }]}>
-        {t('app.tagline')}
-      </Text>
 
-      {/* 🔴 저장은 1탭 거리를 지키되 **색을 낮춘다**(DESIGN_REVIEW §3).
-          위치는 기능 우선순위, 색·크기는 제품 우선순위 — 다시 열었을 때의 핵심 행동은 복습이다 */}
-      <Button label={t('home.cta')} variant="ghost" onPress={() => router.push('/knowledge/new')} />
-      <Text
-        style={[
-          typography.caption,
-          { color: palette.textMuted, marginTop: spacing.sm, marginBottom: spacing.xl },
-        ]}
-      >
-        {t('knowledge.save.hint')}
-      </Text>
-
-      {/* 🔴 홈의 맨 위는 "오늘 무엇을 하면 되는가"다(§7).
-          🚫 0건일 때 숫자를 강조하지 않는다 — 중립적인 문장 하나로 끝낸다(DESIGN_REVIEW §3) */}
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
-        {t('home.today.title')}
-      </Text>
-      {data.due === 0 ? (
-        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.xl }]}>
-          {t('home.today.empty')}
+      {/* ── Today ─────────────────────────────────────────────────────
+          🚫 태그라인·저장 힌트를 여기 두지 않는다. 둘 다 처음 한 번 읽으면 끝인데
+             매일 가장 좋은 자리를 먹고 있었다(저장 힌트는 저장 화면에 그대로 있다). */}
+      <View style={{ marginBottom: spacing.section }}>
+        <Text style={[typography.section, { color: palette.text, marginBottom: spacing.sm }]}>
+          {t('home.today.title')}
         </Text>
-      ) : (
-        <Card>
-          <Text style={[typography.body, { color: palette.text }]}>
-            {t('home.today.count', { count: data.due })}
-          </Text>
+
+        {hasDue ? (
           <Button
-            label={t('review.start')}
+            label={t('home.today.action', { count: data.due })}
             onPress={() => router.push('/review')}
-            style={{ marginTop: spacing.md }}
+            style={{ marginBottom: spacing.md }}
           />
-        </Card>
-      )}
+        ) : (
+          /* 🚫 0 을 강조하지 않는다. 중립적인 문장 하나로 끝낸다(기둥 5) */
+          <Text style={[typography.thought, { color: palette.textMuted, marginBottom: spacing.lg }]}>
+            {t('home.today.empty')}
+          </Text>
+        )}
 
-      {/* 🚫 신규 사용자에게 `책 0 · 문장 0` 을 보여주지 않는다 — 성취 대시보드가 된다 */}
-      {(data.books > 0 || data.knowledge > 0) && (
-        <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
-          <Button
-            label={t('home.stats.books', { count: data.books })}
-            variant="ghost"
-            onPress={() => router.push('/books')}
-            style={styles.grow}
-          />
-          <Button
-            label={t('home.stats.knowledge', { count: data.knowledge })}
-            variant="ghost"
-            onPress={() => router.push('/knowledge')}
-            style={styles.grow}
-          />
-        </View>
-      )}
+        <Button
+          label={t('home.cta')}
+          variant={hasDue ? 'ghost' : 'primary'}
+          onPress={() => router.push('/knowledge/new')}
+        />
+      </View>
 
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+      <View style={[divider, { marginBottom: spacing.section }]} />
+
+      {/* ── Recent ────────────────────────────────────────────────────
+          🔴 카드가 아니다. 그래도 **항목 전체가 터치 영역**이다 —
+             시각적으로 카드가 아닌 것과 기능적으로 목록인 것은 다른 축이다. */}
+      <Text style={[typography.section, { color: palette.text, marginBottom: spacing.xs }]}>
         {t('home.recent.title')}
       </Text>
+
       {data.recent.length === 0 ? (
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('home.recent.empty')}</Text>
+        <Text style={[typography.body, { color: palette.textMuted, marginTop: spacing.sm }]}>
+          {t('home.recent.empty')}
+        </Text>
       ) : (
-        data.recent.map((k) => (
-          <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
-            <Text style={[typography.thought, { color: palette.text }]} numberOfLines={3}>
-              {k.content}
-            </Text>
-          </Card>
-        ))
+        data.recent.map((k, i) => {
+          // 🚫 출처가 없으면 빈 줄을 만들지 않는다
+          const source = [
+            k.bookTitle,
+            k.bookAuthor,
+            k.page === null ? null : t('knowledge.pageShort', { page: k.page }),
+          ]
+            .filter((v) => v !== null && v !== '')
+            .join(' · ');
+          return (
+            <View key={k.id}>
+              {i > 0 && <View style={divider} />}
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push(`/knowledge/${k.id}`)}
+                style={({ pressed }) => ({ paddingVertical: spacing.lg, opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={[typography.quote, { color: palette.text }]} numberOfLines={3}>
+                  {k.content}
+                </Text>
+                {source !== '' && (
+                  <Text style={[...meta, { marginTop: spacing.xs }]} numberOfLines={1}>
+                    {source}
+                  </Text>
+                )}
+              </Pressable>
+            </View>
+          );
+        })
+      )}
+
+      {/* ── Meta ──────────────────────────────────────────────────────
+          🔴 상자를 걷어내되 **누를 수 있게** 남긴다. 시안은 정보로만 두자고 했는데,
+             그러면 홈에서 책 목록·문장 목록으로 가는 유일한 길이 사라진다(§3 수정 채택).
+          🚫 신규 사용자에게 `책 0 · 문장 0` 을 보여주지 않는다 — 성취 대시보드가 된다. */}
+      {(data.books > 0 || data.knowledge > 0) && (
+        <View style={[styles.metaRow, { marginTop: spacing.xl }]}>
+          <Pressable onPress={() => router.push('/books')} hitSlop={10}>
+            <Text style={meta}>{t('home.meta.books', { count: data.books })}</Text>
+          </Pressable>
+          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
+          <Pressable onPress={() => router.push('/knowledge')} hitSlop={10}>
+            <Text style={meta}>{t('home.meta.knowledge', { count: data.knowledge })}</Text>
+          </Pressable>
+        </View>
       )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row' },
-  grow: { flex: 1 },
+  metaRow: { flexDirection: 'row', alignItems: 'center' },
 });

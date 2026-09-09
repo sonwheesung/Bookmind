@@ -17,6 +17,8 @@ export const spacing = {
   lg: 16,
   xl: 24,
   xxl: 32,
+  /** 홈의 영역 사이. 🔴 `xl`(24)로는 구획이 안 갈라졌다(`DESIGN_REVIEW.md` §3, 2026-09-09) */
+  section: 28,
 } as const;
 
 export const radius = {
@@ -35,9 +37,11 @@ export const typography = {
   quote: { fontSize: 18, lineHeight: 28, fontWeight: '400' },
   /** 내 생각 — 원문과 동등하게 둔다 (기둥 6) */
   thought: { fontSize: 16, lineHeight: 26, fontWeight: '400' },
-  title: { fontSize: 22, lineHeight: 30, fontWeight: '600' },
+  title: { fontSize: 22, lineHeight: 30, fontWeight: '700' },
+  /** 화면 안의 구획 제목. 🔴 이게 `label`(13·muted)이라 구획이 안 보였다(2026-09-09) */
+  section: { fontSize: 18, lineHeight: 26, fontWeight: '600' },
   body: { fontSize: 15, lineHeight: 22, fontWeight: '400' },
-  label: { fontSize: 13, lineHeight: 18, fontWeight: '500' },
+  label: { fontSize: 13, lineHeight: 18, fontWeight: '600' },
   caption: { fontSize: 12, lineHeight: 16, fontWeight: '400' },
 } as const;
 

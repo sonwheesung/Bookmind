@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "Re:Read",
-    "tagline": "읽고, 기억하고, 살아낸다."
+    "name": "Re:Read"
   },
   "common": {
     "cancel": "취소",
@@ -16,16 +15,16 @@
     "today": {
       "title": "오늘의 복습",
       "empty": "오늘 다시 만날 문장이 없습니다.",
-      "count": "문장 {{count}}개"
+      "action": "오늘의 복습 · {{count}}개"
     },
     "recent": {
       "title": "최근 저장",
       "empty": "저장한 문장이 여기에 나타납니다."
     },
     "cta": "문장 저장하기",
-    "stats": {
-      "books": "책 · {{count}}",
-      "knowledge": "문장 · {{count}}"
+    "meta": {
+      "books": "책 {{count}}",
+      "knowledge": "문장 {{count}}"
     }
   },
   "knowledge": {
@@ -71,7 +70,8 @@
     "delete": {
       "title": "이 문장을 지울까요?",
       "body": "내 생각과 태그가 함께 사라집니다. 실천은 남습니다."
-    }
+    },
+    "pageShort": "{{page}}쪽"
   },
   "books": {
     "list": {
@@ -120,7 +120,6 @@
       "easy": "바로 떠올랐다"
     },
     "title": "오늘의 복습",
-    "start": "오늘의 복습 시작",
     "count": "다시 만날 문장 {{count}}개",
     "empty": "오늘 다시 만날 문장이 없습니다.",
     "done": "오늘은 여기까지입니다.",

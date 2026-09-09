@@ -1,7 +1,6 @@
 {
   "app": {
-    "name": "Re:Read",
-    "tagline": "Read it. Remember it. Live it."
+    "name": "Re:Read"
   },
   "common": {
     "cancel": "Cancel",
@@ -16,16 +15,16 @@
     "today": {
       "title": "Today's review",
       "empty": "No passages to revisit today.",
-      "count": "{{count}} passages"
+      "action": "Review · {{count}}"
     },
     "recent": {
       "title": "Recently saved",
       "empty": "Saved passages will appear here."
     },
     "cta": "Save a passage",
-    "stats": {
-      "books": "Books · {{count}}",
-      "knowledge": "Passages · {{count}}"
+    "meta": {
+      "books": "Books {{count}}",
+      "knowledge": "Passages {{count}}"
     }
   },
   "knowledge": {
@@ -71,7 +70,8 @@
     "delete": {
       "title": "Delete this passage?",
       "body": "Thoughts and tags go with it. Practices stay."
-    }
+    },
+    "pageShort": "p.{{page}}"
   },
   "books": {
     "list": {
@@ -120,7 +120,6 @@
       "easy": "It came back right away"
     },
     "title": "Today’s review",
-    "start": "Start review",
     "count": "{{count}} passages to revisit",
     "empty": "No passages to revisit today.",
     "done": "That's all for today.",

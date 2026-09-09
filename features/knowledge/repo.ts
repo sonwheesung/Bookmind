@@ -5,6 +5,7 @@
  *    이 파일에 "책이 없으면 저장 거부" 같은 분기를 추가하자는 요구는 그 기둥으로 기각한다.
  */
 import { count, deleteKnowledge, insert, revive, selectAll, selectOne, softDelete, update } from '@/db';
+import { getBook } from '@/features/books/repo';
 import { scheduleNewCard } from '@/features/review/repo';
 import { ensureTag } from '@/features/tags/repo';
 import type { KnowledgeRow, SourceType, ThoughtRow } from '@/features/types';
@@ -46,6 +47,26 @@ export function listKnowledge(limit?: number): KnowledgeRow[] {
   return selectAll<KnowledgeRow>('knowledge', {
     orderBy: 'created_at DESC',
     ...(limit === undefined ? {} : { limit }),
+  });
+}
+
+/** 홈의 최근 저장 한 줄에 붙는 출처. 🔴 없으면 **억지로 만들지 않는다**(`DESIGN_REVIEW.md` §3) */
+export interface RecentCard extends KnowledgeRow {
+  readonly bookTitle: string | null;
+  readonly bookAuthor: string | null;
+}
+
+/**
+ * 홈 전용 목록. 카드 테두리를 걷어낸 뒤로 문장들이 서로 붙어 보여서
+ * **출처 한 줄이 구분자 겸 맥락** 역할을 한다(2026-09-09 홈 개편).
+ *
+ * ⚠ 책을 건당 한 번 더 읽는다. `limit` 이 3 이라 최대 3회이고, 그래서 조인을 만들지 않았다 —
+ *    빌더에 JOIN 을 넣으면 `deleted_at` 필터를 빠뜨릴 통로가 하나 는다(`db/sql.ts` 의 존재 이유).
+ */
+export function listRecent(limit: number): RecentCard[] {
+  return listKnowledge(limit).map((k) => {
+    const book = k.book_id === null ? undefined : getBook(k.book_id);
+    return { ...k, bookTitle: book?.title ?? null, bookAuthor: book?.author ?? null };
   });
 }
 
