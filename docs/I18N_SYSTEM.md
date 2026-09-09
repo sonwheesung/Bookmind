@@ -11,11 +11,30 @@
 | 영역 | 상태 | 비고 |
 |---|---|---|
 | 설계 | ✅ 2026-09-08 | |
-| i18next 골격 · `en`/`ko` | ✅ 2026-09-08 | Phase 0 완료 — `lib/i18n.ts` · `locales/{en,ko}.json` 23키 |
+| i18next 골격 · `en`/`ko` | ✅ 2026-09-08 | Phase 0 — `lib/i18n.ts` · `locales/{en,ko}.json` **68키**(2026-09-09 Phase 2 기준) |
+| 🟢 **`ko` 기기 확인** | ✅ 2026-09-09 | 에뮬 로케일을 `ko-KR` 로 바꿔 화면 전체가 한국어로 뜨는 것을 실측 — 아래 ⚠ |
 | `check:i18n` 가드 | ✅ 2026-09-08 | Phase 0 완료 — `scripts/check-i18n.mjs`(SELF-TEST 내장 · 실패 시 exit 2) |
-| 언어 설정 화면 | ❌ | Phase 6 |
+| 언어 설정 화면 | ❌ | Phase 6. ⚠ 그때까지 언어를 바꾸는 유일한 길은 **기기 언어**다 |
 | AI 응답 언어 설정 | ❌ | Phase 8 |
 | 15개 언어 확장 | 🚫 | 프로덕션 출시 전 검토 |
+
+---
+
+### 0.1 🟢 `ko` 를 기기에서 확인한 방법과 그때 보인 것 (2026-09-09)
+
+```
+adb -s emulator-5574 root
+adb -s emulator-5574 shell setprop persist.sys.locale ko-KR
+adb -s emulator-5574 shell setprop ctl.restart zygote      # 재부팅 없이 적용된다
+```
+
+🔴 **그리고 이 확인에서 §3(언어가 셋이다)이 화면으로 증명됐다.**
+UI 는 한국어가 됐는데 **저장해 둔 원문과 내 생각은 영어 그대로**였다 —
+`Environment shapes behaviour.` · `Move the phone off the bed.`
+축이 섞여 있었다면 그 둘도 번역 대상이 되거나 깨졌을 것이다. **원문은 책 언어 그대로 보관한다**가
+데이터 층에서 지켜지고 있다는 뜻이고, 이건 코드 리뷰로는 안 보이고 **로케일을 바꿔 봐야** 보인다.
+
+⚠ 앱에는 아직 언어 선택 화면이 없다(Phase 6). 지금 언어를 바꾸려면 기기 설정을 바꾸는 수밖에 없다.
 
 ---
 
