@@ -5,6 +5,7 @@
  *    이 파일에 "책이 없으면 저장 거부" 같은 분기를 추가하자는 요구는 그 기둥으로 기각한다.
  */
 import { count, deleteKnowledge, insert, revive, selectAll, selectOne, softDelete, update } from '@/db';
+import { scheduleNewCard } from '@/features/review/repo';
 import { ensureTag } from '@/features/tags/repo';
 import type { KnowledgeRow, SourceType, ThoughtRow } from '@/features/types';
 
@@ -33,6 +34,10 @@ export function saveKnowledge(input: SaveInput): string {
   const thought = input.thought?.trim();
   if (thought) addThought(id, thought);
   for (const name of input.tagNames ?? []) attachTag(id, name);
+
+  // 🔴 예약을 **그 자리에서** 만든다(`REVIEW_SYSTEM.md` §2.3). 나중에 "예약 없는 카드"를 찾아
+  //    채우는 배치를 두지 않는다 — 빠뜨리면 카드가 영원히 큐에 안 뜨는 형태로 조용히 실패한다.
+  scheduleNewCard(id);
 
   return id;
 }

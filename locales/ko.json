@@ -116,7 +116,21 @@
       "hard": "애매하다",
       "good": "기억났다",
       "easy": "쉽다"
-    }
+    },
+    "title": "오늘의 복습",
+    "start": "오늘의 복습 시작",
+    "count": "떠올릴 것 {{count}}개",
+    "empty": "오늘 복습할 것이 없습니다.",
+    "done": "오늘 몫은 끝났습니다.",
+    "savedOn": "{{date}}에 저장했습니다",
+    "cue": {
+      "thought": "내 생각",
+      "source": "출처",
+      "tags": "태그",
+      "head": "이렇게 시작합니다"
+    },
+    "answer": "떠오른 것을 적어 보세요 (선택)",
+    "backHome": "홈으로"
   },
   "settings": {
     "title": "설정",

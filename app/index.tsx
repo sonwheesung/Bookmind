@@ -8,6 +8,7 @@ import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { countBooks } from '@/features/books/repo';
 import { countKnowledge, listKnowledge } from '@/features/knowledge/repo';
+import { dueCount } from '@/features/review/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
 
@@ -26,6 +27,7 @@ export default function Home() {
     recent: listKnowledge(3),
     books: countBooks(),
     knowledge: countKnowledge(),
+    due: dueCount(),
   }));
 
   return (
@@ -57,11 +59,19 @@ export default function Home() {
         {t('knowledge.save.hint')}
       </Text>
 
+      {/* 🔴 홈의 맨 위는 "오늘 무엇을 하면 되는가"다(§7). 0건인 날은 최근 저장으로 이어준다 */}
       <Card>
         <Text style={[typography.label, { color: palette.textMuted }]}>{t('home.today.title')}</Text>
         <Text style={[typography.body, { color: palette.text, marginTop: spacing.sm }]}>
-          {t('home.today.empty')}
+          {data.due === 0 ? t('home.today.empty') : t('home.today.reviewCount', { count: data.due })}
         </Text>
+        {data.due > 0 && (
+          <Button
+            label={t('review.start')}
+            onPress={() => router.push('/review')}
+            style={{ marginTop: spacing.md }}
+          />
+        )}
       </Card>
 
       <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>

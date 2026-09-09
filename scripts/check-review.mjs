@@ -16,6 +16,7 @@ import { deleteKnowledgeSteps } from '../db/cascade.ts';
 import { pickCue, CUE_HEAD_CHARS } from '../features/review/cue.ts';
 import { DAILY_LIMIT, endOfLocalDay, firstDueAt, takeDue } from '../features/review/queue.ts';
 import { dueQuery } from '../features/review/sql.ts';
+import { applyRating, intervalDays, newSchedule, RATINGS } from '../features/review/schedule.ts';
 
 // ── 🔴 SELF-TEST — 판정 함수가 살아 있는가 ───────────────────────────
 function selfTest() {
@@ -201,7 +202,39 @@ function checkDueQuery() {
   db.close();
 }
 
+// ── FSRS — Phase 3 완료 기준 "4등급이 간격을 바꾼다 · again 이 가장 짧다" ──
+function checkFsrs() {
+  const at = new Date('2026-09-10T00:00:00.000Z');
+  const fresh = newSchedule('k1', '2026-09-10T00:00:00.000Z');
+  const days = Object.fromEntries(RATINGS.map((r) => [r, intervalDays(fresh, r, at)]));
+
+  check(
+    days.again < days.hard && days.hard < days.good && days.good < days.easy,
+    `등급 순서가 어긋난다 — ${RATINGS.map((r) => `${r}:${days[r].toFixed(3)}`).join(' ')}`,
+  );
+  check(days.again > 0, 'again 간격이 0 이하다 — 같은 순간에 다시 뜬다');
+
+  // 등급을 매기면 기록이 남는다(🔴 optimizer 의 유일한 입력)
+  const good = applyRating(fresh, 'good', at);
+  check(good.schedule.reps === 1, `reps 가 안 는다: ${good.schedule.reps}`);
+  check(good.schedule.last_reviewed_at === at.toISOString(), 'last_reviewed_at 이 안 찍힌다');
+  check(good.schedule.state !== 'new', `등급을 줬는데 state 가 new 그대로다`);
+  check(typeof good.log.elapsed_days === 'number', 'elapsed_days 가 없다');
+  check(typeof good.log.scheduled_days === 'number', 'scheduled_days 가 없다');
+
+  // 🔴 잊었다 → lapses 가 는다. 복습한 카드에서만 의미가 있다
+  const reviewed = { ...fresh, ...applyRating(fresh, 'easy', at).schedule };
+  const later = new Date('2026-09-20T00:00:00.000Z');
+  const lapsed = applyRating(reviewed, 'again', later);
+  check(lapsed.schedule.lapses === reviewed.lapses + 1, 'again 인데 lapses 가 안 는다');
+  check(
+    intervalDays(reviewed, 'again', later) < intervalDays(reviewed, 'good', later),
+    '복습한 카드에서도 again 이 good 보다 짧아야 한다',
+  );
+}
+
 selfTest();
+checkFsrs();
 checkCue();
 checkQueue();
 checkDueQuery();
@@ -212,5 +245,5 @@ if (bad.length > 0) {
   process.exit(1);
 }
 console.log(
-  `check:review OK — 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
+  `check:review OK — FSRS 4등급 순서 · 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
 );

@@ -116,7 +116,21 @@
       "hard": "Fuzzy",
       "good": "Got it",
       "easy": "Easy"
-    }
+    },
+    "title": "Today’s review",
+    "start": "Start review",
+    "count": "{{count}} to remember",
+    "empty": "Nothing due today.",
+    "done": "Done for today.",
+    "savedOn": "Saved on {{date}}",
+    "cue": {
+      "thought": "Your thought",
+      "source": "From",
+      "tags": "Tags",
+      "head": "It starts like this"
+    },
+    "answer": "Write what came to mind (optional)",
+    "backHome": "Back to home"
   },
   "settings": {
     "title": "Settings",
