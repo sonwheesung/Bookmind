@@ -12,6 +12,12 @@ type Props = {
   emphasis?: 'quote' | 'thought' | 'body';
   autoFocus?: boolean;
   minHeight?: number;
+  /**
+   * 🔴 입력칸이 내용만큼 무한히 자라면 **저장 버튼이 화면 밖으로 밀린다.**
+   * 한 챕터를 붙여넣는 것은 허용해야 하지만(§8), 그때 저장 동선이 막히면 기둥 1 위반이다.
+   * 상한을 넘으면 칸 안에서 스크롤된다.
+   */
+  maxHeight?: number;
 };
 
 /**
@@ -28,6 +34,7 @@ export function Field({
   emphasis = 'body',
   autoFocus = false,
   minHeight,
+  maxHeight,
 }: Props) {
   const { palette, radius, spacing, typography } = useTheme();
 
@@ -56,6 +63,7 @@ export function Field({
             borderRadius: radius.md,
             padding: spacing.md,
             ...(minHeight === undefined ? {} : { minHeight }),
+            ...(maxHeight === undefined ? {} : { maxHeight }),
           },
         ]}
       />

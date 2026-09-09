@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { Chip } from '@/components/Chip';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
@@ -33,9 +34,13 @@ export default function NewKnowledge() {
   const [tags, setTags] = useState('');
 
   const canSave = content.trim() !== '';
+  // 🔴 저장은 화면을 떠나므로, 두 번 눌리면 같은 문장이 두 건 생긴다.
+  //    상태가 아니라 ref 다 — 리렌더를 기다리는 사이에 두 번째 탭이 들어온다.
+  const saving = useRef(false);
 
   const onSave = () => {
-    if (!canSave) return;
+    if (!canSave || saving.current) return;
+    saving.current = true;
     saveKnowledge({
       content,
       bookId,
@@ -62,6 +67,7 @@ export default function NewKnowledge() {
         emphasis="quote"
         autoFocus
         minHeight={140}
+        maxHeight={260}
       />
 
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
@@ -101,29 +107,6 @@ export default function NewKnowledge() {
       </Text>
       <View style={{ height: spacing.xl, borderRadius: radius.sm }} />
     </Screen>
-  );
-}
-
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  const { palette, radius, spacing, typography } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      onPress={onPress}
-      style={{
-        backgroundColor: active ? palette.accent : palette.surface,
-        borderColor: active ? palette.accent : palette.border,
-        borderWidth: 1,
-        borderRadius: radius.full,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-      }}
-    >
-      <Text style={[typography.label, { color: active ? palette.onAccent : palette.text }]} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 

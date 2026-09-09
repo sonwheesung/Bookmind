@@ -5,6 +5,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { Chip } from '@/components/Chip';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
@@ -52,6 +53,16 @@ export default function KnowledgeDetail() {
   const [draftPage, setDraftPage] = useState('');
   const [newThought, setNewThought] = useState('');
   const [newTag, setNewTag] = useState('');
+  // 이미 붙어 있는 태그를 다시 넣으면 조용히 아무 일도 안 일어나 "안 눌렸나"로 읽혔다
+  const [tagNotice, setTagNotice] = useState(false);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggleThought = (thoughtId: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(thoughtId)) next.delete(thoughtId);
+      else next.add(thoughtId);
+      return next;
+    });
 
   if (data.row === undefined) {
     return (
@@ -78,6 +89,21 @@ export default function KnowledgeDetail() {
   const linkBook = (bookId: string | null) => {
     editKnowledge(id, { bookId });
     reload();
+  };
+
+  // 되돌릴 수 없는 동작에는 확인을 붙인다 — 문장·책 삭제에는 있는데 생각에만 없었다
+  const confirmRemoveThought = (thoughtId: string) => {
+    Alert.alert(t('knowledge.thoughts.removeTitle'), t('knowledge.thoughts.removeBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.remove'),
+        style: 'destructive',
+        onPress: () => {
+          removeThought(thoughtId);
+          reload();
+        },
+      },
+    ]);
   };
 
   const confirmDelete = () => {
@@ -107,10 +133,18 @@ export default function KnowledgeDetail() {
             multiline
             emphasis="quote"
             minHeight={140}
+            maxHeight={260}
           />
           <Field label={t('knowledge.field.page')} value={draftPage} onChangeText={setDraftPage} />
           <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
-            <Button label={t('common.save')} onPress={applyEdit} style={styles.grow} />
+            {/* 🔴 새 문장 화면에만 있던 잠금이 여기 빠져 있었다 — 빈 원문으로 누르면
+                예외가 나고 사용자에게는 아무 일도 안 일어난 것처럼 보였다(2026-09-09 점검) */}
+            <Button
+              label={t('common.save')}
+              onPress={applyEdit}
+              disabled={draft.trim() === ''}
+              style={styles.grow}
+            />
             <Button
               label={t('common.cancel')}
               variant="ghost"
@@ -160,8 +194,8 @@ export default function KnowledgeDetail() {
           data.tags.map((tag) => (
             <Chip
               key={tag.id}
-              label={`${tag.name}  ×`}
-              active={false}
+              label={tag.name}
+              trailing="×"
               onPress={() => {
                 detachTag(id, tag.id);
                 reload();
@@ -179,12 +213,26 @@ export default function KnowledgeDetail() {
           variant="ghost"
           disabled={newTag.trim() === ''}
           onPress={() => {
-            attachTag(id, newTag);
+            // 🔴 새 문장 화면과 같은 규칙으로 나눈다 — 화면마다 규칙이 다르면
+            //    사용자는 저장 화면에서 배운 것을 여기서 다시 배워야 한다(§5)
+            const names = newTag
+              .split(',')
+              .map((v) => v.trim())
+              .filter((v) => v !== '');
+            const before = data.tags.length;
+            for (const name of names) attachTag(id, name);
             setNewTag('');
             reload();
+            setTagNotice(names.length > 0 && tagsOf(id).length === before);
           }}
         />
       </View>
+
+      {tagNotice && (
+        <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.md }]}>
+          {t('knowledge.tags.already')}
+        </Text>
+      )}
 
       {/* 내 생각 — 1:N. 최신이 위 */}
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
@@ -195,15 +243,21 @@ export default function KnowledgeDetail() {
           {t('knowledge.thoughts.empty')}
         </Text>
       ) : (
-        data.thoughts.map((th) => (
+        data.thoughts.map((th, i) => (
           <Card key={th.id}>
-            <Text style={[typography.thought, { color: palette.text }]}>{th.body}</Text>
+            {/* 🔴 최신 하나만 펼치고 나머지는 접는다(§3) — 긴 생각이 쌓이면
+                삭제 버튼까지 스와이프 세 번이 걸렸다(2026-09-09 점검) */}
+            <Pressable onPress={() => toggleThought(th.id)} accessibilityRole="button">
+              <Text
+                style={[typography.thought, { color: palette.text }]}
+                numberOfLines={i === 0 || expanded.has(th.id) ? undefined : 3}
+              >
+                {th.body}
+              </Text>
+            </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => {
-                removeThought(th.id);
-                reload();
-              }}
+              onPress={() => confirmRemoveThought(th.id)}
               hitSlop={8}
               style={{ marginTop: spacing.sm }}
             >
@@ -235,29 +289,6 @@ export default function KnowledgeDetail() {
       <Button label={t('common.delete')} variant="danger" onPress={confirmDelete} />
       <View style={{ height: spacing.xl }} />
     </Screen>
-  );
-}
-
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  const { palette, radius, spacing, typography } = useTheme();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      onPress={onPress}
-      style={{
-        backgroundColor: active ? palette.accent : palette.surface,
-        borderColor: active ? palette.accent : palette.border,
-        borderWidth: 1,
-        borderRadius: radius.full,
-        paddingVertical: spacing.sm,
-        paddingHorizontal: spacing.md,
-      }}
-    >
-      <Text style={[typography.label, { color: active ? palette.onAccent : palette.text }]} numberOfLines={1}>
-        {label}
-      </Text>
-    </Pressable>
   );
 }
 

@@ -59,12 +59,15 @@
       "title": "My thoughts",
       "empty": "Nothing written yet. You do not have to.",
       "placeholder": "What does this mean to you?",
-      "add": "Add thought"
+      "add": "Add thought",
+      "removeTitle": "Remove this thought?",
+      "removeBody": "The passage stays."
     },
     "tags": {
       "title": "Tags",
       "empty": "No tags.",
-      "placeholder": "Add a tag"
+      "placeholder": "Add a tag",
+      "already": "Already added."
     },
     "delete": {
       "title": "Delete this passage?",

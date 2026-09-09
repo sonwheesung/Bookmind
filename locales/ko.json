@@ -59,12 +59,15 @@
       "title": "내 생각",
       "empty": "아직 쓴 것이 없습니다. 안 써도 됩니다.",
       "placeholder": "이 문장이 나에게 무엇이었나요?",
-      "add": "생각 남기기"
+      "add": "생각 남기기",
+      "removeTitle": "이 생각을 뗄까요?",
+      "removeBody": "문장은 그대로 남습니다."
     },
     "tags": {
       "title": "태그",
       "empty": "태그가 없습니다.",
-      "placeholder": "태그 추가"
+      "placeholder": "태그 추가",
+      "already": "이미 붙어 있는 태그입니다."
     },
     "delete": {
       "title": "이 문장을 지울까요?",
