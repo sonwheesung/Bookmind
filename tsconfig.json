@@ -3,6 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    // db/ 의 순수 모듈을 node 가드가 그대로 import 한다(`scripts/check-db.mjs`).
+    // node ESM 은 확장자를 요구하므로 소스에서도 `./schema.ts` 로 쓴다 — Metro 는 실경로를 그대로 찾는다.
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": ["./*"]
     }

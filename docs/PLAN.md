@@ -88,18 +88,47 @@ scripts/check-{i18n,chars,docs}.mjs    🔴 셋 다 SELF-TEST 내장(exit 2)
 ## Phase 1 — 로컬 DB v1
 
 **목표**: [`DATABASE.md`](./DATABASE.md) §2의 **12테이블**이 서고, 규약이 코드로 강제된다.
+✅ **완료 2026-09-09.** 규약을 지키는 방식은 문서가 아니라 **빌더**다 — `deleted_at` 필터를
+붙이는 것도, `id`·`updated_at` 을 채우는 것도 호출부가 못 건너뛴다(`DATABASE.md` §6).
 
 - 마이그레이션 러너 (`meta.schema_version`, Expand-only, down 없음)
 - 🔴 **UUID PK + `updated_at` + `deleted_at` 헬퍼**(결정 #8) — 손으로 쓰지 않게 강제
 - 🔴 **`WHERE deleted_at IS NULL` 을 빠뜨릴 수 없는 조회 헬퍼**
 - 시드 없음(태그·카테고리를 우리가 정하지 않는다)
 
-**완료 기준**
+**완료 기준** — ✅ **2026-09-09 실측** (`npm run check:db`)
+
 ```
-[ ] **12테이블** 생성(세는 법은 `DATABASE.md` §0) · 인덱스(idx_rs_due · idx_k_book · idx_k_created · idx_pl_practice_date) 존재
-[ ] 마이그레이션 2회 연속 실행 시 멱등
-[ ] tombstone 삭제 후 조회에서 사라지는지 테스트
-[ ] 🔴 정수 자동증가 ID 가 스키마에 0건 (세는 법: grep -c "AUTOINCREMENT" db/)
+[x] **12테이블** 생성 · 인덱스 12종            요구된 넷(idx_rs_due · idx_k_book · idx_k_created
+                                              · idx_pl_practice_date) + idx_rl_reviewed 포함
+[x] 마이그레이션 2회 연속 실행 시 멱등          버전·표·인덱스·행 수 불변. 🔴 다운그레이드는 거부한다
+[x] tombstone 삭제 후 조회에서 사라진다         그리고 **행은 남는다**(백업 병합의 전제 · §1.1)
+[x] 🔴 정수 자동증가 ID 0건                    db/ 전체 AUTOINCREMENT 0
+[x] 🔴 §3 삭제 규칙 셋                         책→지식은 book_id만 끊김 · 지식→review_logs 보존
+                                              · 지식→practices 연결만 해제 · 고아 태그만 정리
+[x] 🔴 §1.4 되살리기                          체크 해제 후 같은 날 재체크 · 같은 이름 태그 재생성
+[x] 🔴 변이 주입 9종 전부 발화                 README §3 표. 셋은 이유를 못 읽어 단계별 try/catch 추가
+[x] npm run verify 통과                       typecheck·lint·i18n·chars·docs·**db**
+```
+
+🔴 **착수 전 대조에서 문서 모순 셋이 나왔다 — 코드보다 문서를 먼저 고쳤다**(`CLAUDE.md` §13 ②).
+§1.1은 "모든 표가 `deleted_at`을 가진다"인데 §2의 여섯 표에 그 칸이 없었고, §3은 **바로 그 표들을
+tombstone 하라**고 적고 있었다 — 지울 칸이 없는 표를 지우라고 적어 둔 것이다. UNIQUE(`tags.name` ·
+`practice_logs`)와 tombstone이 부딪히는 자리는 어느 문서에도 답이 없었다.
+→ `DATABASE.md` §1.1에 **예외 넷**을 표로 못 박고, §1.4 **되살리기 규칙**을 신설한 뒤 코드를 썼다.
+
+⚠ **에뮬레이터·실기기에서 이 DB 가 열린 적은 없다.** 잰 것은 `node:sqlite` 에 같은 스키마·같은 러너를
+세운 결과다(`DATABASE.md` §6). expo-sqlite 자체의 런타임(네이티브 모듈 적재·파일 경로·권한)은
+**Phase 0 의 ⏸ 렌더 확인과 같은 축**이고 아직 안 닫혔다.
+
+**실제로 만든 것**
+```
+db/schema.ts     DDL · MIGRATIONS · 표별 관약(예외 넷)     🟢 expo 의존 없음
+db/migrate.ts    러너 — meta.schema_version · Expand-only  🟢 없음
+db/sql.ts        빌더 — deleted_at 강제 · 관약 칸 보호       🟢 없음
+db/cascade.ts    §3 삭제 규칙(단계 목록만 만든다)            🟢 없음
+db/index.ts      expo-sqlite 에 물리는 얇은 층 · 트랜잭션    🔴 여기만
+scripts/check-db.mjs                                       실물 SQLite 에 세워서 잰다
 ```
 
 ---

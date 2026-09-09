@@ -11,8 +11,10 @@
 | 영역 | 상태 | 비고 |
 |---|---|---|
 | 스키마 v1 설계 | ✅ 2026-09-08 | **12테이블** (세는 법: `sed -n '/^## 2. 스키마/,/^## 3./p' docs/DATABASE.md \| grep -c "^### "`) |
-| 마이그레이션 러너 | ❌ | Phase 1 |
-| 테이블 생성 | ❌ | Phase 1 |
+| 마이그레이션 러너 | ✅ 2026-09-09 | Phase 1 — `db/migrate.ts`(순수 · `meta.schema_version` · Expand-only) |
+| 테이붔 생성 | ✅ 2026-09-09 | Phase 1 — `db/schema.ts` v1. **12표 · 인덱스 12종** 실찍 |
+| 조회·삭제 헬퍼 | ✅ 2026-09-09 | Phase 1 — `db/sql.ts`(`deleted_at` 강제) · `db/cascade.ts`(§3 삭제 귀칙) |
+| 가드 `npm run check:db` | ✅ 2026-09-09 | 실물 SQLite 에 스키마를 세워 잴다 — §6 |
 | 시드(기본 태그 등) | 🚫 | 시드 없음 — 사용자가 만든다 |
 
 ---
@@ -37,6 +39,36 @@ deleted_at  TEXT                  -- NULL = 살아 있음. tombstone
 
 ⚠ **조회는 전부 `WHERE deleted_at IS NULL`을 건다.** 이걸 빠뜨리면 지운 것이 복습 큐에 되살아난다 —
 빈 화면이 아니라 **틀린 화면**이라 눈치채기 어렵다. 헬퍼로 강제한다.
+
+#### 🔴 예외는 넷뿐이다 — 여기 없으면 예외가 아니다
+
+| 표 | 무엇이 다른가 | 왜 |
+|---|---|---|
+| `review_logs` | 🚫 `deleted_at`·`updated_at` 없음 | **물리 보존**(§2). 지우지 않으므로 tombstone 이 필요 없다 |
+| `review_schedules` | 🚫 `id` 없음 — PK 가 `knowledge_id` | 지식당 1행. 대리 키를 만들면 같은 지식에 두 행이 생길 수 있다 |
+| `knowledge_tags` | 🚫 `id` 없음 — PK 가 `(knowledge_id, tag_id)` | 연결 표. 같은 짝이 두 번 생기면 안 된다 |
+| `meta` | 🚫 넷 다 없음 — `key`/`value` 뿐 | 앱 내부 상태다. 사용자 데이터가 아니고 백업 병합 대상도 아니다 |
+
+🔴 **나머지 여덟 표는 예외 없이 네 칸을 다 가진다.**
+`ai_analyses`·`recall_questions`·`practice_logs`·`tags` 는 초안(2026-09-08)에서 `created_at` 만 갖고 있었는데,
+**§3 삭제 규칙은 그 표들을 tombstone 하라고 적고 있었다** — 지울 칸이 없는 표를 지우라고 적어 둔 것이다.
+2026-09-09 Phase 1 착수 대조에서 잡아 네 칸으로 맞췄다. ⚠ `id` 가 없는 두 표도 **`deleted_at` 은 가진다** —
+없는 것은 대리 키뿐이다.
+
+### 1.4 🔴 UNIQUE 와 tombstone 이 부딪히는 자리 — **되살린다**
+
+tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. 두 곳이 실제로 걸린다:
+
+| 표 | 제약 | 부딪히는 상황 |
+|---|---|---|
+| `tags` | `name` UNIQUE (NOCASE) | 태그를 지우고 **같은 이름을 다시** 만든다 |
+| `practice_logs` | `(practice_id, date)` UNIQUE | 체크 → 해제 → **같은 날 다시 체크**(`PRACTICE_SYSTEM.md` §6 — 해제를 허용한다) |
+
+🔴 **규칙: 새 행을 만들지 않고 tombstone 을 되살린다**(`deleted_at = NULL` · `updated_at` 갱신).
+
+- 🚫 **UNIQUE 에 `deleted_at` 을 넣어 우회하지 않는다.** 같은 이름의 죽은 행이 무한히 쌓이고 백업이 그만큼 커진다.
+- 🚫 **물리 삭제로 도망가지 않는다.** 그러면 §1.1 의 이유(복원이 지운 것을 되살린다)가 그대로 돌아온다.
+- 되살리기는 **헬퍼 한 곳**에 둔다 — 호출부가 `INSERT` 를 직접 쓰면 UNIQUE 위반으로 죽는다.
 
 ### 1.2 시간은 UTC ISO 8601로 저장, 표시할 때만 로케일
 
@@ -112,7 +144,7 @@ AI 분석 결과. 지식당 최신 1건을 쓰되 **재분석 이력을 남긴�
 | `model` | TEXT | | |
 | `prompt_ver` | INTEGER | | 🔴 프롬프트를 고친 뒤 품질 비교의 유일한 축 |
 | `revision` | INTEGER | O | 1부터 |
-| `created_at` | TEXT | O | |
+| `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 |
 
 ### recall_questions
 
@@ -127,7 +159,7 @@ AI 분석 결과. 지식당 최신 1건을 쓰되 **재분석 이력을 남긴�
 | `question` | TEXT | O | |
 | `expected_point` | TEXT | | 정답이 아니라 **"이런 걸 떠올렸으면 좋겠다"** 의 요지 |
 | `order_no` | INTEGER | O | |
-| `created_at` | TEXT | O | |
+| `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 |
 
 🚫 **정답 문자열 컬럼이 없다.** 채점하지 않기 때문이다(기둥 5, §5 규칙 4).
 
@@ -145,7 +177,7 @@ FSRS 카드 상태. **지식당 1행**(PK = `knowledge_id`).
 | `reps` | INTEGER | O | |
 | `lapses` | INTEGER | O | |
 | `last_reviewed_at` | TEXT | | |
-| `updated_at` | TEXT | O | |
+| `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 — 🔴 `id` 만 없다 |
 
 ⚠ `due_at`에 인덱스를 건다 — "오늘의 복습"이 매 부팅마다 도는 유일한 쿼리다.
 
@@ -187,22 +219,28 @@ FSRS 카드 상태. **지식당 1행**(PK = `knowledge_id`).
 | `practice_id` | TEXT | O | |
 | `date` | TEXT | O | `YYYY-MM-DD` **로컬 날짜** |
 | `done_at` | TEXT | O | 체크한 시각(UTC) |
+| `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 — 체크 해제가 tombstone 이다(§1.4) |
 
-⚠ UNIQUE `(practice_id, date)` — 하루에 두 번 체크되지 않게.
+⚠ UNIQUE `(practice_id, date)` — 하루에 두 번 체크되지 않게. 🔴 해제했다 다시 체크하면 **되살린다**(§1.4).
 
 ### tags
 
-`id` TEXT PK · `name` TEXT (UNIQUE, 대소문자 무시) · `created_at`
+`id` TEXT PK · `name` TEXT (UNIQUE, 대소문자 무시) · `created_at` / `updated_at` / `deleted_at`(§1.1)
+
+⚠ 지운 태그와 **같은 이름을 다시 만들면 되살린다**(§1.4).
 
 ### knowledge_tags
 
-`knowledge_id` TEXT · `tag_id` TEXT · PK `(knowledge_id, tag_id)`
+`knowledge_id` TEXT · `tag_id` TEXT · PK `(knowledge_id, tag_id)` · `created_at` / `updated_at` / `deleted_at`(§1.1)
 
 ⚠ 지식 삭제 시 **고아 태그를 정리**한다(참조 0이면 삭제) — Idea Repository 승계.
 
 ### meta
 
 | `key` TEXT PK · `value` TEXT | `schema_version` 등 |
+
+🔴 **마이그레이션 버전의 정본은 `meta.schema_version` 하나다**(§1.3). SQLite 의 `PRAGMA user_version` 을 **함께 쓰지 않는다** — 한 사실을 두 곳에서 관리하면 어느 쪽이 맞는지 판정할 수 없게 된다(형제 Idea Repository 는 `user_version` 쪽을 골랐다).
+⚠ `meta` 는 러너가 **자기 부트스트랩으로** 만든다 — 버전을 읽으려면 이 표가 먼저 있어야 하기 때문이다.
 
 ---
 
@@ -255,3 +293,27 @@ My Word는 카테고리 삭제 시 단어를 캐스케이드 삭제하는데, �
 - 🔴 그래서 §1.1의 UUID PK + tombstone이 **백업의 전제조건**이다. 이게 없으면 병합이 불가능하다.
 - 서버는 복호화할 수 없다 → 고지 문구는 **"읽지 못합니다"**(AI의 "저장하지 않습니다"와 다르다.
   [`ARCHITECTURE.md`](./ARCHITECTURE.md) §6.2).
+
+---
+
+## 6. 구현 위치와 가드 (2026-09-09 Phase 1)
+
+| 파일 | 무엇 | expo 의짐 |
+|---|---|---|
+| `db/schema.ts` | 표·인덱스 DDL · `MIGRATIONS` · 표별 관록(§1.1 예외 넷) | 🟢 **없다** |
+| `db/migrate.ts` | 러너 — `meta.schema_version` 을 보고 버전 순서대로 1회심 | 🟢 없다 |
+| `db/sql.ts` | 쿼리 바더 — `deleted_at IS NULL` 을 **붙이고**, 관약 칸을 직접 쓰면 마을린다 | 🟢 없다 |
+| `db/cascade.ts` | §3 삭제 귀칙 — 단계 목록만 만들고 실행하지 않는다 | 🟢 없다 |
+| `db/index.ts` | 위 넷을 expo-sqlite 에 물리는 엉은 층 · 트랜잭션 | 🔴 여기만 |
+
+🔴 **이 분할이 가드의 전제다.** 상위 넷이 순수해서
+`scripts/check-db.mjs` 가 node 의 `node:sqlite` 에 **진짜 스키마를 세워** 재다 —
+에뮬레이튰도 실기기도 필요 없다. 그리고 **앱과 가드가 같은 러너를 돌린다** —
+가드가 러너를 베컴 만들면 검사하는 것이 러너가 아니라 사본이다.
+
+재는 것(2026-09-09 실찍): 표 12 · 인덱스 12 · 마이그레이션 2회 연속 실행 멱등 ·
+tombstone 이 조회에서 사라지고 행은 남는가 · §3 삭제 귀칙 셋(지식·책·실천) ·
+§1.4 되살리기 · 고아 태그 정리 · `AUTOINCREMENT` 0건 · 다운그레이드 거부.
+
+⚠ **`node:sqlite` 는 experimental 이다**(Node 22). 사라지면 `better-sqlite3` 로 갈아끔는다 —
+가드만 바뀌면 되고 `db/` 는 안 바뀜다. 그것도 이 분할의 이유다.

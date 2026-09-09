@@ -299,7 +299,8 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 | 언어 | TypeScript ~5.9 (`strict`, `any` 금지) | ❌ |
 | 라우팅 | expo-router 6 | ❌ |
 | 상태 | Zustand (+ persist) | ❌ |
-| **로컬 DB** | **expo-sqlite** | ❌ — 복습 큐·통계·검색에 쿼리가 필요 |
+| **로컬 DB** | **expo-sqlite** `~16.0.10` | ✅ Phase 1(2026-09-09) — 12표 · 러너 · 헬퍼 |
+| UUID | expo-crypto `~15.0.9` | ✅ Phase 1 — `randomUUID()`. 🚫 자동증가 정수 금지(결정 #8) |
 | 복습 알고리즘 | `ts-fsrs` | ❌ — §14 #5 |
 | OCR | ⚠ 미결정 C — **온디바이스가 기둥 2에서 도출된다** | ❌ |
 | 알림 | expo-notifications | ❌ — 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) |
@@ -505,9 +506,9 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 
 ---
 
-## 16. 현재 상태 (2026-09-08 작업 · 2026-09-09 갱신)
+## 16. 현재 상태 (2026-09-09)
 
-**문서 체계 수립 + 기획 검증 + Phase 0 완료.** 화면 1개가 뜨고 가드 3종이 돈다.
+**문서 체계 + 기획 검증 + Phase 0 + Phase 1 완료.** 화면 1개가 뜨고, 12표가 서고, 가드 4종이 돈다.
 
 - ✅ `CLAUDE.md` §1~§16 · `docs/` 12종 · 기획서 원문 보존 · 스킬 4종
 - ✅ 서버 경계 확정(§6) — 실물 조사(common_server 스키마 · 조각 서버 스키마) 근거 포함
@@ -516,6 +517,10 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
   🔴 세 렌즈가 겹쳐 짚은 Phase 번호 드리프트 37곳 정정 · 결정 #14~#16 신설
 - ✅ **Phase 0(2026-09-08)** — Expo 부트 · 토큰 · i18n · 가드 3종(전부 SELF-TEST 내장).
   변이 6종 FAIL 발화 확인 · 번들 200(1.66MB) · 🔴 번들에 폰트 참조 0건(결정 #13 코드 검증)
+- ✅ **Phase 1(2026-09-09)** — 로컬 DB v1. 12표 · 인덱스 12 · 마이그레이션 러너 · UUID/tombstone 헬퍼 ·
+  §3 삭제 규칙. 🔴 **`db/` 를 순수 모듈로 갈라 `check:db` 가 실물 SQLite 에 같은 스키마·같은 러너를
+  세워 잰다**(`docs/DATABASE.md` §6) — 변이 9종 전부 발화.
+  🔴 착수 전 대조에서 **문서 모순 셋**이 나와 코드보다 먼저 고쳤다(§1.1 예외 넷 · §1.4 되살리기 신설)
 
 ### 🔴 지금 열려 있는 것
 
@@ -524,9 +529,13 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 2. ⏸ **에뮬레이터 렌더 미확인** — Phase 0 완료 기준 중 유일하게 안 닫힌 항목.
    AVD `reread`(5574) 미생성 · 외장 `D:` 라 콜드 부팅 259초. 🔴 **Phase 2 를 닫기 전에는 반드시 한다** —
    번들 200 은 컴파일이지 렌더가 아니다(`docs/PLAN.md` Phase 0).
+   🔴 **Phase 1 로 걸린 것이 하나 늘었다** — expo-sqlite 로 **실제 파일 DB 를 연 적이 아직 없다.**
+   `check:db` 가 재는 것은 스키마·러너·규칙이고, 네이티브 모듈 적재·파일 경로·권한은 다른 축이다.
 3. ⚠ **미결정 7건** — 전부 해당 Phase 에 마감이 걸려 있다. 지금 막는 것은 없다.
 
 ### 다음 단계
 
-[`docs/PLAN.md`](./docs/PLAN.md) **Phase 1 — 로컬 DB v1(12테이블 · 마이그레이션 러너 ·
-UUID/tombstone 헬퍼)**. 착수 전 읽을 것은 [`docs/DATABASE.md`](./docs/DATABASE.md) §1 불변 규약.
+[`docs/PLAN.md`](./docs/PLAN.md) **Phase 2 — 책 · 빠른 저장 · 지식 카드**.
+착수 전 읽을 것은 [`docs/KNOWLEDGE_SYSTEM.md`](./docs/KNOWLEDGE_SYSTEM.md)(저장 흐름 · 필수 입력은
+`content` 하나)와 [`docs/DATABASE.md`](./docs/DATABASE.md) §6(조회·삭제는 `db/` 헬퍼로만).
+🔴 **Phase 2 를 닫기 전에 에뮬레이터 렌더 + expo-sqlite 실제 개봉을 함께 확인한다**(위 ②).

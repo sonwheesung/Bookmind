@@ -17,7 +17,7 @@
 | [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **16건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
-| [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 | ✅ 2026-09-08 |
+| [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
 | [`KNOWLEDGE_SYSTEM.md`](./KNOWLEDGE_SYSTEM.md) | 책 · 수집(입력/OCR) · 지식 카드 · 내 생각 · 태그 · 검색 · 홈 | ✅ 2026-09-08 |
 | [`REVIEW_SYSTEM.md`](./REVIEW_SYSTEM.md) | 🔴 **제품의 급소** — FSRS · 두 층의 복습 · 회상 질문 5종 · 오늘의 복습 · 알림 | ✅ 2026-09-08 |
 | [`AI_SYSTEM.md`](./AI_SYSTEM.md) | 분석 · 질문 생성 · 프록시 무저장 · 콘텐츠 유형 5종 · 비용 방어 · 고지 문안 | ✅ 2026-09-08 |
@@ -46,7 +46,7 @@
 
 ## 2. 구현 현황
 
-**2026-09-08 문서 체계 수립 + Phase 0 완료.** 아래 표가 착수 순서의 기준이 된다.
+**2026-09-09 문서 체계 + Phase 0 + Phase 1 완료.** 아래 표가 착수 순서의 기준이 된다.
 Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ### 앱
@@ -56,7 +56,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | Expo 부트 (SDK 54 · expo-router · TS strict · **Metro 8091**) | ✅ | Phase 0. 🔴 포트 미지정 시 8081로 모여 My Word와 충돌 |
 | 테마 토큰 · 타이포 | ✅ | Phase 0. 🔴 **시스템 폰트**(결정 #13) — `assets/fonts/` 없음. 사용자가 저장하는 책 문장의 언어를 우리가 못 정하므로 번들 폰트는 두부(□)를 만든다 |
 | i18n 골격 (`en`·`ko`) + `check:i18n` | ✅ | Phase 0. 🔴 첫날에 세운다 |
-| 로컬 DB v1 (12테이블) | ❌ | Phase 1 · [`DATABASE.md`](./DATABASE.md) |
+| 로컬 DB v1 (12테이블) | ✅ | Phase 1(2026-09-09). 러너 · UUID/tombstone 헬퍼 · 삭제 규칙 · `check:db` 가 실물 SQLite 에 세워 잰다 · [`DATABASE.md`](./DATABASE.md) §6 |
 | 빠른 저장 (직접 입력 · 붙여넣기) | ❌ | Phase 2. 🔴 필수 입력은 `content` 하나 |
 | 책 등록 · 목록 · 상세 | ❌ | Phase 2 |
 | 지식 카드 · 내 생각(1:N) · 태그 | ❌ | Phase 2 |
@@ -104,13 +104,14 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 넷을 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 여섯을 순서대로 돌린다
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
 npm run check:i18n    # ① 키 누락 ② 잉여 ③ 보간 일치 ④ 비한국어 파일 한글 잔존
 npm run check:chars   # 🔴 제어문자 — CR 은 grep 이 못 봐서 바이트로 읽는다(아래 §)
 npm run check:docs    # 문서에 박힌 개수 ⇄ 실제 세기 대조
+npm run check:db      # 🔴 로컬 스키마·삭제 규칙 — 실물 SQLite(node:sqlite)에 세워서 잰다
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
@@ -129,6 +130,25 @@ npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 
 | 파일에 `0x08` 주입 | `1건, offset 12 (0x08)` ✅ |
 | 문서 개수 조작(12→11) | `문서 11 ≠ 실제 12` ✅ |
 | 🔴 **앵커 제거**(문구 변경) | `앵커를 못 찾았다` ✅ — 조용히 통과하지 않는다 |
+
+**`check:db` 변이 주입 실측(2026-09-09 · 9종 전부 발화)**
+
+| 변이 | 결과 |
+|---|---|
+| `deleted_at` 필터 제거 | **exit 2** — SELF-TEST 가 먼저 잡는다 ✅ |
+| tombstone → 물리 삭제 | `tombstone 이 물리 삭제됐다` ✅ |
+| 실천 연결 해제 단계 삭제 | `실천의 지식 연결이 안 끊겼다` ✅ |
+| 고아 태그 `NOT EXISTS` 제거 | `다른 지식이 아직 쓰는 태그를 지웠다` ✅ |
+| 인덱스 `idx_rs_due` 제거 | `인덱스 idx_rs_due 가 없다` ✅ |
+| 표 하나 제거 | `스키마 단계가 예외로 죽었다: no such table` ✅ |
+| 마이그레이션 버전 기록 누락 | `멱등 단계가 예외로 죽었다: table books already exists` ✅ |
+| UUID → `AUTOINCREMENT` | `AUTOINCREMENT 가 db/ 에 1건` ✅ |
+| 다운그레이드 검사 제거 | `DB 가 코드보다 앞선 상태인데 러너가 그냥 진행한다` ✅ |
+
+🔴 **셋은 처음에 `exit 1` 이 나는데 이유를 못 읽었다** — 스키마가 깨진 변이에서 예외로 죽어
+앞 단계가 모아 둔 실패 목록이 화면에 안 나왔다. 단계마다 `try/catch` 로 감싸 고쳤다.
+**변이를 안 주입했으면 몰랐을 결함이다** — 통과만 보면 이런 것이 안 보인다.
+
 
 **앞으로 붙는 것**
 

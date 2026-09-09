@@ -11,8 +11,8 @@
 | 영역 | 상태 | 비고 |
 |---|---|---|
 | 설계 | ✅ 2026-09-08 | |
-| i18next 골격 · `en`/`ko` | ❌ | Phase 0 — 🔴 첫날에 세운다 |
-| `check:i18n` 가드 | ❌ | Phase 0 |
+| i18next 골격 · `en`/`ko` | ✅ 2026-09-08 | Phase 0 완료 — `lib/i18n.ts` · `locales/{en,ko}.json` 23키 |
+| `check:i18n` 가드 | ✅ 2026-09-08 | Phase 0 완료 — `scripts/check-i18n.mjs`(SELF-TEST 내장 · 실패 시 exit 2) |
 | 언어 설정 화면 | ❌ | Phase 6 |
 | AI 응답 언어 설정 | ❌ | Phase 8 |
 | 15개 언어 확장 | 🚫 | 프로덕션 출시 전 검토 |
@@ -87,7 +87,7 @@ settings.language.title
 
 ## 5. 가드 — `npm run check:i18n`
 
-Phase 0에서 만든다. 최소 4가지를 본다(Idea Repository 승계):
+✅ **Phase 0에서 만들었다**(`scripts/check-i18n.mjs`). 최소 4가지를 본다(Idea Repository 승계):
 
 ```
 ① 키 누락    en 에 있고 ko 에 없는 키
