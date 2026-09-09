@@ -10,7 +10,7 @@
 
 ## 1. 문서 목록
 
-**14개** (세는 법: `ls docs/*.md | wc -l`)
+**15개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
@@ -19,13 +19,14 @@
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
 | [`KNOWLEDGE_SYSTEM.md`](./KNOWLEDGE_SYSTEM.md) | 책 · 수집(입력/OCR) · 지식 카드 · 내 생각 · 태그 · 검색 · 홈 | ✅ 2026-09-08 |
-| [`REVIEW_SYSTEM.md`](./REVIEW_SYSTEM.md) | 🔴 **제품의 급소** — FSRS · 두 층의 복습 · 회상 질문 5종 · 오늘의 복습 · 알림 | ✅ 2026-09-08 |
+| [`REVIEW_SYSTEM.md`](./REVIEW_SYSTEM.md) | 🔴 **제품의 급소** — FSRS · 두 층의 복습 · 회상 질문 5종 · 오늘의 복습 · 알림 · 4등급 라벨 | ✅ 2026-09-09 |
 | [`AI_SYSTEM.md`](./AI_SYSTEM.md) | 분석 · 질문 생성 · 프록시 무저장 · 콘텐츠 유형 5종 · 비용 방어 · 고지 문안 | ✅ 2026-09-08 |
 | [`PRACTICE_SYSTEM.md`](./PRACTICE_SYSTEM.md) | 실천 생성(사용자 확정) · 체크 · 연속일 · **지식과의 분리** | ✅ 2026-09-08 |
 | [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) | 구독 단독(광고 없음) · 티어 · 해지 후 동작 · 엔타이틀먼트 · 법적 의무 | ✅ 2026-09-08 |
-| [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 | ✅ 2026-09-08 |
+| [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 **6축** | ✅ 2026-09-09 |
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
+| [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 | 📝 2026-09-09 문서만 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -35,8 +36,7 @@
 | 문서 | 언제 | 상태 |
 |---|---|---|
 | `UI_GUIDE.md` | 첫 화면 전(Phase 0~2) — 토큰 · 공통 컴포넌트 · **UI 금지 목록** | ❌ |
-| `EDGE_CASES.md` | 첫 버그. 각 `*_SYSTEM.md` 말미의 엣지 케이스 표를 EC-NNN으로 이관 | ❌ |
-| `BACKUP_SYSTEM.md` | Phase 12 (v1.1) | ❌ |
+| `VAULT_SYSTEM.md` (암호화 백업 금고) | Phase 12 (v1.1) — 조각 `server/` 복사 승계 | ❌ |
 | `LEGAL_SYSTEM.md` | Phase 11 — 처리방침 · 약관 · Play 데이터 보안 | ❌ |
 | `STORE_LISTING.md` | Phase 11 | ❌ |
 | `BUILD.md` | 첫 릴리스 빌드 | ❌ |
