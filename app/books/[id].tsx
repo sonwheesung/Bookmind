@@ -1,12 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
-import { bookCounts, getBook, removeBook, setBookStatus } from '@/features/books/repo';
+import { bookCounts, getBook, removeBook, renameBook, setBookStatus } from '@/features/books/repo';
 import { listKnowledgeOfBook } from '@/features/knowledge/repo';
 import { BOOK_STATUSES, type BookStatus } from '@/features/types';
 import { useDbQuery } from '@/hooks/useDbQuery';
@@ -24,6 +26,10 @@ export default function BookDetail() {
   const id = params.id;
   const { t } = useTranslation();
   const { palette, radius, spacing, typography } = useTheme();
+
+  const [editing, setEditing] = useState(false);
+  const [draftTitle, setDraftTitle] = useState('');
+  const [draftAuthor, setDraftAuthor] = useState('');
 
   const { data, reload } = useDbQuery(() => {
     const row = getBook(id);
@@ -63,13 +69,57 @@ export default function BookDetail() {
     reload();
   };
 
+  const startEdit = () => {
+    setDraftTitle(row.title);
+    setDraftAuthor(row.author ?? '');
+    setEditing(true);
+  };
+
+  const applyEdit = () => {
+    renameBook(id, { title: draftTitle, author: draftAuthor });
+    setEditing(false);
+    reload();
+  };
+
   return (
     <Screen scroll>
       <Header title={row.title} back />
-      {row.author !== null && (
-        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.lg }]}>
-          {row.author}
-        </Text>
+
+      {editing ? (
+        <>
+          <Field label={t('books.field.title')} value={draftTitle} onChangeText={setDraftTitle} />
+          <Field label={t('books.field.author')} value={draftAuthor} onChangeText={setDraftAuthor} />
+          <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
+            {/* 🔴 제목이 비면 저장을 잠근다 — 지식 상세에서 이 잠금이 빠져 조용한 먹통이 났었다
+                (2026-09-09 · docs/EDGE_CASES.md §2). 같은 실수를 여기서 되풀이하지 않는다 */}
+            <Button
+              label={t('common.save')}
+              onPress={applyEdit}
+              disabled={draftTitle.trim() === ''}
+              style={styles.grow}
+            />
+            <Button
+              label={t('common.cancel')}
+              variant="ghost"
+              onPress={() => setEditing(false)}
+              style={styles.grow}
+            />
+          </View>
+        </>
+      ) : (
+        <>
+          {row.author !== null && (
+            <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+              {row.author}
+            </Text>
+          )}
+          <Button
+            label={t('common.edit')}
+            variant="ghost"
+            onPress={startEdit}
+            style={{ marginBottom: spacing.lg }}
+          />
+        </>
       )}
 
       {/* ⚠ 상태 전이를 자동화하지 않는다 — 사용자가 누른 것만 바뀐다(§4.1) */}
@@ -146,4 +196,6 @@ export default function BookDetail() {
 
 const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
+  row: { flexDirection: 'row' },
+  grow: { flex: 1 },
 });
