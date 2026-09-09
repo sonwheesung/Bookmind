@@ -19,7 +19,8 @@
     "check:db": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-db.mjs",
     "check:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-review.mjs",
     "check:backup": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-backup.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup"
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup",
+    "icons": "node scripts/make-icons.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

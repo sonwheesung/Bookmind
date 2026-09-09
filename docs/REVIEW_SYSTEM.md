@@ -340,9 +340,17 @@ res/values/colors.xml notification_icon_color
 ["expo-notifications", { "icon": "./assets/notification-icon.png", "color": "#3A5A73" }]
 ```
 
-⏸ **그래서 여기서 막힌다: 그 아이콘 파일이 없다.** 앱 아이콘도 아직 없어서(`app.json` 에 `icon` 필드가
-없고 `ic_launcher` 는 Expo 기본값) **알림 아이콘만 따로 만드는 것은 두 번 일이다.**
-→ 알림 아이콘(24dp 흰 실루엣)은 **앱 아이콘 결정과 함께** 간다.
+✅ **2026-09-09 같은 날 닫혔다.** 아이콘 넉 장을 만들고(`scripts/make-icons.mjs`) `app.json` 에 물린 뒤
+`prebuild` 를 다시 돌려 **세 축이 전부 생성되는 것을 확인**했다.
+
+```
+AndroidManifest  expo.modules.notifications.default_notification_icon · _color   ✅
+res/drawable-*   notification_icon.png  5종(mdpi~xxxhdpi)                        ✅
+res/values       colors.xml 의 notification_icon_color = #3A5A73                 ✅
+```
+
+🟢 적응형 아이콘의 `monochrome` 레이어도 함께 붙었다(Android 13+ 테마 아이콘).
+⏸ 남은 것은 **기기에서 눈으로 보는 것**이다 — 리소스가 있다는 것과 24dp 에서 알아볼 수 있다는 것은 다른 축이다.
 
 ⚠ `android/` 는 확인 뒤 지웠다. CNG 산출물이라 남기면 `app.json` 과 어긋난 채 다음 세션을 속인다.
 
