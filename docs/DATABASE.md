@@ -78,6 +78,9 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 ### 1.3 마이그레이션은 Expand-only
 
 - 컬럼을 **바꾸거나 지우지 않는다.** 덧붙인다.
+- **v2 (2026-09-09)** — `books.total_pages` · `books.read_pages`(결정 #17).
+  🟢 **Expand-only 러너의 첫 실전이었다.** `ALTER TABLE ... ADD COLUMN` 두 줄이고 기존 행은 NULL 로 남는다 —
+  되돌릴 일도, 데이터를 옮길 일도 없었다. 규약이 값을 한 자리다.
 - `meta.schema_version`을 올리고, 러너는 버전 순서대로 한 번씩만 적용한다.
 - 🔴 **내려가는 마이그레이션(down)을 만들지 않는다.** 로컬 DB에는 롤백할 백업이 없다(v1.1 전까지).
 
@@ -96,9 +99,17 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 | `status` | TEXT | O | `wish` \| `reading` \| `done` |
 | `started_at` | TEXT | | 독서 시작일 |
 | `finished_at` | TEXT | | 독서 완료일 |
+| `total_pages` | INTEGER | | 🔴 v2 추가(결정 #17). 책의 전체 쪽수 |
+| `read_pages` | INTEGER | | 🔴 v2 추가. 지금까지 읽은 쪽수 |
 | `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 |
 
-⚠ **독서 진행률(%)은 v1에 없다**(MVP 제외). 넣을 때 컬럼을 덧붙인다.
+🔴 **독서 진행률(%)은 저장하지 않는다.** `read_pages / total_pages` 로 **매번 계산한다**(§4) —
+저장하면 두 값과 어긋나는 순간이 반드시 오고, 그때 어느 쪽이 맞는지 판정할 수 없다.
+
+⚠ ~~"독서 진행률(%)은 v1에 없다(MVP 제외). 넣을 때 컬럼을 덧붙인다."~~
+→ 🟢 **2026-09-09 에 그 "넣을 때"가 왔다**(결정 #17). 적어 둔 대로 **컬럼을 덧붙였다** —
+설계를 바꾼 것이 아니라 예고한 확장이라 마이그레이션 v2 두 줄로 끝났다.
+⚠ 둘 다 nullable 이다. **제목만으로 책이 성립한다**는 규칙은 그대로다.
 
 ### knowledge
 

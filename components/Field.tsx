@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
 
 import { useTheme } from '@/theme';
 
@@ -18,6 +18,8 @@ type Props = {
    * 상한을 넘으면 칸 안에서 스크롤된다.
    */
   maxHeight?: number;
+  /** 숫자만 받는 칸(페이지 수 등)에 쓴다 */
+  keyboardType?: KeyboardTypeOptions;
 };
 
 /**
@@ -35,6 +37,7 @@ export function Field({
   autoFocus = false,
   minHeight,
   maxHeight,
+  keyboardType,
 }: Props) {
   const { palette, radius, spacing, typography } = useTheme();
 
@@ -52,6 +55,7 @@ export function Field({
         placeholderTextColor={palette.textMuted}
         multiline={multiline}
         autoFocus={autoFocus}
+        {...(keyboardType === undefined ? {} : { keyboardType })}
         textAlignVertical={multiline ? 'top' : 'center'}
         style={[
           typography[emphasis],

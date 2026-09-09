@@ -7,6 +7,7 @@ import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { parsePages } from '@/features/books/progress';
 import { createBook } from '@/features/books/repo';
 import { BOOK_STATUSES, type BookStatus } from '@/features/types';
 import { useTheme } from '@/theme';
@@ -19,6 +20,8 @@ export default function NewBook() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [status, setStatus] = useState<BookStatus>('reading');
+  const [totalPages, setTotalPages] = useState('');
+  const [readPages, setReadPages] = useState('');
 
   const canSave = title.trim() !== '';
 
@@ -28,6 +31,19 @@ export default function NewBook() {
 
       <Field label={t('books.field.title')} value={title} onChangeText={setTitle} autoFocus emphasis="body" />
       <Field label={t('books.field.author')} value={author} onChangeText={setAuthor} />
+      {/* ⚠ 둘 다 선택이다. 모르면 비워 두고, 그러면 진행률 줄이 아예 안 뜬다(§4.4) */}
+      <Field
+        label={t('books.field.totalPages')}
+        value={totalPages}
+        onChangeText={setTotalPages}
+        keyboardType="number-pad"
+      />
+      <Field
+        label={t('books.field.readPages')}
+        value={readPages}
+        onChangeText={setReadPages}
+        keyboardType="number-pad"
+      />
 
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
         {t('books.field.status')}
@@ -62,7 +78,13 @@ export default function NewBook() {
         label={t('books.new.action')}
         disabled={!canSave}
         onPress={() => {
-          createBook({ title, author, status });
+          createBook({
+            title,
+            author,
+            status,
+            totalPages: parsePages(totalPages),
+            readPages: parsePages(readPages),
+          });
           router.back();
         }}
       />

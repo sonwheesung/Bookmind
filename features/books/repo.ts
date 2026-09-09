@@ -20,11 +20,19 @@ export function getBook(id: string): BookRow | undefined {
 }
 
 /** 제목만 있으면 성립한다. 저자·상태는 선택(상태 기본값 `wish`). */
-export function createBook(input: { title: string; author?: string; status?: BookStatus }): string {
+export function createBook(input: {
+  title: string;
+  author?: string;
+  status?: BookStatus;
+  totalPages?: number | null;
+  readPages?: number | null;
+}): string {
   return insert('books', {
     title: input.title.trim(),
     author: input.author?.trim() ? input.author.trim() : null,
     status: input.status ?? 'wish',
+    total_pages: input.totalPages ?? null,
+    read_pages: input.readPages ?? null,
   });
 }
 
@@ -33,10 +41,21 @@ export function setBookStatus(id: string, status: BookStatus): void {
   update('books', { id }, { status });
 }
 
-export function renameBook(id: string, patch: { title?: string; author?: string | null }): void {
+export function renameBook(
+  id: string,
+  patch: {
+    title?: string;
+    author?: string | null;
+    /** 🔴 `null` 은 "모른다"다. 값을 지우는 것도 정상 입력이다(§4.4) */
+    totalPages?: number | null;
+    readPages?: number | null;
+  },
+): void {
   const next: Record<string, unknown> = {};
   if (patch.title !== undefined) next.title = patch.title.trim();
   if (patch.author !== undefined) next.author = patch.author?.trim() ? patch.author.trim() : null;
+  if (patch.totalPages !== undefined) next.total_pages = patch.totalPages;
+  if (patch.readPages !== undefined) next.read_pages = patch.readPages;
   if (Object.keys(next).length === 0) return;
   update('books', { id }, next);
 }

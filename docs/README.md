@@ -10,11 +10,11 @@
 
 ## 1. 문서 목록
 
-**13개** (세는 법: `ls docs/*.md | wc -l`)
+**14개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **16건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **17건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
@@ -24,6 +24,7 @@
 | [`PRACTICE_SYSTEM.md`](./PRACTICE_SYSTEM.md) | 실천 생성(사용자 확정) · 체크 · 연속일 · **지식과의 분리** | ✅ 2026-09-08 |
 | [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) | 구독 단독(광고 없음) · 티어 · 해지 후 동작 · 엔타이틀먼트 · 법적 의무 | ✅ 2026-09-08 |
 | [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 | ✅ 2026-09-08 |
+| [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
@@ -73,7 +74,8 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 구독 (RevenueCat · 무료 한도) | ❌ | Phase 10. ⚠ 미결정 A · B |
 | 백업 / 복원 | ❌ | Phase 12 (v1.1). 🔴 출시 직후 최우선 |
 | 광고 | 🚫 | 안 한다 — `MONETIZATION_SYSTEM.md` §1 |
-| ISBN 검색 · 음성 입력 · 독서 진행률 | 🚫 | MVP 제외. 2차 |
+| ISBN 검색 · 음성 입력 | 🚫 | MVP 제외. 2차 |
+| 독서 진행률(%) | 🔨 | 🔴 **결정 #17 로 v1.0 에 들어왔다**(2026-09-09) |
 | 커뮤니티 | 🚫 | 3차 · `ARCHITECTURE.md` §7 |
 
 ### 서버 · 외부 (Re:Read 코드 밖 선행 작업)

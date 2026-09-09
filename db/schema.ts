@@ -206,6 +206,19 @@ CREATE TABLE knowledge_tags (
 CREATE INDEX idx_kt_tag ON knowledge_tags(tag_id);
 `;
 
-export const MIGRATIONS: readonly string[] = [V1];
+/**
+ * v2 — 독서 진행률(결정 #17 · 2026-09-09).
+ *
+ * 🔴 **Expand-only 의 첫 실전이다**(§1.3). 컬럼을 덧붙이기만 하고 기존 행은 NULL 로 남는다 —
+ *    데이터를 옮기지도, 되돌리지도 않는다. `DATABASE.md` §2 가 *"넣을 때 컬럼을 덧붙인다"* 고
+ *    미리 적어 둔 그 자리라서 두 줄로 끝났다.
+ * 🚫 비율(%)은 컬럼으로 두지 않는다 — 두 값에서 매번 계산한다(§4 · 파생값은 저장하지 않는다).
+ */
+const V2 = `
+ALTER TABLE books ADD COLUMN total_pages INTEGER;
+ALTER TABLE books ADD COLUMN read_pages  INTEGER;
+`;
+
+export const MIGRATIONS: readonly string[] = [V1, V2];
 
 /** 시드 없음 — 태그·카테고리를 우리가 정하지 않는다(`docs/PLAN.md` Phase 1). */

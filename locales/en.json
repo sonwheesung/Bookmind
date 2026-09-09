@@ -86,7 +86,9 @@
     "field": {
       "title": "Title",
       "author": "Author",
-      "status": "Status"
+      "status": "Status",
+      "totalPages": "Total pages",
+      "readPages": "Pages read"
     },
     "status": {
       "wish": "Want to read",
@@ -101,7 +103,8 @@
         "practices": "Practices {{count}}"
       },
       "passages": "From this book",
-      "empty": "Nothing saved from this book yet."
+      "empty": "Nothing saved from this book yet.",
+      "progress": "{{read}} / {{total}} pages"
     },
     "delete": {
       "title": "Delete this book?",

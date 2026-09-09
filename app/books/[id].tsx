@@ -8,6 +8,7 @@ import { Card } from '@/components/Card';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { parsePages, progressPercent } from '@/features/books/progress';
 import { bookCounts, getBook, removeBook, renameBook, setBookStatus } from '@/features/books/repo';
 import { listKnowledgeOfBook } from '@/features/knowledge/repo';
 import { BOOK_STATUSES, type BookStatus } from '@/features/types';
@@ -30,6 +31,8 @@ export default function BookDetail() {
   const [editing, setEditing] = useState(false);
   const [draftTitle, setDraftTitle] = useState('');
   const [draftAuthor, setDraftAuthor] = useState('');
+  const [draftTotal, setDraftTotal] = useState('');
+  const [draftRead, setDraftRead] = useState('');
 
   const { data, reload } = useDbQuery(() => {
     const row = getBook(id);
@@ -49,6 +52,7 @@ export default function BookDetail() {
     );
   }
   const { row, counts } = data;
+  const percent = progressPercent(row);
 
   const confirmDelete = () => {
     Alert.alert(t('books.delete.title'), t('books.delete.body', { count: counts.knowledge }), [
@@ -72,11 +76,18 @@ export default function BookDetail() {
   const startEdit = () => {
     setDraftTitle(row.title);
     setDraftAuthor(row.author ?? '');
+    setDraftTotal(row.total_pages === null ? '' : String(row.total_pages));
+    setDraftRead(row.read_pages === null ? '' : String(row.read_pages));
     setEditing(true);
   };
 
   const applyEdit = () => {
-    renameBook(id, { title: draftTitle, author: draftAuthor });
+    renameBook(id, {
+      title: draftTitle,
+      author: draftAuthor,
+      totalPages: parsePages(draftTotal),
+      readPages: parsePages(draftRead),
+    });
     setEditing(false);
     reload();
   };
@@ -89,6 +100,18 @@ export default function BookDetail() {
         <>
           <Field label={t('books.field.title')} value={draftTitle} onChangeText={setDraftTitle} />
           <Field label={t('books.field.author')} value={draftAuthor} onChangeText={setDraftAuthor} />
+          <Field
+            label={t('books.field.totalPages')}
+            value={draftTotal}
+            onChangeText={setDraftTotal}
+            keyboardType="number-pad"
+          />
+          <Field
+            label={t('books.field.readPages')}
+            value={draftRead}
+            onChangeText={setDraftRead}
+            keyboardType="number-pad"
+          />
           <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
             {/* 🔴 제목이 비면 저장을 잠근다 — 지식 상세에서 이 잠금이 빠져 조용한 먹통이 났었다
                 (2026-09-09 · docs/EDGE_CASES.md §2). 같은 실수를 여기서 되풀이하지 않는다 */}
@@ -149,6 +172,28 @@ export default function BookDetail() {
         })}
       </View>
 
+      {/* 🔴 모르면 아예 안 그린다 — 0% 는 "안 읽었다"이지 "모른다"가 아니다(§4.4) */}
+      {percent !== null && (
+        <View style={{ marginBottom: spacing.lg }}>
+          <View style={[styles.progressRow, { marginBottom: spacing.xs }]}>
+            <Text style={[typography.label, { color: palette.textMuted }]}>
+              {t('books.detail.progress', { read: row.read_pages, total: row.total_pages })}
+            </Text>
+            <Text style={[typography.label, { color: palette.text }]}>{percent}%</Text>
+          </View>
+          <View
+            style={{
+              height: 6,
+              borderRadius: radius.full,
+              backgroundColor: palette.border,
+              overflow: 'hidden',
+            }}
+          >
+            <View style={{ width: `${percent}%`, height: '100%', backgroundColor: palette.accent }} />
+          </View>
+        </View>
+      )}
+
       <Card>
         <Text style={[typography.body, { color: palette.text }]}>
           {t('books.detail.counts.knowledge', { count: counts.knowledge })}
@@ -196,6 +241,7 @@ export default function BookDetail() {
 
 const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap' },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   row: { flexDirection: 'row' },
   grow: { flex: 1 },
 });

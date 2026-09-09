@@ -86,7 +86,9 @@
     "field": {
       "title": "제목",
       "author": "저자",
-      "status": "상태"
+      "status": "상태",
+      "totalPages": "총 페이지",
+      "readPages": "읽은 페이지"
     },
     "status": {
       "wish": "읽고 싶음",
@@ -101,7 +103,8 @@
         "practices": "실천 {{count}}"
       },
       "passages": "이 책에서 나온 문장",
-      "empty": "이 책에서 저장한 문장이 아직 없습니다."
+      "empty": "이 책에서 저장한 문장이 아직 없습니다.",
+      "progress": "{{read}} / {{total}}쪽"
     },
     "delete": {
       "title": "이 책을 지울까요?",

@@ -22,6 +22,7 @@ import { MIGRATIONS, TABLES, TABLE_NAMES } from '../db/schema.ts';
 import { runMigrations, readSchemaVersion, CODE_SCHEMA_VERSION } from '../db/migrate.ts';
 import { buildInsert, buildSelect, buildSoftDelete, buildReviveWhere, buildRevive } from '../db/sql.ts';
 import { deleteKnowledgeSteps, deleteBookSteps, deletePracticeSteps } from '../db/cascade.ts';
+import { parsePages, progressPercent, progressRatio } from '../features/books/progress.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const NOW = '2026-09-09T00:00:00.000Z';
@@ -217,6 +218,47 @@ function checkSchema() {
       `${t} 의 deleted_at 유무가 TABLES 선언과 다르다 (실물 ${cols.includes('deleted_at')} ≠ 선언 ${m.soft})`,
     );
   }
+
+  db.close();
+}
+
+/**
+ * 🔴 Expand-only 의 본론 — **이미 데이터가 있는 옛 DB 가 올라가는가.**
+ *    새 DB 에서 v1..vN 을 한 번에 도는 것과는 다른 축이다. 사용자의 기기에는 데이터가 들어 있고,
+ *    그 위로 마이그레이션이 지나간다. 그때 행이 사라지거나 컬럼이 안 붙으면 되돌릴 방법이 없다.
+ */
+function checkUpgrade() {
+  const { db, driver } = open();
+
+  // v1 만 적용된 옛 DB 를 손으로 만든다(러너를 쓰면 최신까지 가 버린다)
+  driver.exec('CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+  const v1 = MIGRATIONS[0];
+  driver.exec(v1);
+  driver.run('INSERT INTO meta (key, value) VALUES (?, ?)', ['schema_version', '1']);
+
+  const bookId = randomUUID();
+  const ins = buildInsert('books', { title: '옛 DB 의 책', status: 'reading' }, { id: bookId, now: NOW });
+  driver.run(ins.text, ins.params);
+
+  const before = db
+    .prepare('PRAGMA table_info(books)')
+    .all()
+    .map((c) => c.name);
+  check(!before.includes('total_pages'), 'v1 인데 벌써 total_pages 가 있다 — 이 검사가 무의미해진다');
+
+  runMigrations(driver); // v1 → v2
+
+  const after = db
+    .prepare('PRAGMA table_info(books)')
+    .all()
+    .map((c) => c.name);
+  check(after.includes('total_pages'), 'v2 를 돌렸는데 total_pages 가 없다');
+  check(after.includes('read_pages'), 'v2 를 돌렸는데 read_pages 가 없다');
+  check(readSchemaVersion(driver) === CODE_SCHEMA_VERSION, '버전이 안 올라갔다');
+
+  const row = db.prepare('SELECT title, total_pages FROM books WHERE id = ?').get(bookId);
+  check(row?.title === '옛 DB 의 책', '🔴 마이그레이션이 기존 행을 날렸다');
+  check(row?.total_pages === null, '새 컬럼의 기존 행 값이 NULL 이 아니다');
 
   db.close();
 }
@@ -537,6 +579,31 @@ function checkPracticeDelete() {
   db.close();
 }
 
+/**
+ * 파생값(진행률) — `KNOWLEDGE_SYSTEM.md` §4.4 · `DATABASE.md` §4.
+ * 🔴 여기서 재는 핵심은 **"모른다(null)"와 "0%"가 구분되는가** 다. 섞이면 화면이 거짓말을 한다.
+ */
+function checkProgress() {
+  check(progressPercent({ total_pages: 250, read_pages: 180 }) === 72, '기본 계산이 틀린다');
+  check(progressPercent({ total_pages: 250, read_pages: 0 }) === 0, '0쪽은 0% 여야 한다');
+
+  // 🔴 모르는 것은 null 이다 — 0 이 아니다
+  check(progressRatio({ total_pages: null, read_pages: 100 }) === null, '총 쪽을 모르는데 비율이 나왔다');
+  check(progressRatio({ total_pages: 250, read_pages: null }) === null, '읽은 쪽을 모르는데 비율이 나왔다');
+  check(progressRatio({ total_pages: 0, read_pages: 0 }) === null, '총 0쪽인데 0으로 나눴다');
+
+  // ⚠ 넘치면 자른다(개정판·전자책)
+  check(progressPercent({ total_pages: 100, read_pages: 300 }) === 100, '100%를 넘겼다');
+  check(progressRatio({ total_pages: 100, read_pages: -5 }) === null, '음수를 그대로 썼다');
+
+  // 입력 파싱 — 빈 값과 숫자 아닌 것은 "모름"
+  check(parsePages('  180 ') === 180, '공백 낀 숫자를 못 읽는다');
+  check(parsePages('') === null, '빈 값이 0 이 됐다');
+  check(parsePages('백팔십') === null, '숫자가 아닌데 값이 나왔다');
+  check(parsePages('12.5') === null, '소수를 받아들였다');
+  check(parsePages('0') === 0, '0 을 못 받는다');
+}
+
 function checkSource() {
   // 🔴 자동증가 정수 ID 0건 (PLAN Phase 1 완료 기준)
   let auto = 0;
@@ -574,11 +641,13 @@ function stage(name, fn) {
 selfTest();
 stage('스키마', checkSchema);
 stage('멱등', checkIdempotent);
+stage('업그레이드', checkUpgrade);
 stage('tombstone', checkTombstone);
 stage('책 삭제', checkBookDelete);
 stage('고아 태그', checkOrphanTags);
 stage('되살리기', checkRevive);
 stage('실천 삭제', checkPracticeDelete);
+stage('진행률', checkProgress);
 stage('소스 스캔', checkSource);
 
 if (bad.length > 0) {
@@ -587,5 +656,5 @@ if (bad.length > 0) {
   process.exit(1);
 }
 console.log(
-  `check:db OK — 12표 · 마이그레이션 v${CODE_SCHEMA_VERSION}(${MIGRATIONS.length}단계) 멱등 · tombstone·되살리기·삭제규칙 통과 · SELF-TEST 7종`,
+  `check:db OK — 12표 · 마이그레이션 v${CODE_SCHEMA_VERSION}(${MIGRATIONS.length}단계) 멱등 · tombstone·되살리기·삭제규칙 · 진행률 파생값 · SELF-TEST 7종`,
 );

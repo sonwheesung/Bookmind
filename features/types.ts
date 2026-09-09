@@ -16,6 +16,9 @@ export interface BookRow {
   status: BookStatus;
   started_at: string | null;
   finished_at: string | null;
+  /** 🔴 v2(결정 #17). 둘 다 선택 — 모르면 null 이고, 비율은 저장하지 않는다 */
+  total_pages: number | null;
+  read_pages: number | null;
   created_at: string;
   updated_at: string;
 }
