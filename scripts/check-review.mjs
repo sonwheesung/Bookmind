@@ -17,6 +17,7 @@ import { pickCue, CUE_HEAD_CHARS } from '../features/review/cue.ts';
 import { DAILY_LIMIT, endOfLocalDay, firstDueAt, takeDue } from '../features/review/queue.ts';
 import { dueQuery } from '../features/review/sql.ts';
 import { applyRating, intervalDays, newSchedule, RATINGS } from '../features/review/schedule.ts';
+import { REMINDER_DAYS, REMINDER_TIMES, parseTime, planReminders } from '../features/review/notify.ts';
 
 // ── 🔴 SELF-TEST — 판정 함수가 살아 있는가 ───────────────────────────
 function selfTest() {
@@ -44,6 +45,15 @@ function selfTest() {
   const b = endOfLocalDay(new Date(2026, 8, 9, 23, 0, 0));
   if (a !== b) fail('같은 날인데 하루의 끝이 다르게 나온다');
   if (endOfLocalDay(new Date(2026, 8, 10, 1, 0, 0)) === a) fail('다음 날인데 하루의 끝이 같다');
+
+  // ④ planReminders 가 **넣기도 하고 안 넣기도 하는가** (한쪽만 하면 아래 검사가 무의미하다)
+  const now = new Date(2026, 8, 9, 10, 0, 0);
+  const some = planReminders({ dueAts: ['2026-09-09T00:00:00.000Z'], now, time: '21:00' });
+  if (some.length === 0) fail('만기가 있는데 하나도 예약하지 않는다');
+  if (planReminders({ dueAts: [], now, time: '21:00' }).length !== 0) {
+    fail('만기가 없는데 예약한다 — 0건인 날 알림은 신뢰를 깎는다');
+  }
+  if (parseTime('21:00') === null) fail('정상 시각을 못 읽는다');
 }
 
 // ── 검사 ─────────────────────────────────────────────────────────────
@@ -259,8 +269,87 @@ function checkFsrs() {
   );
 }
 
+/**
+ * 🔴 알림 예약(§6.2.1) — **숫자는 경계값을 잰다.**
+ *    시각 파싱이 대충 통과하면 `new Date(...)` 가 조용히 다른 날로 굴러간다.
+ */
+function checkReminder() {
+  // ① 시각 파싱 경계
+  for (const good of REMINDER_TIMES) check(parseTime(good) !== null, `정상 시각을 거부한다: ${good}`);
+  check(parseTime('00:00')?.hour === 0, '00:00 을 못 읽는다');
+  check(parseTime('23:59')?.minute === 59, '23:59 를 못 읽는다');
+  for (const bad2 of [
+    '24:00',
+    '21:60',
+    '-1:00',
+    '9:00',
+    '21:0',
+    '',
+    ' 21:00',
+    '21:00 ',
+    '2100',
+    'ab:cd',
+    '1e1:00',
+    '٢١:٠٠',
+  ]) {
+    check(parseTime(bad2) === null, `이상한 시각을 통과시킨다: ${JSON.stringify(bad2)}`);
+  }
+
+  const now = new Date(2026, 8, 9, 10, 0, 0); // 로컬 09/09 10:00
+  const dueNow = ['2026-09-09T00:00:00.000Z'];
+
+  // ② 만기가 이미 왔고 오늘 시각이 아직이면 오늘부터 7일
+  const full = planReminders({ dueAts: dueNow, now, time: '21:00' });
+  check(full.length === REMINDER_DAYS, `오늘부터 ${REMINDER_DAYS}일이 아니라 ${full.length}일이다`);
+  check(full[0]?.getDate() === 9 && full[0]?.getHours() === 21, '첫 예약이 오늘 21시가 아니다');
+
+  // ③ 오늘 시각이 이미 지났으면 오늘은 뺀다
+  const late = planReminders({ dueAts: dueNow, now: new Date(2026, 8, 9, 22, 0, 0), time: '21:00' });
+  check(late.length === REMINDER_DAYS - 1, `지난 시각을 넣었다: ${late.length}`);
+  check(late[0]?.getDate() === 10, '지난 시각을 빼고 나서 다음 날부터가 아니다');
+
+  // 🔴 경계: 정확히 같은 시각이면 넣지 않는다(넣으면 즉시 발화한다)
+  const exact = planReminders({ dueAts: dueNow, now: new Date(2026, 8, 9, 21, 0, 0), time: '21:00' });
+  check(exact.length === REMINDER_DAYS - 1, '지금과 같은 시각을 예약했다');
+
+  // ④ 만기가 사흘 뒤면 그 앞의 날들은 뺀다
+  const later = planReminders({
+    dueAts: [new Date(2026, 8, 12, 9, 0, 0).toISOString()],
+    now,
+    time: '21:00',
+  });
+  check(later.length === REMINDER_DAYS - 3, `앞선 날을 예약했다: ${later.length}`);
+  check(later[0]?.getDate() === 12, '만기 날부터가 아니다');
+
+  // ⑤ 만기가 아주 멀면(8일 뒤) 예약이 없다 — 예산 밖이다
+  const far = planReminders({
+    dueAts: [new Date(2026, 8, 20, 9, 0, 0).toISOString()],
+    now,
+    time: '21:00',
+  });
+  check(far.length === 0, `예산(${REMINDER_DAYS}일) 밖인데 예약했다: ${far.length}`);
+
+  // ⑥ 이상한 입력에서 조용히 0을 준다(예외로 앱을 죽이지 않는다)
+  check(planReminders({ dueAts: dueNow, now, time: '25:00' }).length === 0, '이상한 시각인데 예약한다');
+  check(planReminders({ dueAts: dueNow, now, time: '21:00', days: 0 }).length === 0, 'days 0 인데 예약한다');
+  check(
+    planReminders({ dueAts: dueNow, now, time: '21:00', days: -1 }).length === 0,
+    'days 음수인데 예약한다',
+  );
+  check(planReminders({ dueAts: ['', 'x'], now, time: '21:00' }).length === 0, '빈 문자열을 만기로 친다');
+
+  // ⑦ 🔴 자정 경계 — 오늘 23:00 만기 카드는 **오늘 21시 알림에 포함**된다(§2.1 과 같은 기준)
+  const tonight = planReminders({
+    dueAts: [new Date(2026, 8, 9, 23, 0, 0).toISOString()],
+    now,
+    time: '21:00',
+  });
+  check(tonight[0]?.getDate() === 9, '오늘 자정 전 만기인데 오늘 알림에서 빠졌다');
+}
+
 selfTest();
 checkFsrs();
+checkReminder();
 checkCue();
 checkQueue();
 checkDueQuery();
@@ -271,5 +360,5 @@ if (bad.length > 0) {
   process.exit(1);
 }
 console.log(
-  `check:review OK — FSRS 4등급 순서·간격 성장 · 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · SELF-TEST 3종`,
+  `check:review OK — FSRS 4등급 순서·간격 성장 · 단서 4갈래 · 자정 경계 · 상한 ${DAILY_LIMIT} · 큐 질의(지운 지식 2겹 차단) · 알림 예약(시각 경계 12종 · 예산 ${REMINDER_DAYS}일) · SELF-TEST 4종`,
 );

@@ -170,5 +170,17 @@
       "invalidFile": "This is not a backup file, or it is damaged.",
       "newerApp": "This file was made by a newer version. Update the app, then import it."
     }
+  },
+  "reminder": {
+    "title": "Review reminder",
+    "hint": "Only on days with passages to revisit. Once a day.",
+    "on": "On",
+    "off": "Off",
+    "time": "Time",
+    "denied": "Notifications are turned off in your device settings.",
+    "notify": {
+      "title": "Today's review",
+      "body": "There are passages to revisit."
+    }
   }
 }

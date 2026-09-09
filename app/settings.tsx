@@ -1,12 +1,17 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/Card';
+import { Chip } from '@/components/Chip';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { useBackupStore } from '@/features/backup/store';
+import { REMINDER_TIMES } from '@/features/review/notify';
+import { syncReminders } from '@/features/review/reminder';
 import { LANGUAGE_NAMES, useLanguageStore } from '@/features/settings/language';
+import { useReminderStore } from '@/features/settings/reminder';
 import { SUPPORTED } from '@/lib/i18n';
 import { useTheme } from '@/theme';
 
@@ -22,6 +27,34 @@ export default function Settings() {
   const language = useLanguageStore((s) => s.language);
   const setLanguage = useLanguageStore((s) => s.setLanguage);
   const lastExportedAt = useBackupStore((s) => s.lastExportedAt);
+  const enabled = useReminderStore((s) => s.enabled);
+  const time = useReminderStore((s) => s.time);
+  const setEnabled = useReminderStore((s) => s.setEnabled);
+  const setTime = useReminderStore((s) => s.setTime);
+  const [denied, setDenied] = useState(false);
+
+  const copy = { title: t('reminder.notify.title'), body: t('reminder.notify.body') };
+
+  /**
+   * 🔴 예약을 **상태를 바꾼 직후에** 다시 맞춘다(`REVIEW_SYSTEM.md` §6.2.1).
+   * 권한을 거절당하면 스위치를 도로 끈다. 🚫 켜진 척하지 않는다.
+   */
+  async function toggleReminder() {
+    const next = !enabled;
+    setEnabled(next);
+    const r = await syncReminders(next, time, copy);
+    if (r.blocked === 'permission') {
+      setEnabled(false);
+      setDenied(true);
+      return;
+    }
+    setDenied(false);
+  }
+
+  async function pickTime(v: string) {
+    setTime(v);
+    await syncReminders(enabled, v, copy);
+  }
 
   return (
     <Screen scroll>
@@ -49,6 +82,41 @@ export default function Settings() {
 
       <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.md }]}>
         {t('settings.language.hint')}
+      </Text>
+
+      {/* 🔴 알림은 기둥 7 의 도달 수단이다. 그런데 **기본값은 꺼짐**이다(`REVIEW_SYSTEM.md` §6.2) */}
+      <Text
+        style={[
+          typography.label,
+          { color: palette.textMuted, marginTop: spacing.xl, marginBottom: spacing.sm },
+        ]}
+      >
+        {t('reminder.title')}
+      </Text>
+      <Card onPress={() => void toggleReminder()}>
+        <View style={styles.row}>
+          <Text style={[typography.body, { color: palette.text }]}>{t('reminder.title')}</Text>
+          <Text style={[typography.body, { color: enabled ? palette.accent : palette.textMuted }]}>
+            {enabled ? t('reminder.on') : t('reminder.off')}
+          </Text>
+        </View>
+      </Card>
+
+      {enabled && (
+        <>
+          <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.md }]}>
+            {t('reminder.time')}
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm }}>
+            {REMINDER_TIMES.map((v) => (
+              <Chip key={v} label={v} active={v === time} onPress={() => void pickTime(v)} />
+            ))}
+          </View>
+        </>
+      )}
+
+      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.md }]}>
+        {denied ? t('reminder.denied') : t('reminder.hint')}
       </Text>
 
       {/* 🔴 백업은 설정 안에 있지만 부가 기능이 아니다 — 결정 #1 의 대가를 닫는 자리다(결정 #15) */}

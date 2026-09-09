@@ -304,7 +304,7 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 | 백업 파일 | expo-file-system `~19.0` · expo-sharing `~14.0` · expo-document-picker `~14.0` | ✅ Phase 2(2026-09-09) — 🟢 셋 다 Expo Go 내장이라 재빌드가 없었다 |
 | 복습 알고리즘 | `ts-fsrs` | ❌ — §14 #5 |
 | OCR | ⚠ 미결정 C — **온디바이스가 기둥 2에서 도출된다** | ❌ |
-| 알림 | expo-notifications | ❌ — 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) |
+| 알림 | expo-notifications `~0.32.17` | 🔨 Phase 4(2026-09-09) — 🟢 **Expo Go 에서 로컬 알림 도달 확인**. 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) — 그 축은 미확인 |
 | 구독 | react-native-purchases (RevenueCat) | ❌ |
 | 로그인 | @react-native-google-signin/google-signin | ❌ |
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID |
@@ -542,6 +542,10 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
   🔴 결정 #15 로 **무료 사용자의 전손이 v1.0 에서 닫혔다**(`docs/BACKUP_SYSTEM.md`)
 - 🔨 **화면 문구 전수 검수(2026-09-09)** — ChatGPT 창구(`docs/DESIGN_REVIEW.md`)로 88키 검수.
   복습 4등급이 `쉽다`(문제의 난이도)에서 `바로 떠올랐다`(회상 경험)로 바뀐 것이 가장 크다
+- 🔨 **Phase 4 알림(2026-09-09)** — 예약 계산(순수·가드 12종 경계) · 설정 스위치 · 시각 5종.
+  🟢 **에뮬레이터에서 실제로 도달했다.** 🔧 켜자마자 예약이 **두 배**가 되던 결함을 실측이 잡았다
+  (`REVIEW_SYSTEM.md` §6.5 — 화면으로는 안 보인다).
+  ⏸ 아이콘·Doze·강제 종료·재부팅은 `prebuild`/실기기 축이라 **Expo Go 로는 못 닫는다**
 
 ### 🔴 지금 열려 있는 것
 
@@ -554,8 +558,8 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 
 ### 다음 단계
 
-[`docs/PLAN.md`](./docs/PLAN.md) **Phase 4 — 알림(기둥 7)**.
-🔴 착수하면 **먼저 "Expo Go 에서 로컬 알림이 어디까지 되는지" 실측**한다. SDK 53 부터 Expo Go 의
-푸시가 빠졌고, 로컬 알림도 어디까지 되는지는 재 봐야 안다 — 안 되면 dev build 가 먼저다.
+[`docs/PLAN.md`](./docs/PLAN.md) **Phase 5 — OCR**, 또는 **Phase 4 의 남은 네 칸**(아이콘·Doze·
+강제 종료·재부팅). 🔴 뒤쪽은 **`prebuild` 와 실기기가 있어야 한다** — Expo Go 로는 원리상 못 닫는다.
+⚠ 알림 아이콘은 24dp 흰 실루엣 한 장이라 **앱 아이콘 결정과 함께** 가는 것이 싸다.
 ✅ Phase 3 의 ⏸ 였던 **비행기 모드 복습**은 2026-09-09 에 닫혔다 — 오프라인에서 전 과정이 돌고
 DB 에도 남는다(`EDGE_CASES.md` §7.2). ⏸ 남은 것은 **사용자 판정**("AI 없이도 쓸 만한가")뿐이다.
