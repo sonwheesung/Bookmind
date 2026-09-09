@@ -11,13 +11,28 @@ android/
 ios/
 
 # ---- 환경변수 · 비밀 ----
+# 🔴 첫 푸시 전 점검에서 뚫린 자리를 메웠다(2026-09-09).
+#    `.env` 는 막고 있었는데 `.env.production` 이 통과했고,
+#    서비스 계정 JSON · 개인키 · google-services.json 은 아예 목록에 없었다.
+#    ⚠ 점검 방법: `git check-ignore -q <가짜파일>` 로 **물려서** 확인한다. 목록을 눈으로 읽지 않는다.
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 credentials/
+secrets/
 *.jks
 *.keystore
 keystore.properties
+*.pem
+*.p8
+*.p12
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+*service-account*.json
+google-services.json
+GoogleService-Info.plist
 
 # ---- 빌드 산출물 ----
 *.aab

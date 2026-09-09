@@ -348,6 +348,32 @@ emulator -avd reread -port 5574 -no-snapshot -no-snapshot-save -no-boot-anim -gp
 - ⚠ RN 화면은 uiautomator 텍스트가 0으로 나올 수 있다 — 로드 판정은 `screencap` 으로.
 - ⚠ 포트로 AVD를 식별하지 않는다. `emu avd name` 으로 묻는다.
 
+### 3.1 🔴 첫 푸시 전 점검 (2026-09-09 실행)
+
+`origin` 은 등록돼 있었지만 **원격 브랜치가 0개**였다. 첫 푸시는 `@{u}..` 가 아니라 **전체 이력**이 대상이다.
+
+```bash
+# ① 지금 추적 중인 파일 이름
+git ls-files | grep -iE '\.env|secret|credential|token|\.jks|\.keystore|service-account|\.pem|\.key$'
+# ② 이력에서 **추가(A)** 된 적이 있는가. 🔴 D(삭제)와 구분한다 — 이름만 보면 오판한다
+git log --all --name-status --format= | grep -iE '^A.*(위 패턴)'
+# ③ 추가된 줄의 본문
+git log --all -p --format= | grep '^+' | grep -EI '<시크릿 패턴>'
+# ④ .gitignore 를 **가짜 파일로 물려서** 확인한다. 목록을 눈으로 읽지 않는다
+git check-ignore -q secrets/x.json && echo OK || echo 뚫림
+```
+
+★ **대조군을 먼저 돌린다.** 가짜 시크릿을 물려 1이 나오는 것을 본 뒤에야 0건을 믿는다.
+
+🔴 **그래서 실제로 하나 잡았다.** `sk-[A-Za-z0-9]{32,}` 가 `sk-ant-...` 를 **못 보고 있었다**
+(하이픈이 문자 클래스에 없다). 본검사는 0건이었지만 그 0건은 *"없다"* 가 아니라 *"안 봤다"* 였다.
+→ 패턴을 고치고 대조군 5종(sk-ant · discord · postgres · google · PEM)과 음성대조 1종으로 다시 쟀다.
+
+⚠ **`.gitignore` 도 네 자리가 뚫려 있었다** — `secrets/` · `google-services.json` · 개인키(`id_rsa`·`*.pem`) ·
+`.env.production`(`.env` 는 막고 있었는데 `.env.*` 가 아니었다). 물려 보기 전에는 목록이 충분해 **보였다.**
+
+⚠ 저작권 축도 본다(독서 앱이라 열려 있다). 저장소에 든 "책 문장"은 예시 한 줄과 **제목·저자명**뿐이었다.
+
 ---
 
 ## 4. 아키텍처 원칙
