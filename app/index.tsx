@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -30,7 +30,19 @@ export default function Home() {
 
   return (
     <Screen scroll>
-      <Header title={t('app.name')} />
+      <Header
+        title={t('app.name')}
+        right={
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('settings.title')}
+            onPress={() => router.push('/settings')}
+            hitSlop={12}
+          >
+            <Text style={[typography.label, { color: palette.textMuted }]}>{t('settings.title')}</Text>
+          </Pressable>
+        }
+      />
       <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.xl }]}>
         {t('app.tagline')}
       </Text>

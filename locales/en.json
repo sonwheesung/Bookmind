@@ -119,7 +119,7 @@
     "title": "Settings",
     "language": {
       "title": "Language",
-      "system": "Device language"
+      "hint": "Saved passages and your thoughts stay in the language you wrote them in."
     }
   },
   "ai": {
