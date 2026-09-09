@@ -418,6 +418,8 @@ grep -c "Failed to start watch mode" <metro 로그>
 - 의존 방향: `app/`(라우트) → `features/` → `db/`·`lib/`·`theme/`. **역방향 import 금지.**
 - **모든 화면은 `components/Screen`으로 감싼다** — 화면에서 SafeAreaView·ScrollView를 직접 쓰지 않는다.
   세이프에어리어와 키보드 가림을 한 곳에서 처리한다(조각 승계).
+    🔴 **키보드는 겹침을 재서 영역을 줄인다. 여백을 더하지 않는다**(`EDGE_CASES.md` §11).
+    ~~`KeyboardAvoidingView`~~ 는 안드로이드에서 `behavior` 없이 쓰면 **아무 일도 안 한다** — 2026-09-09 실기기에서 밟았다.
 - **저장 흐름에 필수 입력을 추가하지 않는다**(기둥 1). 필수는 `content` 하나뿐이다.
 - **모든 로컬 레코드는 UUID PK + `updated_at` + `deleted_at`.** 정수 자동증가 ID 금지(결정 #8).
 - **조회는 항상 `deleted_at IS NULL`.** 헬퍼로 강제한다 — 빠뜨리면 빈 화면이 아니라 **틀린 화면**이 된다.
