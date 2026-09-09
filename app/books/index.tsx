@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { BookCover } from '@/components/BookCover';
 import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
@@ -32,10 +33,17 @@ export default function BookList() {
       ) : (
         data.map((b) => (
           <Card key={b.id} onPress={() => router.push(`/books/${b.id}`)}>
-            <Text style={[typography.body, { color: palette.text }]}>{b.title}</Text>
-            <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
-              {[b.author, t(`books.status.${b.status}`)].filter((v) => v != null && v !== '').join(' · ')}
-            </Text>
+            <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'center' }}>
+              <BookCover book={b} size="sm" />
+              <View style={{ flex: 1 }}>
+                <Text style={[typography.body, { color: palette.text }]} numberOfLines={2}>
+                  {b.title}
+                </Text>
+                <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
+                  {[b.author, t(`books.status.${b.status}`)].filter((v) => v != null && v !== '').join(' · ')}
+                </Text>
+              </View>
+            </View>
           </Card>
         ))
       )}

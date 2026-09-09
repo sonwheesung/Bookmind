@@ -8,8 +8,12 @@
  * 🔴 순수하다 — DB 도 시각도 모른다. 값을 받아 값을 돌려준다(가드가 node 에서 잰다).
  */
 
-/** 원문 앞 몇 글자를 단서로 줄 것인가(§3.1 출발값). 절반을 보여주면 회상이 아니라 읽기가 된다. */
-export const CUE_HEAD_CHARS = 12;
+/**
+ * 원문 앞 몇 글자를 단서로 줄 것인가(§3.1).
+ * 🔄 12 → 8 (2026-09-09). 12자면 문장을 거의 알아봐서 **회상이 아니라 인식**이 된다 —
+ *    단서는 맞히는 힌트가 아니라 기억을 꺼내는 트리거여야 한다.
+ */
+export const CUE_HEAD_CHARS = 8;
 
 export interface CueInput {
   readonly content: string;

@@ -78,6 +78,8 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 ### 1.3 마이그레이션은 Expand-only
 
 - 컬럼을 **바꾸거나 지우지 않는다.** 덧붙인다.
+- **v3 (2026-09-09)** — `review_schedules.learning_steps`. 🔴 결함 수정(`REVIEW_SYSTEM.md` §1.2).
+- **v4 (2026-09-09)** — `books.cover_color`. 표지 자리표시자 색을 **고정**하기 위해 저장한다.
 - **v2 (2026-09-09)** — `books.total_pages` · `books.read_pages`(결정 #17).
   🟢 **Expand-only 러너의 첫 실전이었다.** `ALTER TABLE ... ADD COLUMN` 두 줄이고 기존 행은 NULL 로 남는다 —
   되돌릴 일도, 데이터를 옮길 일도 없었다. 규약이 값을 한 자리다.
@@ -100,6 +102,7 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 | `started_at` | TEXT | | 독서 시작일 |
 | `finished_at` | TEXT | | 독서 완료일 |
 | `total_pages` | INTEGER | | 🔴 v2 추가(결정 #17). 책의 전체 쪽수 |
+| `cover_color` | TEXT | | 🔴 v4 추가. 표지 자리표시자 색. **등록할 때 한 번 배정해 고정**한다 |
 | `read_pages` | INTEGER | | 🔴 v2 추가. 지금까지 읽은 쪽수 |
 | `created_at` / `updated_at` / `deleted_at` | TEXT | | §1.1 |
 

@@ -5,6 +5,7 @@
  *    화면이 삭제 순서를 직접 조립하면 규칙이 두 곳에 살게 된다.
  */
 import { count, deleteBook, insert, selectAll, selectOne, update } from '@/db';
+import { pickCoverColor } from '@/features/books/cover';
 import type { BookCounts, BookRow, BookStatus } from '@/features/types';
 
 export function listBooks(): BookRow[] {
@@ -33,6 +34,8 @@ export function createBook(input: {
     status: input.status ?? 'wish',
     total_pages: input.totalPages ?? null,
     read_pages: input.readPages ?? null,
+    // 🔴 등록할 때 한 번 배정한다 — 랜덤이면 열 때마다 바뀌어 기억이 안 생긴다
+    cover_color: pickCoverColor(input.title),
   });
 }
 

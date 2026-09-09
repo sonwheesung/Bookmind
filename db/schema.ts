@@ -232,6 +232,18 @@ const V3 = `
 ALTER TABLE review_schedules ADD COLUMN learning_steps INTEGER NOT NULL DEFAULT 0;
 `;
 
-export const MIGRATIONS: readonly string[] = [V1, V2, V3];
+/**
+ * v4 — 책 표지 자리표시자 색 (2026-09-09 · `DESIGN_REVIEW.md` §3).
+ *
+ * 🔴 **색을 저장하는 이유**: 랜덤이면 앱을 다시 열 때마다 바뀐다.
+ *    사용자에게 *"Atomic Habits = 파란 A"* 라는 시각적 기억이 생기므로 **등록할 때 한 번 배정**한다.
+ * ⚠ 기존 행은 NULL 이고, 화면은 그때 제목에서 안정적으로 골라 쓴다(§표지 없음 처리).
+ * 🚫 이미지 에셋이 아니다 — 색 문자열 하나다. PNG·SVG·외부 API 전부 필요 없다.
+ */
+const V4 = `
+ALTER TABLE books ADD COLUMN cover_color TEXT;
+`;
+
+export const MIGRATIONS: readonly string[] = [V1, V2, V3, V4];
 
 /** 시드 없음 — 태그·카테고리를 우리가 정하지 않는다(`docs/PLAN.md` Phase 1). */

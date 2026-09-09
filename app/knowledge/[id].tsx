@@ -157,12 +157,13 @@ export default function KnowledgeDetail() {
         <>
           <Card>
             <Text style={[typography.quote, { color: palette.text }]}>{row.content}</Text>
-            {(data.book !== undefined || row.page !== null) && (
-              <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.md }]}>
-                {[data.book?.title, row.page].filter((v) => v != null && v !== '').join(' · ')}
-              </Text>
-            )}
           </Card>
+          {/* 🔴 카드인 것은 원문 하나다. 출처·태그는 메타데이터라 카드에서 뺀다(DESIGN_REVIEW §3) */}
+          {(data.book !== undefined || row.page !== null) && (
+            <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.md }]}>
+              {[data.book?.title, row.page].filter((v) => v != null && v !== '').join(' · ')}
+            </Text>
+          )}
           <Button
             label={t('common.edit')}
             variant="ghost"
@@ -188,21 +189,20 @@ export default function KnowledgeDetail() {
         {t('knowledge.tags.title')}
       </Text>
       <View style={[styles.chips, { gap: spacing.sm, marginBottom: spacing.sm }]}>
-        {data.tags.length === 0 ? (
-          <Text style={[typography.caption, { color: palette.textMuted }]}>{t('knowledge.tags.empty')}</Text>
-        ) : (
-          data.tags.map((tag) => (
-            <Chip
-              key={tag.id}
-              label={tag.name}
-              trailing="×"
-              onPress={() => {
-                detachTag(id, tag.id);
-                reload();
-              }}
-            />
-          ))
-        )}
+        {/* 🚫 "태그가 없습니다"를 쓰지 않는다 — 없는 것에 문장을 붙이면 할 일처럼 읽힌다 */}
+        {data.tags.length === 0
+          ? null
+          : data.tags.map((tag) => (
+              <Chip
+                key={tag.id}
+                label={tag.name}
+                trailing="×"
+                onPress={() => {
+                  detachTag(id, tag.id);
+                  reload();
+                }}
+              />
+            ))}
       </View>
       <View style={[styles.row, { gap: spacing.sm, marginBottom: spacing.xl }]}>
         <View style={styles.grow}>

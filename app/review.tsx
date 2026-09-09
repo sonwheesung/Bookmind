@@ -64,13 +64,15 @@ export default function Review() {
         {t('review.savedOn', { date: savedOn })}
       </Text>
 
+      {/* 🔴 단서는 카드가 아니다 — 카드를 여럿 세우면 사용자가 "이 카드는 뭐지"를 먼저 해석한다
+          (DESIGN_REVIEW §3). 이 화면에서 카드인 것은 원문 하나다 */}
       {card.cue.kind !== 'none' && (
-        <Card>
+        <View style={{ marginBottom: spacing.xl }}>
           <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
             {t(`review.cue.${card.cue.kind}`)}
           </Text>
           <Text style={[typography.thought, { color: palette.text }]}>{card.cue.text}</Text>
-        </Card>
+        </View>
       )}
 
       {revealed ? (
@@ -78,9 +80,9 @@ export default function Review() {
           <Text style={[typography.quote, { color: palette.text }]}>{card.knowledge.content}</Text>
         </Card>
       ) : (
-        <Card>
-          <Text style={[typography.body, { color: palette.textMuted }]}>{t('review.prompt')}</Text>
-        </Card>
+        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.md }]}>
+          {t('review.prompt')}
+        </Text>
       )}
 
       {/* 회상 답변 — 🔴 입력은 선택이다. 안 쓰고 넘어갈 수 있다(§8) */}
@@ -96,6 +98,12 @@ export default function Review() {
           minHeight={80}
           maxHeight={160}
         />
+      )}
+
+      {revealed && (
+        <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+          {t('review.howRecalled')}
+        </Text>
       )}
 
       {revealed ? (

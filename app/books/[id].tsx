@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { BookCover } from '@/components/BookCover';
 import { Card } from '@/components/Card';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
@@ -131,11 +132,15 @@ export default function BookDetail() {
         </>
       ) : (
         <>
-          {row.author !== null && (
-            <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.sm }]}>
-              {row.author}
-            </Text>
-          )}
+          <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.md }]}>
+            {/* 🔴 이미지 파일이 아니다 — 첫 글자 + 고정 색(DESIGN_REVIEW §3) */}
+            <BookCover book={row} />
+            {row.author !== null && (
+              <Text style={[typography.body, { color: palette.textMuted, alignSelf: 'center' }]}>
+                {row.author}
+              </Text>
+            )}
+          </View>
           <Button
             label={t('common.edit')}
             variant="ghost"
@@ -194,27 +199,33 @@ export default function BookDetail() {
         </View>
       )}
 
-      <Card>
-        <Text style={[typography.body, { color: palette.text }]}>
-          {t('books.detail.counts.knowledge', { count: counts.knowledge })}
-        </Text>
-        <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
-          {[
-            t('books.detail.counts.thoughts', { count: counts.thoughts }),
-            t('books.detail.counts.reviews', { count: counts.reviews }),
-            t('books.detail.counts.practices', { count: counts.practices }),
-          ].join(' · ')}
-        </Text>
-      </Card>
+      {/* 🔴 데이터가 생긴 뒤에만 통계를 낸다(DESIGN_REVIEW §3).
+          빈 책에 `문장 0 · 생각 0 · 복습 0 · 실천 0` 은 진행이 아니라 **미완성**으로 보인다 */}
+      {counts.knowledge > 0 && (
+        <Card>
+          <Text style={[typography.body, { color: palette.text }]}>
+            {t('books.detail.counts.knowledge', { count: counts.knowledge })}
+          </Text>
+          <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
+            {[
+              t('books.detail.counts.thoughts', { count: counts.thoughts }),
+              t('books.detail.counts.reviews', { count: counts.reviews }),
+              t('books.detail.counts.practices', { count: counts.practices }),
+            ].join(' · ')}
+          </Text>
+        </Card>
+      )}
 
-      <Text
-        style={[
-          typography.label,
-          { color: palette.textMuted, marginTop: spacing.lg, marginBottom: spacing.sm },
-        ]}
-      >
-        {t('books.detail.passages')}
-      </Text>
+      {data.passages.length > 0 && (
+        <Text
+          style={[
+            typography.label,
+            { color: palette.textMuted, marginTop: spacing.lg, marginBottom: spacing.sm },
+          ]}
+        >
+          {t('books.detail.passages')}
+        </Text>
+      )}
       {data.passages.length === 0 ? (
         <Text style={[typography.body, { color: palette.textMuted }]}>{t('books.detail.empty')}</Text>
       ) : (

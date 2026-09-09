@@ -19,6 +19,8 @@ export interface BookRow {
   /** 🔴 v2(결정 #17). 둘 다 선택 — 모르면 null 이고, 비율은 저장하지 않는다 */
   total_pages: number | null;
   read_pages: number | null;
+  /** 🔴 v4. 표지 자리표시자 색 — 등록할 때 한 번 배정해 고정한다 */
+  cover_color: string | null;
   created_at: string;
   updated_at: string;
 }

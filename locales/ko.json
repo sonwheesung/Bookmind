@@ -14,13 +14,14 @@
   },
   "home": {
     "today": {
-      "title": "오늘",
+      "title": "오늘의 복습",
       "reviewCount": "떠올릴 것 {{count}}개",
-      "empty": "오늘 복습할 것이 없습니다."
+      "empty": "오늘 다시 만날 문장이 없습니다.",
+      "count": "문장 {{count}}개"
     },
     "recent": {
       "title": "최근 저장",
-      "empty": "아직 저장한 것이 없습니다."
+      "empty": "저장한 문장이 여기에 나타납니다."
     },
     "cta": "문장 저장하기",
     "stats": {
@@ -133,7 +134,8 @@
       "head": "이렇게 시작합니다"
     },
     "answer": "떠오른 것을 적어 보세요 (선택)",
-    "backHome": "홈으로"
+    "backHome": "홈으로",
+    "howRecalled": "어떻게 떠올랐나요?"
   },
   "settings": {
     "title": "설정",

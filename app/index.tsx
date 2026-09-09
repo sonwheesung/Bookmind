@@ -49,7 +49,9 @@ export default function Home() {
         {t('app.tagline')}
       </Text>
 
-      <Button label={t('home.cta')} onPress={() => router.push('/knowledge/new')} />
+      {/* 🔴 저장은 1탭 거리를 지키되 **색을 낮춘다**(DESIGN_REVIEW §3).
+          위치는 기능 우선순위, 색·크기는 제품 우선순위 — 다시 열었을 때의 핵심 행동은 복습이다 */}
+      <Button label={t('home.cta')} variant="ghost" onPress={() => router.push('/knowledge/new')} />
       <Text
         style={[
           typography.caption,
@@ -59,35 +61,45 @@ export default function Home() {
         {t('knowledge.save.hint')}
       </Text>
 
-      {/* 🔴 홈의 맨 위는 "오늘 무엇을 하면 되는가"다(§7). 0건인 날은 최근 저장으로 이어준다 */}
-      <Card>
-        <Text style={[typography.label, { color: palette.textMuted }]}>{t('home.today.title')}</Text>
-        <Text style={[typography.body, { color: palette.text, marginTop: spacing.sm }]}>
-          {data.due === 0 ? t('home.today.empty') : t('home.today.reviewCount', { count: data.due })}
+      {/* 🔴 홈의 맨 위는 "오늘 무엇을 하면 되는가"다(§7).
+          🚫 0건일 때 숫자를 강조하지 않는다 — 중립적인 문장 하나로 끝낸다(DESIGN_REVIEW §3) */}
+      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+        {t('home.today.title')}
+      </Text>
+      {data.due === 0 ? (
+        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.xl }]}>
+          {t('home.today.empty')}
         </Text>
-        {data.due > 0 && (
+      ) : (
+        <Card>
+          <Text style={[typography.body, { color: palette.text }]}>
+            {t('home.today.count', { count: data.due })}
+          </Text>
           <Button
             label={t('review.start')}
             onPress={() => router.push('/review')}
             style={{ marginTop: spacing.md }}
           />
-        )}
-      </Card>
+        </Card>
+      )}
 
-      <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
-        <Button
-          label={t('home.stats.books', { count: data.books })}
-          variant="ghost"
-          onPress={() => router.push('/books')}
-          style={styles.grow}
-        />
-        <Button
-          label={t('home.stats.knowledge', { count: data.knowledge })}
-          variant="ghost"
-          onPress={() => router.push('/knowledge')}
-          style={styles.grow}
-        />
-      </View>
+      {/* 🚫 신규 사용자에게 `책 0 · 문장 0` 을 보여주지 않는다 — 성취 대시보드가 된다 */}
+      {(data.books > 0 || data.knowledge > 0) && (
+        <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
+          <Button
+            label={t('home.stats.books', { count: data.books })}
+            variant="ghost"
+            onPress={() => router.push('/books')}
+            style={styles.grow}
+          />
+          <Button
+            label={t('home.stats.knowledge', { count: data.knowledge })}
+            variant="ghost"
+            onPress={() => router.push('/knowledge')}
+            style={styles.grow}
+          />
+        </View>
+      )}
 
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
         {t('home.recent.title')}

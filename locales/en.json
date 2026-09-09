@@ -14,13 +14,14 @@
   },
   "home": {
     "today": {
-      "title": "Today",
+      "title": "Today's review",
       "reviewCount": "{{count}} to remember",
-      "empty": "Nothing due today."
+      "empty": "No passages to revisit today.",
+      "count": "{{count}} passages"
     },
     "recent": {
       "title": "Recently saved",
-      "empty": "Nothing saved yet."
+      "empty": "Saved passages will appear here."
     },
     "cta": "Save a passage",
     "stats": {
@@ -133,7 +134,8 @@
       "head": "It starts like this"
     },
     "answer": "Write what came to mind (optional)",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "howRecalled": "How did it come back?"
   },
   "settings": {
     "title": "Settings",
