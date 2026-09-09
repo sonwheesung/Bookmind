@@ -7,6 +7,20 @@
 > 착수 순서는 [`PLAN.md`](./PLAN.md) Phase 2.
 > 작성 2026-09-09 — **문서 선행**(코드 착수 전). 여기 적힌 것과 코드가 다르면 코드를 고친다.
 
+## 구현 현황
+
+| 영역 | 상태 |
+|---|---|
+| 문서(이 문서 · `CLAUDE.md` §14 #15 · `README.md` 색인·검증 루틴) | ✅ 2026-09-09 |
+| 패키지 `expo-file-system ~19.0` · `expo-sharing ~14.0` · `expo-document-picker ~14.0` | ✅ 2026-09-09 — 🟢 **셋 다 Expo Go 에 들어 있다.** dev build 재빌드가 필요 없다 |
+| 순수 모듈 `features/backup/{format,merge}.ts` · `db/restore.ts` | ✅ 2026-09-09 — 형식·검증·병합 규칙·복원 SQL |
+| 앱 층 `features/backup/{repo,store}.ts` · `db/index.ts`(`dumpTable`·`applyRestore`·`tableColumns`) | ✅ 2026-09-09 |
+| 화면 `/backup` + 설정 행 · i18n `backup.*` 17키 | ✅ 2026-09-09 |
+| 가드 `scripts/check-backup.mjs`(7축 · SELF-TEST 4종) | ✅ 2026-09-09 — 변이 8종 전부 발화 |
+| 에뮬레이터 실측 | ✅ 2026-09-09 — §9 |
+
+---
+
 ## 0. 왜 v1.0 에 있나 — 이것만이 무료 사용자의 전손을 닫는다
 
 결정 #1(지식의 정본은 기기다)의 대가는 **기기 교체 시 전손**이다.
@@ -67,6 +81,8 @@
 - 표 순서는 `db/schema.ts` 의 `TABLE_NAMES` 에서 `meta` 를 뺀 것과 **같아야 한다**(가드가 잰다 — §7).
 - 파일명 `ReRead-backup-YYYYMMDD-HHmm.json`(기기 로컬 시각) · MIME `application/json`.
 - `counts` 는 **미리보기용**이지 검증용이 아니다. 틀려도 거부하지 않는다 — 실제 적용은 `data` 로 한다.
+  🔴 **살아 있는 행만 센다.** tombstone 까지 세면 *"문장 2"* 라고 안내하고 화면에는 하나만 나타난다
+  (2026-09-09 에뮬레이터에서 실제로 그렇게 떴다 — `EDGE_CASES.md` §8).
 - `formatVersion` 은 **구조가 바뀔 때만** 올린다. 마이그레이션으로 컬럼이 하나 늘었다고 올리지 않는다 —
   가져오기가 **아는 컬럼만 골라 넣고 모르는 컬럼은 버리므로**(§4.3) 구/신 앱이 서로 읽을 수 있다.
 - 크기 상한 **20MB**(문자열 기준). 그 위는 거부한다 — 문장 앱이라 실사용은 수 MB 안쪽이다.
@@ -126,12 +142,17 @@ PK 가 UUID 라 서로 다른 기기의 행이 우연히 충돌하지 않는다�
 | `review_schedules` (PK = `knowledge_id`) | 같은 규칙(`updated_at` 비교) | 지식이 있을 때만 삽입 |
 | 🔴 `review_logs` | **건너뛴다**(같은 id 는 같은 사건이다) | 삽입 |
 | `tags` | 로컬 유지 | 같은 `name` 이 있으면 **파일 id → 로컬 id 로 재매핑**, 없으면 삽입 |
-| `knowledge_tags` (PK = 두 컬럼) | `updated_at` 비교 | 재매핑을 적용해 삽입 |
+| `knowledge_tags` (PK = 두 컬럼) | `updated_at` 비교 | 태그 재매핑을 적용해 삽입 |
+| 🔴 `practice_logs` | `updated_at` 비교 | `(practice_id, date)` 가 이미 있으면 **건너뛴다**(id 가 달라도) |
 
 - 🔴 **`deleted_at` 도 값이다.** 파일 쪽 `updated_at` 이 크면 로컬의 살아 있는 행이 **tombstone 으로
   덮인다** — 그게 맞다. "저쪽에서 나중에 지웠다"를 이쪽이 무시하면 지운 것이 되살아난다.
-- 🔴 **`tags.name` 재매핑은 §1.4 되살리기 규칙을 먼저 본다.** 같은 이름의 tombstone 이 로컬에 있으면
-  삽입하면 UNIQUE 로 터진다 — 되살려서 그 id 로 재매핑한다.
+- 🔴 **`tags.name` 은 UNIQUE 다.** 같은 이름 다른 id 를 그냥 삽입하면 **트랜잭션 전체가 롤백된다.**
+  그래서 파일의 태그 id 를 로컬 id 로 **재매핑**하고, 그 태그 행 자체는 넣지 않는다.
+  tombstone 인 로컬 태그로도 재매핑한다 — 나중에 그 태그를 다시 쓰면 §1.4 되살리기가 처리한다.
+- 🔴 **`practice_logs(practice_id, date)` 도 UNIQUE 다**(설계 때 §4.3 표에서 빠져 있었다 — 구현하며 찾았다).
+  같은 날의 실천 체크는 **id 가 달라도 같은 사실**이라 로컬을 남긴다.
+  ⚠ 이걸 안 하면 두 기기에서 같은 날 체크한 사용자의 가져오기가 **통째로 실패**한다.
 - 컬럼 처리: 파일 행에서 **앱이 아는 컬럼만** 골라 넣는다. 모르는 컬럼은 버리고, 빠진 컬럼은 DB DEFAULT.
 - `updated_at` 은 **파일 값을 보존한다.** 가져오기는 사용자의 편집이 아니다 — 여기서 `now()` 를 찍으면
   다음 가져오기 때 이 기기가 항상 이긴다.
@@ -186,12 +207,59 @@ thoughts → practices → knowledge → tags → books`) 한 뒤,
 | ③ tombstone | 지운 행이 파일에 있고, 가져온 뒤에도 지워진 채로 있다 |
 | ④ 합치기 | `updated_at` 이 큰 쪽이 이긴다(양방향) · 같으면 로컬 유지 |
 | ⑤ 거부 | 남의 JSON · `formatVersion` 2 · `schemaVersion` 99 · 20MB 초과 |
-| ⑥ SELF-TEST | 위 다섯을 **일부러 깨뜨려** FAIL 이 나는지 먼저 확인한다(exit 2) |
+| ⑥ 파일 이름 | `ReRead-backup-YYYYMMDD-HHmm.json` |
+| 🔴 ⑦ 소스 통로 | 내보내기가 `dumpTable` 을 쓰는가 · `selectAll` 로 갈아타지 않았는가 · `dumpTable` 이 `deleted_at` 을 거르지 않는가 |
+| SELF-TEST | 판정 도구가 살아 있는가를 **먼저** 증명한다(exit 2) — 씨앗이 실제로 들어갔는가 · `diffAll` 이 차이를 보는가 · `pickKnown` 이 컬럼을 버리는가 · `parseBackup` 이 **정상 파일을 통과시키는가** |
+
+🔴 **축 ⑦ 이 왜 따로 있나**: ②③은 가드 자신의 `dump` 로 잰다. 앱이 `selectAll`(자동으로
+`deleted_at IS NULL`)로 갈아타면 그 검사들은 **여전히 초록인데 파일에서만** 지운 기록이 사라진다.
+화면도 안 깨진다 — 통로 자체를 재야 잡힌다. 변이 2종(`dumpTable` 에 필터 넣기 · `selectAll` 로 교체)으로 확인했다.
+
+**변이 주입 실측 (2026-09-09 · 8종 전부 발화)**
+
+| 변이 | 발화 |
+|---|---|
+| `BACKUP_TABLES` 에서 `tags` 제외 | ① 표 누락 + 왕복 FK 실패 |
+| 파일이 최신일 때 안 덮게(`<=` → `>=`) | ③ tombstone 미적용 · ④ 양방향 4건 |
+| 태그 재매핑 제거 | ④ `UNIQUE constraint failed: tags.name` |
+| 미래 스키마 파일 통과 | ⑤ 미래 스키마를 통과시킨다 |
+| `pickKnown` 이 모르는 컬럼을 안 버림 | SELF-TEST(exit 2) |
+| `dumpTable` 에 `deleted_at IS NULL` | ⑦ |
+| 내보내기를 `selectAll` 로 교체 | ⑦ |
+| 가드의 `dump` 가 tombstone 을 거름 | SELF-TEST(exit 2) — 씨앗 확인에서 죽는다 |
 
 가드가 도는 조건은 지금까지와 같다 — `features/backup/format.ts` 와 병합 규칙을 **순수 모듈**로 두고
 `expo-file-system` · `expo-sharing` 은 화면 쪽 얇은 층에만 둔다.
 
-## 8. 제외 · 후보
+## 8. i18n 키 (17개)
+
+`settings.backup` · `backup.title` · `backup.intro` · `backup.exportAction` · `backup.importAction` ·
+`backup.lastExport` · `backup.never` · `backup.caution` · `backup.shareUnavailable` · `backup.exportFailed` ·
+`backup.import.{preview,previewBody,merge,replace,replaceConfirmTitle,replaceConfirmBody,done,failed,invalidFile,newerApp}`
+
+⚠ 버튼 문구가 `backup.exportAction` 인 이유: ~~`backup.export`~~ 로 두면 `backup.export.failed` 와
+**같은 자리를 다툰다**(문자열 vs 객체). JSON 에서는 뒤에 온 쪽이 이겨 앞의 문구가 조용히 사라진다.
+
+## 9. 에뮬레이터 실측 (2026-09-09 · AVD `reread` 5574 · Expo Go)
+
+밟은 것만 적는다.
+
+| 무엇 | 결과 |
+|---|---|
+| 설정 → 백업 행 | *"파일로 내보내기 / 아직 없습니다"* ✅ |
+| 내보내기 | OS 공유 시트에 **`ReRead-backup-20260909-0659.json`**(Quick Share · Drive · Gmail) ✅ |
+| 시트를 닫음 | *"마지막 내보내기: 2026. 9. 9."* 로 바뀐다 ✅ |
+| 가져오기 → 파일 선택 | 미리보기 *"책 1 · 문장 2 · 생각 0 · 실천 0"* → 🔴 **문장 2 가 틀렸다**(하나는 tombstone) → §2 로 고침 |
+| 합치기 | *"추가 5 · 갱신 0 · 건너뜀 0"* — 책1 + 문장2(tombstone 포함) + 태그1 + 연결1 ✅ |
+| 홈 | 책·2 · 문장·**6**(5+1) · 최근 저장에 *"Imported passage lives here."* — 🟢 **가져온 tombstone 은 안 나타난다** ✅ |
+| 모르는 컬럼(`future_col`) 섞인 파일 | 조용히 버리고 나머지를 넣는다 ✅ |
+| 같은 파일 두 번째 가져오기 | *"추가 0 · 갱신 0 · 건너뜀 5"* ✅ |
+
+⚠ **문서 피커가 `*/*` 라 "최근" 탭에 이미지가 먼저 보인다.** 형제(Idea Repository)도 같은 자리를 적어 뒀다.
+🚫 `application/json` 으로 좁히지 않는다 — 제공자가 `.json` 을 `octet-stream` 으로 라벨하면 **파일이 아예
+회색으로 죽어** 사용자가 이유도 모른 채 막힌다. 보이는 게 지저분한 쪽이 막히는 쪽보다 낫다.
+
+## 10. 제외 · 후보
 
 - 🚫 서버 업로드 · 클라우드 동기화 · 자동 주기 백업 · 여러 기기 실시간 동기화(전부 v1.1 금고 또는 그 밖).
 - 후보(결정 없음): 비밀번호 암호화 옵션 · 텍스트/Markdown 내보내기(읽기용) · 책 한 권만 내보내기.

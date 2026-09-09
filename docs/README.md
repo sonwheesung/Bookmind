@@ -26,7 +26,7 @@
 | [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 **6축** | ✅ 2026-09-09 |
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
-| [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 | 📝 2026-09-09 문서만 |
+| [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 · 가드 7축 | ✅ 2026-09-09 **구현·실측 완료** |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -108,15 +108,16 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 여섯을 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 여덟을 순서대로 돌린다
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
-npm run check:i18n    # ① 키 누락 ② 잉여 ③ 보간 일치 ④ 비한국어 파일 한글 잔존
+npm run check:i18n    # ①누락 ②잉여 ③보간 ④한글잔존 ⑤없는 키 ⑥죽은 키
 npm run check:chars   # 🔴 제어문자 — CR 은 grep 이 못 봐서 바이트로 읽는다(아래 §)
 npm run check:docs    # 문서에 박힌 개수 ⇄ 실제 세기 대조
 npm run check:db      # 🔴 로컬 스키마·삭제 규칙 — 실물 SQLite(node:sqlite)에 세워서 잰다
 npm run check:review  # 복습 규칙 — 자정 경계 · 하루 상한 · 단서 우선순위(기기에서 재현이 어려운 축)
+npm run check:backup  # 🔴 백업 왕복 — 내보낸 파일을 빈 DB 에 되돌려 **행 단위로** 맞댄다
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```

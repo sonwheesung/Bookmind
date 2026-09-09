@@ -140,11 +140,35 @@
     "language": {
       "title": "Language",
       "hint": "Saved passages and your thoughts stay in the language you wrote them in."
-    }
+    },
+    "backup": "Backup"
   },
   "ai": {
     "notice": {
       "proxy": "For AI analysis, the passage, your thought, book title, page and language are sent through the Re:Read server to the AI provider. Re:Read does not store this content; only usage counts are retained."
+    }
+  },
+  "backup": {
+    "title": "Backup",
+    "intro": "Your passages and thoughts live only on this device. Export a file and you can bring them back on a new one.",
+    "exportAction": "Export to a file",
+    "importAction": "Import from a file",
+    "lastExport": "Last export: {{value}}",
+    "never": "None yet",
+    "caution": "The exported file holds everything you saved, unencrypted. Keep it somewhere safe. The file is never sent to a server.",
+    "shareUnavailable": "File sharing is not available on this device.",
+    "exportFailed": "Could not export.",
+    "import": {
+      "preview": "What this file holds",
+      "previewBody": "Books {{books}} · Passages {{knowledge}} · Thoughts {{thoughts}} · Practices {{practices}}",
+      "merge": "Merge",
+      "replace": "Replace",
+      "replaceConfirmTitle": "Replace what is on this device?",
+      "replaceConfirmBody": "Everything on this device will become the file's contents. This cannot be undone.",
+      "done": "Added {{added}} · Updated {{updated}} · Skipped {{skipped}}",
+      "failed": "Could not import. Nothing on this device changed.",
+      "invalidFile": "This is not a backup file, or it is damaged.",
+      "newerApp": "This file was made by a newer version. Update the app, then import it."
     }
   }
 }

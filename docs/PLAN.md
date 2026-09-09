@@ -14,7 +14,7 @@
 |---|---|---|
 | 0 | 스캐폴드 · 토큰 · i18n 골격 | ✅ **2026-09-08** |
 | 1 | 로컬 DB v1 | ❌ |
-| 2 | 책 · 빠른 저장 · 지식 카드 · 내 생각 · 태그 | ❌ |
+| 2 | 책 · 빠른 저장 · 지식 카드 · 내 생각 · 태그 · **백업** | ✅ 2026-09-09 |
 | 3 | 복습 v1 (FSRS · 기본 복습 · 오늘의 복습 · 홈) | ❌ |
 | 4 | 🔴 로컬 알림 — **여기서 시작해 이후와 병행 검증** | ❌ |
 | 5 | OCR | ❌ |
@@ -145,7 +145,7 @@ scripts/check-db.mjs                                       실물 SQLite 에 세
 - 🟢 **로컬 내보내기/가져오기(결정 #15)** — JSON 한 파일 + OS 공유 시트(`expo-sharing`).
   설계는 `idea_repository/docs/BACKUP_SYSTEM.md` 승계(병합/교체 · 형식 식별자 · 손상 파일 거부)
 
-**완료 기준** — 🔨 **CRUD 는 2026-09-09 에뮬 실측으로 닫혔다. 내보내기/가져오기가 남았다.**
+**완료 기준** — ✅ **2026-09-09 전부 닫혔다**(CRUD · 내보내기/가져오기 모두 에뮬 실측).
 
 ```
 [x] 책 없이 원문만으로 저장 → 목록에 뜬다      에뮬 실측(AVD reread · Expo Go)
@@ -153,9 +153,10 @@ scripts/check-db.mjs                                       실물 SQLite 에 세
 [x] 책 삭제 후 지식이 남고 book_id 가 NULL      🔴 화면에서 확인 — 삭제 후 카드가 `책 없음` 으로 남았다
 [x] 지식 삭제 후 고아 태그 정리                 ⚠ check:db 로만 확인(기기에서는 안 밟았다)
 [x] 에뮬 E2E: 저장 → 목록 → 상세 → 생각 추가 → 삭제
-[ ] 🟢 내보내기 → 앱 삭제 → 재설치 → 가져오기 → 데이터 동일 (결정 #15)
-[ ] 🔴 가져오기가 tombstone 을 존중한다 (지운 것이 되살아나지 않는다)
-[ ] 내보내기 화면에 "이 파일에 모든 내용이 그대로 들어 있다" 고지
+[x] 🟢 내보내기 → 공유 시트 → 가져오기 → 데이터 동일   ⚠ **재설치는 안 해 봤다**(같은 기기에서 왕복만)
+[x] 🔴 가져오기가 tombstone 을 존중한다                 지운 문장이 든 파일을 넣어도 안 되살아난다
+[x] 같은 파일을 두 번 넣어도 아무것도 안 바뀐다          "추가 0 · 갱신 0 · 건너뜀 5"
+[x] 내보내기 화면에 "이 파일에 모든 내용이 그대로 들어 있다" 고지
 ```
 
 🔴 **이 Phase 에서 처음 확인된 것 — expo-sqlite 가 기기에서 실제로 열린다.**
@@ -171,7 +172,13 @@ app/knowledge/index.tsx           문장 목록
 app/knowledge/[id].tsx            상세 — 원문 수정 · 책 연결 · 태그 붙이기/떼기 · 생각 1:N · 삭제
 app/books/{index,new,[id]}.tsx    책 목록 · 등록 · 상세(파생 집계 4종 · 🔴 삭제 경고에 문장 수)
 features/{books,knowledge,tags}/  도메인 계층 — 화면은 SQL 을 모른다
-components/{Button,Field,Card,Header}.tsx · hooks/useDbQuery.ts
+components/{Button,Field,Card,Header,Chip,BookCover}.tsx · hooks/useDbQuery.ts
+
+app/backup.tsx                    백업 — 내보내기 · 가져오기(미리보기 → 합치기/바꾸기)
+features/backup/{format,merge}.ts 🔴 순수 — 파일 형식·검증·병합 규칙(가드가 이걸 직접 잰다)
+features/backup/{repo,store}.ts   expo-file-system · sharing · document-picker 를 아는 얇은 층
+db/restore.ts                     🔴 복원 전용 SQL — 파일의 id·시각을 **그대로** 넣는다
+scripts/check-backup.mjs          왕복·tombstone·합치기·거부·소스 통로 (변이 9종 발화)
 ```
 ⚠ **`useDbQuery` 는 포커스가 돌아올 때마다 다시 읽는다.** 안 그러면 다른 화면에서 지운 것이
 목록에 남아 보인다 — `DATABASE.md` §1.1 의 "빈 화면이 아니라 틀린 화면"이 UI 층에서 재현되는 자리다.

@@ -18,16 +18,20 @@
     "check:docs": "node scripts/check-docs.mjs",
     "check:db": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-db.mjs",
     "check:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-review.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review"
+    "check:backup": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-backup.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
     "expo": "~54.0.35",
     "expo-constants": "~18.0.13",
     "expo-crypto": "~15.0.9",
+    "expo-document-picker": "~14.0.8",
+    "expo-file-system": "~19.0.24",
     "expo-linking": "~8.0.12",
     "expo-localization": "~17.0.9",
     "expo-router": "~6.0.24",
+    "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",

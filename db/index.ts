@@ -11,7 +11,8 @@ import { randomUUID } from 'expo-crypto';
 import * as SQLite from 'expo-sqlite';
 
 import { deleteBookSteps, deleteKnowledgeSteps, deletePracticeSteps } from './cascade.ts';
-import { runMigrations, type SqlDriver } from './migrate.ts';
+import { CODE_SCHEMA_VERSION, readSchemaVersion, runMigrations, type SqlDriver } from './migrate.ts';
+import { buildDeleteAll, buildRowInsert, buildRowUpdate } from './restore.ts';
 import { type TableName } from './schema.ts';
 import {
   buildCount,
@@ -127,6 +128,59 @@ export function revive(table: TableName, key: Readonly<Record<string, unknown>>)
 export function reviveWhere(table: TableName, where: string, params: readonly unknown[]): number {
   const sql = buildReviveWhere(table, where, params, nowIso());
   return getDb().runSync(sql.text, sql.params as SQLite.SQLiteBindParams).changes;
+}
+
+// ── 백업(`docs/BACKUP_SYSTEM.md`) ────────────────────────────────────────
+// 🔴 아래 셋만 tombstone 을 본다. 화면용 헬퍼는 위쪽 그대로 `deleted_at IS NULL` 을 타야 한다.
+
+/** 이 기기의 스키마 버전. 파일에 적어 두고, 읽을 때 `CODE_SCHEMA_VERSION` 과 견준다(§4.2) */
+export function schemaVersion(): number {
+  return readSchemaVersion(wrap(getDb()));
+}
+
+export { CODE_SCHEMA_VERSION };
+
+/**
+ * 앱이 아는 컬럼 목록. 🔴 손으로 나열하지 않는다 — 마이그레이션으로 컬럼이 늘면 자동으로 따라온다.
+ * 이 목록이 곧 "모르는 컬럼은 버린다"(§4.3)의 기준이다.
+ */
+export function tableColumns(table: TableName): string[] {
+  const rows = getDb().getAllSync<{ name: string }>(`PRAGMA table_info(${table})`);
+  return rows.map((r) => r.name);
+}
+
+/**
+ * 🔴 **tombstone 까지 통째로** 꺼낸다 — 내보내기 전용이다.
+ * `selectAll` 을 쓰면 `deleted_at IS NULL` 이 붙어 지운 기록이 파일에서 사라지고,
+ * 그 파일을 되돌리는 순간 **지운 것이 되살아난다**(§1 · 결정 #8).
+ */
+export function dumpTable(table: TableName): Record<string, unknown>[] {
+  return getDb().getAllSync<Record<string, unknown>>(`SELECT * FROM ${table}`);
+}
+
+export interface RestoreOp {
+  readonly kind: 'insert' | 'update' | 'delete-all';
+  readonly table: TableName;
+  readonly row?: Record<string, unknown>;
+}
+
+/**
+ * 🔴 **한 트랜잭션이다.** 중간에 실패하면 아무것도 바뀌지 않는다(§4.1) —
+ * 반쯤 들어간 DB 는 되돌릴 방법이 없고, 사용자는 무엇이 들어갔는지 알 수 없다.
+ */
+export function applyRestore(ops: readonly RestoreOp[]): void {
+  const database = getDb();
+  database.withTransactionSync(() => {
+    for (const op of ops) {
+      const sql =
+        op.kind === 'delete-all'
+          ? buildDeleteAll(op.table)
+          : op.kind === 'insert'
+            ? buildRowInsert(op.table, op.row ?? {})
+            : buildRowUpdate(op.table, op.row ?? {});
+      database.runSync(sql.text, sql.params as SQLite.SQLiteBindParams);
+    }
+  });
 }
 
 /** 삭제 규칙(§3)은 전부 `db/cascade.ts` 가 정하고, 여기서는 한 트랜잭션으로 돌리기만 한다. */

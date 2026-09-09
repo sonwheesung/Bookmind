@@ -301,6 +301,7 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 | 상태 | Zustand (+ persist) | ❌ |
 | **로컬 DB** | **expo-sqlite** `~16.0.10` | ✅ Phase 1(2026-09-09) — 12표 · 러너 · 헬퍼 |
 | UUID | expo-crypto `~15.0.9` | ✅ Phase 1 — `randomUUID()`. 🚫 자동증가 정수 금지(결정 #8) |
+| 백업 파일 | expo-file-system `~19.0` · expo-sharing `~14.0` · expo-document-picker `~14.0` | ✅ Phase 2(2026-09-09) — 🟢 셋 다 Expo Go 내장이라 재빌드가 없었다 |
 | 복습 알고리즘 | `ts-fsrs` | ❌ — §14 #5 |
 | OCR | ⚠ 미결정 C — **온디바이스가 기둥 2에서 도출된다** | ❌ |
 | 알림 | expo-notifications | ❌ — 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) |
@@ -535,10 +536,12 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
   §3 삭제 규칙. 🔴 **`db/` 를 순수 모듈로 갈라 `check:db` 가 실물 SQLite 에 같은 스키마·같은 러너를
   세워 잰다**(`docs/DATABASE.md` §6) — 변이 9종 전부 발화.
   🔴 착수 전 대조에서 **문서 모순 셋**이 나와 코드보다 먼저 고쳤다(§1.1 예외 넷 · §1.4 되살리기 신설)
-- 🔨 **Phase 2 CRUD(2026-09-09)** — 홈·빠른 저장·문장 목록/상세·책 목록/등록/상세.
-  🟢 **AVD `reread`(5574) 생성 · 콜드 부팅 60초 · Expo Go E2E** — 저장 → 목록 → 상세 → 생각 추가 →
-  책 연결 → 책 삭제(문장 생존) → 문장 삭제까지 화면에서 밟았다.
-  ⏳ **남은 것: 로컬 내보내기/가져오기(결정 #15)** — Phase 2 의 나머지다
+- ✅ **Phase 2(2026-09-09) 완료** — 홈·빠른 저장·문장 목록/상세·책 목록/등록/상세·**백업(내보내기/가져오기)**.
+  🟢 **AVD `reread`(5574) · Expo Go E2E** — 저장 → 목록 → 상세 → 생각 추가 → 책 연결 →
+  책 삭제(문장 생존) → 문장 삭제, 그리고 **내보내기 → 공유 시트 → 가져오기(합치기·두 번 넣어도 동일)** 까지 밟았다.
+  🔴 결정 #15 로 **무료 사용자의 전손이 v1.0 에서 닫혔다**(`docs/BACKUP_SYSTEM.md`)
+- 🔨 **화면 문구 전수 검수(2026-09-09)** — ChatGPT 창구(`docs/DESIGN_REVIEW.md`)로 88키 검수.
+  복습 4등급이 `쉽다`(문제의 난이도)에서 `바로 떠올랐다`(회상 경험)로 바뀐 것이 가장 크다
 
 ### 🔴 지금 열려 있는 것
 
@@ -551,8 +554,7 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 
 ### 다음 단계
 
-[`docs/PLAN.md`](./docs/PLAN.md) **Phase 2 의 나머지 — 로컬 내보내기/가져오기(결정 #15)**.
-JSON 한 파일 + OS 공유 시트이고, 설계는 `idea_repository/docs/BACKUP_SYSTEM.md` 를 승계한다.
-🔴 착수 전 읽을 것: [`docs/DATABASE.md`](./docs/DATABASE.md) §1.1(tombstone 이 백업의 전제) ·
-§1.4(되살리기). **가져오기가 tombstone 을 존중해야 한다** — 안 그러면 지운 것이 복원으로 되살아난다.
-그 뒤가 Phase 3(복습 v1 · FSRS)이다.
+[`docs/PLAN.md`](./docs/PLAN.md) **Phase 4 — 알림(기둥 7)**.
+🔴 착수하면 **먼저 "Expo Go 에서 로컬 알림이 어디까지 되는지" 실측**한다. SDK 53 부터 Expo Go 의
+푸시가 빠졌고, 로컬 알림도 어디까지 되는지는 재 봐야 안다 — 안 되면 dev build 가 먼저다.
+⏸ Phase 3(복습)에 하나 남았다: **비행기 모드에서 복습 전 과정**(완료 기준 5개 중 마지막).
