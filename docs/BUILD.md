@@ -240,7 +240,53 @@ unzip -p "$AAB" base/manifest/AndroidManifest.xml | grep -a EXPO_UPDATE_URL     
 APK 에 `jarsigner`·`keytool` 을 쓰면 *"jar is unsigned"* 가 **정상 출력**이라 오진한다
 (`common/R8_OBFUSCATION.md` §4 · LinkMemo 실측).
 
+## 6.1 vc2 실측 — 네이티브가 하나 늘면 얼마나 커지나 (2026-09-10)
+
+| | vc1 | vc2 | 차이 |
+|---|---:|---:|---|
+| 빌드 시간 | 20m 01s | **14m 49s** | 캐시가 있어 더 빨랐다 |
+| AAB 크기 | 53.4MB | **71.2MB** | 🔴 **+17.8MB** — ML Kit 모델 다섯(라틴·한국어·일본어·중국어·데바나가리) |
+| versionCode | 1 | 2 | |
+| version | 0.1.0 | 0.2.0 | runtimeVersion 은 `1.0.0` 고정(결정 #18) |
+
+🔴 **AAB 는 ABI 를 네 벌 굽는다**(arm64-v8a · armeabi-v7a · x86 · x86_64).
+APK 를 `-PreactNativeArchitectures` 로 한 벌만 구울 때와 시간 감각이 다르다.
+에뮬레이터 확인용 APK 는 `x86_64` 한 벌이면 되고, 그게 훨씬 빠르다.
+
+⚠ `-x lint` 로는 **`lintVitalRelease` 가 안 빠진다.** 이름이 다른 별개 태스크이고,
+릴리스에서만 도는데 캐시가 없으면 몇 분을 먹는다. 로그가 거기서 멈춰 보여도 정상이다.
+
+⚠ 오래 붙잡는 구간 셋을 적어 둔다. 처음 보면 멎은 줄 안다.
+`buildCMakeRelWithDebInfo[<abi>]`(ABI 마다) · `lintVitalAnalyzeRelease` · `checkReleaseDuplicateClasses`.
+🔴 판정은 **로그 파일의 수정 시각**으로 한다(`find <log> -newermt '-5 minutes'`).
+줄 수는 안 늘어도 파일은 갱신되고 있을 수 있다.
+
 ## 7. 내부 테스트 업로드
+
+### 7.0.1 🔴 거짓 초록을 **두 번째로** 확인했다 (2026-09-10 저녁)
+
+vc2 를 올리려다 같은 자리에서 막혔다. 이번에는 **의도한 대로** 막힌 것이라 값이 더 크다.
+
+```
+npm run check:play-access   → 🎯 Re:Read  edits.insert  200      (초록)
+npx eas-cli submit          → ✖ The service account is missing the
+                                 necessary permissions to submit the app
+```
+
+🔴 오후에 업로드를 끝내고 `앱을 테스트 트랙으로 출시` 권한을 회수했는데(권한 5 → 4),
+진단은 **여전히 200 이다.** 이 계정은 RevenueCat 용이라 읽기 권한이 상시이기 때문이다.
+
+★ **진단이 초록인 것과 올릴 수 있는 것은 다른 사실이다.** 같은 날 오전에 한 번,
+저녁에 또 한 번 같은 자리에서 확인했다. `check:play-access` 를 `verify` 에 넣지 않은 이유가 이것이다.
+
+업로드가 필요할 때의 순서는 넷이고, **마지막 하나를 빠뜨리지 않는다**.
+
+```
+① 권한 켜기(콘솔) → ② eas submit → ③ 콘솔에서 게시 → ④ 🔴 권한 회수
+```
+
+⚠ ②가 통과해도 `releaseStatus: draft` 라 **테스터 폰에는 아직 안 간다.** ③이 있어야 한다.
+
 
 ✅ **2026-09-10 실제로 밟았다.** 아래는 그때 잰 것이다.
 
