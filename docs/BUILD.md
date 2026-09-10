@@ -199,8 +199,20 @@ APK 에 `jarsigner`·`keytool` 을 쓰면 *"jar is unsigned"* 가 **정상 출�
 | Play 앱 | **Re:Read** · 앱 ID `4973508670760124973` · `com.vivacegames.reread` |
 | 기본 언어 | **en-US**(결정 #7). 🔴 조각이 `ko-KR` 로 둬서 번역 없는 나라가 한국어를 보던 자리다 |
 | 유형 | 앱 · **무료**(구독은 인앱 결제다). ⚠ 게시 후에는 무료를 유료로 못 바꾼다 |
-| 올라간 것 | `internal` 트랙 · **status `draft`** · versionCode 1 · sha1 `6725fa38…` |
+| 올라간 것 | `internal` 트랙 · versionCode 1 · sha1 `6725fa38…` |
+| **게시** | ✅ **2026-09-10 16:14** · `활성` · *내부 테스터에게 제공됨* · **검토되지 않음** |
+| 테스터 | 기존 목록 **`사장님 검증 전용`**(2명) 연결. 🔴 doply(41명)는 안 붙였다. 내부 테스트는 우리만 있으면 된다 |
+| 참여 링크 | `https://play.google.com/apps/internaltest/<내부 테스트 ID>` |
+| 크기 | AAB 53.4MB → **신규 설치 18.7MB**(기기별 분할). 다운로드 11초 |
 | 프로덕션 | **릴리스 0건**(확인함). 아무것도 새지 않았다 |
+
+🔴 **폰에는 `com.vivacegames.reread (unreviewed)` 로 뜬다.** `Re:Read` 가 아니다.
+앱 설정이 끝나고 앱 검토가 끝날 때까지 **임시 이름**이 표시된다(콘솔이 직접 그렇게 안내한다).
+고장이 아니다. 이름은 Phase 11 의 스토어 등록정보와 함께 붙는다.
+
+⚠ **게시 시점에 경고 1개가 있었다**: *"이 App Bundle 유형과 연결된 가독화 파일이 없습니다."*
+R8 을 아직 안 켜서 mapping 파일이 없다는 뜻이고(Phase 11 · `common/R8_OBFUSCATION.md`)
+**게시를 막지 않는다.** R8 을 켜면 gradle 이 AAB 안에 자동으로 넣는다.
 
 🔴 **선행 조건 셋. 하나라도 없으면 `eas submit` 이 죽는다.**
 
@@ -236,6 +248,27 @@ APK 에 `jarsigner`·`keytool` 을 쓰면 *"jar is unsigned"* 가 **정상 출�
 npx eas-cli submit --platform android --profile internal \
   --path android/app/build/outputs/bundle/release/app-release.aab --non-interactive
 ```
+
+### 7.3 게시 절차 (2026-09-10 실측)
+
+```
+테스터 탭 → 이메일 목록 체크 → 저장            (진행률 1/3 → 2/3)
+출시 탭 → 버전 수정 → 출시 노트 → 다음         (1단계)
+미리보기 및 확인 → 경고를 읽는다 → 저장 및 출시  (2단계 · 🔴 즉시 게시된다)
+```
+
+🔴 **출시 노트의 닫는 태그는 자기 줄에 있어야 한다.** 한 줄에 붙여 쓰면
+*"2행: en-US의 태그가 닫히지 않았습니다"* 로 거부되고 **`다음` 버튼이 비활성**이 된다.
+⚠ 그때 판정은 글자 수가 아니라 **오류 문구**로 한다(`PLAY_RELEASE_AUTOMATION.md` §5.15).
+
+```
+<en-US>
+First internal build. Save a passage, recall it later, and get a daily reminder.
+</en-US>
+```
+
+⚠ **2단계의 버튼은 `저장 및 출시` 이고 하단에 *"변경사항이 Google Play에 즉시 게시됩니다"* 라고 적혀 있다.**
+내부 테스트는 검토를 안 타므로 **되돌릴 창이 없다.** 누르기 전에 경고를 읽는다.
 
 - 🔴 **`releaseStatus: "draft"` 로 올린다.** `completed` 는 **스토어 등록정보가 다 채워져야** 통과하고,
   비어 있으면 *"The app is missing the required metadata"* 로 죽는다(같은 문서 §5.11).
