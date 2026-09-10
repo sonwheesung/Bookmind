@@ -28,7 +28,7 @@
 ~~⚠ 스토어용 서명 키는 Phase 11 에서 따로 만든다.~~
 → 🔴 **2026-09-10 에 앞당겼다.** 내부 테스트 업로드를 하려면 **업로드 키**가 필요하다(§5).
 디버그 키로 서명된 AAB 는 Play 가 받지 않고, **이유를 안 알려준다.**
-🟢 폰에 직접 넣는 APK 는 여전히 디버그 키로 충분하다 — 두 경로가 나뉘었을 뿐이다.
+🟢 폰에 직접 넣는 APK 는 여전히 디버그 키로 충분하다. 두 경로가 나뉘었을 뿐이다.
 
 ---
 
@@ -109,7 +109,7 @@ curl -H "expo-platform: android" -H "accept: multipart/mixed" http://127.0.0.1:8
 
 🔴 **지문을 적어 두는 이유**: 굽고 나서 `keytool -printcert` 결과를 이 값과 **대조**하면
 디버그 키로 떨어진 것을 그 자리에서 잡는다(§5.1). 지문은 공개값이라 적어도 되고,
-🚫 **비밀번호는 여기에 적지 않는다**(`common/SOCIAL_LOGIN.md` 머리말 규율 — 경로와 env 이름만).
+🚫 **비밀번호는 여기에 적지 않는다**(`common/SOCIAL_LOGIN.md` 머리말 규율. 경로와 env 이름만 적는다).
 
 🔴 **저장소 밖에 둔다.** 형제 방식 승계(`secrets/jogak-upload.jks`) ·
 `common/COMMIT_CONVENTION.md` §8 이 `*.jks` 를 커밋 금지로 못박았다.
@@ -120,7 +120,7 @@ curl -H "expo-platform: android" -H "accept: multipart/mixed" http://127.0.0.1:8
 
 `android/` 는 CNG 산출물이라 빌드마다 다시 만들어진다(§2). 손으로 넣은 서명 설정은 **그때 사라지고**,
 그 상태로 구우면 **디버그 키로 서명된 AAB 가 조용히 성공한다.**
-LinkMemo 가 정확히 그것을 밟았고(`common/R8_OBFUSCATION.md` §2-C) `jarsigner -verify` 는 **통과했다** —
+LinkMemo 가 정확히 그것을 밟았고(`common/R8_OBFUSCATION.md` §2-C) `jarsigner -verify` 는 **통과했다.**
 서명이 있기는 하니까. Play 업로드에서야 드러난다.
 
 → `plugins/with-upload-signing.js` (조각 `with-upload-signing.js` 승계). 값은 `process.env` 로 받는다.
@@ -170,14 +170,14 @@ bash scripts/build-aab.sh 2>&1 | tee /tmp/aab.log     # ✅ 흘러나온다
 bash scripts/build-aab.sh 2>&1 | tail -60             # 🚫 끝날 때까지 0바이트
 ```
 
-**살아 있는지 판정하는 법** — 출력이 없어도 이 둘로 갈린다:
+**살아 있는지 판정하는 법.** 출력이 없어도 이 둘로 갈린다:
 
 ```bash
 find android/app/build -newermt '-2 minutes' | wc -l      # 0 이면 멈춘 것이다
 tasklist | grep -c java.exe                                # ⚠ 형제 빌드가 섞여 있을 수 있다
 ```
 
-**굽고 나서 반드시 세 줄** — 어긋나도 오류가 안 나고 조용히 실패하는 축들이다:
+**굽고 나서 반드시 세 줄.** 어긋나도 오류가 안 나고 조용히 실패하는 축들이다:
 
 ```bash
 AAB=android/app/build/outputs/bundle/release/app-release.aab
@@ -196,7 +196,7 @@ APK 에 `jarsigner`·`keytool` 을 쓰면 *"jar is unsigned"* 가 **정상 출�
 
 | # | 무엇 | 누가 |
 |---|---|---|
-| ① | Play Console 에 앱 생성 (`com.vivacegames.reread`) | 🔴 **사용자** — 계정 로그인·약관 동의 |
+| ① | Play Console 에 앱 생성 (`com.vivacegames.reread`) | 🔴 **사용자**(계정 로그인·약관 동의) |
 | ② | 서비스 계정에 **그 앱을 추가**하고 `앱을 테스트 트랙으로 출시` 권한 | 🔴 **사용자** (콘솔) |
 | ③ | 내부 테스트 트랙에 테스터 목록 | 🔴 **사용자** |
 
@@ -213,22 +213,22 @@ npx eas-cli submit --platform android --profile internal \
   비어 있으면 *"The app is missing the required metadata"* 로 죽는다(같은 문서 §5.11).
   등록정보는 Phase 11 항목이므로 **번들만 트랙에 넣어 두고 게시는 콘솔에서** 한다.
 - 🔴 **`프로덕션으로 출시` 권한은 주지 않는다.** 테스트 트랙 셋은 권한 하나로 다 열린다(같은 문서 §3).
-- 🔴 **끝나면 권한을 회수한다.** 되돌릴 때가 켤 때보다 위험하다 —
+- 🔴 **끝나면 권한을 회수한다.** 되돌릴 때가 켤 때보다 위험하다.
   이미 켜진 칸을 끄는 것이라 **틀리면 끄는 대신 켠다**(같은 문서 §5.13, 세 번 재현됐다).
   체크박스는 누른 뒤 **확대해서 상태를 읽는다.**
 
 ⚠ **`versionCode` 는 매번 올린다.** Play 가 같은 값을 거부하고, 로컬 빌드는 `app.json` 값을 그대로 쓴다.
-🔴 `app.json` 만 고치고 구우면 **옛 값이 나간다** — `prebuild` 가 `build.gradle` 로 옮기는 값이라
+🔴 `app.json` 만 고치고 구우면 **옛 값이 나간다.** `prebuild` 가 `build.gradle` 로 옮기는 값이라
 `prebuild` 를 먼저 돌리고 눈으로 확인한다(`common/CLOSED_TESTING.md` 마지막 절, 조각 실측).
 
 ### 7.1 왜 `1.0.0` 이 아니라 `0.1.0` 인가
 
 `common/PRE_LAUNCH_CHECK.md` §4: **정식 출시본은 `1.0.0`, 비공개 테스트까지는 `0.x` 가 정직하다.**
 판정 기준은 *"낯선 사람이 돈을 낼 수 있는가"* 이고 지금은 아니다.
-⚠ 조각이 `0.2.6` 으로 프로덕션에 나가 세 번의 릴리스를 지나쳤다 — **프로덕션 승격 때 올린다.**
+⚠ 조각이 `0.2.6` 으로 프로덕션에 나가 세 번의 릴리스를 지나쳤다. **프로덕션 승격 때 올린다.**
 
 ---
 
-*최종 갱신: 2026-09-10 — 업로드 키스토어(§5)·AAB(§6)·내부 테스트 업로드(§7) 신설.
+*최종 갱신: 2026-09-10. 업로드 키스토어(§5)·AAB(§6)·내부 테스트 업로드(§7) 신설.
 §0 의 "서명 키는 Phase 11" 을 앞당긴 이유를 그 자리에 적었다.
-이전: 2026-09-09 — 첫 실기기 빌드. 개발 빌드로 한 시간을 쓰고 릴리스로 옮겨 5분에 끝났다.*
+이전: 2026-09-09. 첫 실기기 빌드. 개발 빌드로 한 시간을 쓰고 릴리스로 옮겨 5분에 끝났다.*
