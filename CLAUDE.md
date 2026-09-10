@@ -707,8 +707,7 @@ OTA 가 붙어 있으니 **순수 JS 로 끝나는 것부터** 한다. 검색과
 
 - ✅ **AAB vc2**: `BUILD SUCCESSFUL in 14m 49s` · **71.2MB**(vc1 53.4MB · ML Kit 모델로 +17.8MB)
   · versionCode **2** · `0.2.0` · runtimeVersion `1.0.0` 고정 · ABI 네 벌
-  · 🔴 서명 주체가 **업로드 키**임을 SHA1 로 확인 · 보관 `D:uilds\Bookmind
-eread-vc2.aab`
+  · 🔴 서명 주체가 **업로드 키**임을 SHA1 로 확인 · 보관 `D:\builds\Bookmind\reread-vc2.aab`
 - 🔴 **첫 시도는 막혔다.** 오후에 회수한 `앱을 테스트 트랙으로 출시` 권한이 없어서
   `eas submit` 이 거부됐다. **의도한 대로 막힌 것**이다.
 - ✅ **대표님 승인 뒤 넷을 다 밟아 게시했다**(21:28). `0.2.0 · 내부 테스트에게 제공됨`.
