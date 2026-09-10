@@ -94,9 +94,10 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | Anthropic API 키 | ❌ | 🔴 서버 env에만 |
 | RevenueCat + 스토어 상품(월/연) | ❌ | Phase 10 |
 | Google Sign-In OAuth 클라이언트 | ❌ | Play 서명 키 SHA-1 필요 |
-| 🔴 **Play 콘솔 앱 생성** | ❌ | **지금 막고 있는 것.** 사용자만 가능(약관 동의) · 경로 `u/1` · ⚠ 패키지명이 영구 고정된다 |
-| 🔴 **서비스 계정에 Re:Read 앱 추가** | ❌ | 키는 있다. 🔴 새 앱은 안 딸려 온다 → 안 넣으면 **403** (`common/PLAY_RELEASE_AUTOMATION.md` §4) |
-| 내부 테스트 트랙 · 테스터 | ❌ | 내부 테스트는 우리뿐이면 된다(12명×14일은 **비공개** 요건) |
+| ~~Play 콘솔 앱 생성~~ | ✅ 2026-09-10 | **Re:Read** · 앱 ID `4973508670760124973` · en-US · 앱 · 무료 |
+| ~~서비스 계정에 Re:Read 앱 추가~~ | ✅ 2026-09-10 | 부여 → 업로드 → **회수**(권한 5 → 4) |
+| 내부 테스트 트랙 · 테스터 | 🔨 | 번들 `draft` vc1 올라감. **테스터 연결·게시는 남았다** |
+| 🔴 **첫 업로드** | ✅ 2026-09-10 | `internal` · `draft` · vc1 · 프로덕션 릴리스 0건 확인 · [`BUILD.md`](./BUILD.md) §7 |
 | ~~EAS 프로젝트~~ | ✅ 2026-09-10 | `@shs00925/reread` · `8785afeb-…` |
 | ~~업로드 키스토어~~ | ✅ 2026-09-10 | `secrets/reread-upload.jks` · SHA1 `44:0E:B4:…` |
 | 처리방침 · 약관 게시 (EN · KO) | ❌ | Phase 11 |
@@ -130,6 +131,15 @@ npm run check:ota     # 🔴 OTA 설정(채널·runtimeVersion·버전 오염). 
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
+
+**진단(가드가 아니다 · `verify` 에 안 들어간다)**
+
+```bash
+npm run check:play-access   # 🔴 서비스 계정이 Play 의 우리 앱에 닿나. 404/403/200 으로 세 상태를 가른다
+```
+
+⚠ **이건 판정이 아니라 단서다.** 200 이어도 업로드는 막힐 수 있다(별개 권한 · [`BUILD.md`](./BUILD.md) §7.0).
+그래서 `verify` 에 넣지 않았다. **가드가 아닌 것을 가드 목록에 넣으면 초록의 뜻이 흐려진다.**
 
 ⚠ **`typecheck` 는 생성된 라우트 타입에 기댄다**(`app.json` `typedRoutes: true` → `.expo/types/router.d.ts`).
 `.expo/` 는 gitignore 라 **새로 받은 저장소에서는 그 파일이 없다** — 그 상태로 typecheck 를 돌리면
