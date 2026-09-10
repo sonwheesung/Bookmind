@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
@@ -179,12 +180,14 @@ export default function KnowledgeDetail() {
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
         {t('knowledge.field.book')}
       </Text>
-      <View style={[styles.chips, { gap: spacing.sm, marginBottom: spacing.xl }]}>
-        <Chip label={t('knowledge.book.none')} active={row.book_id === null} onPress={() => linkBook(null)} />
-        {data.books.map((b) => (
-          <Chip key={b.id} label={b.title} active={row.book_id === b.id} onPress={() => linkBook(b.id)} />
-        ))}
-      </View>
+      {/* 🔴 저장 화면과 **같은 부품**이다(§1.1.1). 두 화면이 다르게 생기면
+          사용자는 저장 화면에서 배운 것을 여기서 다시 배워야 한다 */}
+      <BookSelect
+        books={data.books}
+        value={row.book_id}
+        onChange={linkBook}
+        onCreate={() => router.push('/books/new')}
+      />
 
       {/* 태그 */}
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>

@@ -46,7 +46,8 @@
       "tagsHint": "Separate with commas"
     },
     "book": {
-      "none": "No book"
+      "none": "No book",
+      "create": "+ Add a new book"
     },
     "list": {
       "title": "Passages",

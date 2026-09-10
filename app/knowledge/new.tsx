@@ -1,10 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
+import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
-import { Chip } from '@/components/Chip';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
@@ -90,12 +90,14 @@ export default function NewKnowledge() {
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
         {t('knowledge.field.book')}
       </Text>
-      <View style={[styles.chips, { gap: spacing.sm, marginBottom: spacing.lg }]}>
-        <Chip label={t('knowledge.book.none')} active={bookId === null} onPress={() => setBookId(null)} />
-        {books.map((b) => (
-          <Chip key={b.id} label={b.title} active={bookId === b.id} onPress={() => setBookId(b.id)} />
-        ))}
-      </View>
+      {/* 🔴 칩이 아니라 목록이다(§1.1.1). 요점은 폭이 아니라 **`+ 새 책 등록`이 그 안에 있다**는 것이다.
+          책이 0권일 때 칩만 있으면 이 화면에서 책을 만들 길이 없었다 */}
+      <BookSelect
+        books={books}
+        value={bookId}
+        onChange={setBookId}
+        onCreate={() => router.push('/books/new')}
+      />
 
       <Field label={t('knowledge.field.page')} value={page} onChangeText={setPage} />
 
@@ -126,7 +128,3 @@ export default function NewKnowledge() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  chips: { flexDirection: 'row', flexWrap: 'wrap' },
-});

@@ -4,12 +4,18 @@
  * 🔴 **책을 지워도 지식은 남는다**(§4.3). 그 규칙은 `db/cascade.ts` 에 있고 여기서는 부르기만 한다 —
  *    화면이 삭제 순서를 직접 조립하면 규칙이 두 곳에 살게 된다.
  */
-import { count, deleteBook, insert, selectAll, selectOne, update } from '@/db';
+import { count, deleteBook, getDb, insert, selectAll, selectOne, update } from '@/db';
 import { pickCoverColor } from '@/features/books/cover';
+import { listBooksQuery } from '@/features/books/sql';
 import type { BookCounts, BookRow, BookStatus } from '@/features/types';
 
+/**
+ * 🔴 **최근에 쓴 책이 위로 온다**(§4.0). 지금 읽는 책이 저절로 맨 위에 오게 하는 것이 요점이다.
+ *    정렬 규칙은 `sql.ts` 에 있고 가드가 실물 SQLite 로 잰다.
+ */
 export function listBooks(): BookRow[] {
-  return selectAll<BookRow>('books', { orderBy: 'created_at DESC' });
+  const sql = listBooksQuery();
+  return getDb().getAllSync<BookRow>(sql.text, sql.params as never);
 }
 
 export function countBooks(): number {

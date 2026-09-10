@@ -60,9 +60,59 @@ npx expo prebuild --platform android --no-install
 ⚠ `prebuild` 는 **매번 `package.json` 에 `"ios": "expo run:ios"` 를 끼워 넣는다.** 되돌린다 —
 iOS 는 ⚠ 미결정 D 이고 이 PC 에서 돌지 않는다. 2026-09-09 하루에만 네 번 되돌렸다.
 
+```bash
+git checkout -- package.json      # 🔴 이렇게 되돌린다
+```
+
+🚫 **줄만 지우지 말 것.** 2026-09-10 에 그 줄을 손으로 지웠다가 앞 줄의 **쉼표가 남아**
+`package.json` 이 깨졌고, 빌드가 25초 만에 이렇게 죽었다.
+
+```
+* Where: Settings file 'android\settings.gradle' line: 29
+> Process 'command 'cmd'' finished with non-zero exit value 1
+```
+
+🔴 **이 메시지는 원인을 하나도 안 알려준다.** gradle 은 자기가 부른 명령의 종료 코드만 옮긴다.
+진짜 이유는 그 명령을 직접 돌려야 나온다.
+
+```bash
+npx expo-modules-autolinking react-native-config --platform android --json
+# → SyntaxError: Expected double-quoted property name in JSON at position 2005
+```
+
+★ **gradle 이 "명령이 1 로 죽었다"고 하면 그 명령을 손으로 돌려 본다.** 25초를 태우고
+settings.gradle 을 들여다보는 대신 한 줄로 끝난다.
+
 ⚠ `android/` 는 CNG 산출물이라 커밋하지 않고, 확인이 끝나면 지운다. 남기면 `app.json` 과 어긋난 채
 다음 세션을 속인다. 🚫 지울 때 Gradle 데몬이 `.dex` 를 물고 있으면 그냥 둔다 —
 **`gradlew --stop` 을 쓰지 않는다. 형제 프로젝트의 빌드까지 죽인다.**
+
+## 2.1 🔧 라우트를 더했는데 `tsc` 가 계속 빨갛다 (2026-09-10)
+
+증상: `app/` 에 화면을 추가하고 `router.push('/practice')` 를 쓰면 tsc 가
+*"Argument of type '/practice' is not assignable"* 를 낸다. 파일은 분명히 있다.
+
+원인: expo-router 의 타입 생성이 **증분으로 틀리게 갱신된다.** 실제로 나온 값은 이랬다.
+
+```
+`/practice/index`   ← 🔴 index.tsx 를 접지 않았다
+`/practice/new`
+`/practice/[id]`
+```
+
+같은 구조인 `app/books/` 는 `/books` 로 멀쩡히 접혀 있었다. 차이는 하나뿐이다.
+**Metro 가 이미 떠 있는 동안 파일이 생겼는가.**
+
+고치는 법:
+
+```bash
+# Metro 를 멈추고
+rm -f .expo/types/router.d.ts
+npx expo start --port 8091      # 지운 자리에 처음부터 다시 만든다
+```
+
+🚫 **`tsc` 를 의심하지 말 것.** 우리는 여기서 두 번 헤맸다(검색·통계 때 한 번, 실천 때 또 한 번).
+🔴 `.expo/types/router.d.ts` 는 **산출물이지 소스가 아니다.** 이상하면 지우고 다시 만든다.
 
 ## 3. 폰에 넣기 (무선 디버깅)
 

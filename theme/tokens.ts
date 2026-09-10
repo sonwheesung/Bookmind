@@ -55,6 +55,8 @@ type Palette = {
   onAccent: string;
   /** 되돌릴 수 없는 동작에만 — 🚫 미달성·실패 표시에 쓰지 않는다 (기둥 5) */
   danger: string;
+  /** 모달 뒤를 덮는 색. 🔴 두 테마 모두 **어둡게** 둔다. 밝게 덮으면 뒤가 안 죽는다 */
+  backdrop: string;
 };
 
 export const lightPalette: Palette = {
@@ -66,6 +68,7 @@ export const lightPalette: Palette = {
   accent: '#3A5A73',
   onAccent: '#FFFFFF',
   danger: '#A8422F',
+  backdrop: 'rgba(28, 26, 23, 0.45)',
 };
 
 export const darkPalette: Palette = {
@@ -77,6 +80,7 @@ export const darkPalette: Palette = {
   accent: '#8FB3CC',
   onAccent: '#16150F',
   danger: '#E0836E',
+  backdrop: 'rgba(0, 0, 0, 0.6)',
 };
 
 export type { Palette };

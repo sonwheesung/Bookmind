@@ -24,8 +24,9 @@
     "check:stats": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-stats.mjs",
     "check:practice": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-practice.mjs",
     "check:ocr": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-ocr.mjs",
+    "check:books": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-books.mjs",
     "check:play-access": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-play-access.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota && npm run check:search && npm run check:stats && npm run check:practice && npm run check:ocr",
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota && npm run check:search && npm run check:stats && npm run check:practice && npm run check:ocr && npm run check:books",
     "build:aab": "bash scripts/build-aab.sh",
     "icons": "node scripts/make-icons.mjs"
   },

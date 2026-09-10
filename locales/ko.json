@@ -46,7 +46,8 @@
       "tagsHint": "쉼표로 구분합니다"
     },
     "book": {
-      "none": "책 없음"
+      "none": "책 없음",
+      "create": "+ 새 책 등록"
     },
     "list": {
       "title": "문장",
