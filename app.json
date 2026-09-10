@@ -37,6 +37,13 @@
       "expo-router",
       "expo-sqlite",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Re:Read uses your photos only to read the text on a book page. The photo is not stored or uploaded.",
+          "cameraPermission": "Re:Read uses the camera only to read the text on a book page. The photo is not stored or uploaded."
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/icons/re-read-notification.png",

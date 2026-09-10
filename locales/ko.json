@@ -195,6 +195,27 @@
     "reviewValue": "{{count}}회 · 기억률 {{percent}}%",
     "streakValue": "{{count}}일"
   },
+  "ocr": {
+    "title": "사진에서 가져오기",
+    "entry": "사진에서 문장 가져오기",
+    "camera": "사진 찍기",
+    "library": "앨범에서 고르기",
+    "recognizing": "사진을 읽는 중입니다…",
+    "unavailable": "이 빌드에서는 사진 읽기를 쓸 수 없습니다. 직접 입력해 주세요.",
+    "scriptLabel": "문자",
+    "resultLabel": "읽은 내용",
+    "empty": "읽힌 글자가 없습니다.",
+    "emptyHint": "이 사진에서는 글자가 나오지 않았습니다. 직접 입력해도 됩니다.",
+    "useText": "이 문장으로 저장",
+    "manual": "직접 입력하기",
+    "script": {
+      "latin": "로마자",
+      "korean": "한국어",
+      "japanese": "일본어",
+      "chinese": "중국어",
+      "devanagari": "데바나가리"
+    }
+  },
   "practice": {
     "title": "실천",
     "todayTitle": "오늘의 실천",

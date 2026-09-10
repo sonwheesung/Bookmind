@@ -195,6 +195,27 @@
     "reviewValue": "{{count}} times · Recalled {{percent}}%",
     "streakValue": "{{count}} days"
   },
+  "ocr": {
+    "title": "From a photo",
+    "entry": "Get text from a photo",
+    "camera": "Take a photo",
+    "library": "Pick from album",
+    "recognizing": "Reading the photo…",
+    "unavailable": "This build cannot read photos. Type the passage instead.",
+    "scriptLabel": "Script",
+    "resultLabel": "What was read",
+    "empty": "Nothing was read.",
+    "emptyHint": "Nothing came out of this photo. You can type the passage instead.",
+    "useText": "Use this text",
+    "manual": "Type it instead",
+    "script": {
+      "latin": "Latin",
+      "korean": "Korean",
+      "japanese": "Japanese",
+      "chinese": "Chinese",
+      "devanagari": "Devanagari"
+    }
+  },
   "practice": {
     "title": "Practices",
     "todayTitle": "Today's practice",

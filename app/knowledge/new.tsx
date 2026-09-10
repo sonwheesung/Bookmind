@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -27,7 +27,12 @@ export default function NewKnowledge() {
 
   const { data: books } = useDbQuery(() => listBooks());
 
-  const [content, setContent] = useState('');
+  // 🔴 사진에서 온 텍스트를 받는다(`docs/KNOWLEDGE_SYSTEM.md` §2.2).
+  //    저장 규칙을 스캔 화면에 복사하지 않고 **여기 한 벌만** 둔다
+  const params = useLocalSearchParams<{ text?: string; source?: string }>();
+  const fromOcr = params.source === 'ocr';
+
+  const [content, setContent] = useState(params.text ?? '');
   const [bookId, setBookId] = useState<string | null>(null);
   const [page, setPage] = useState('');
   const [thought, setThought] = useState('');
@@ -50,6 +55,7 @@ export default function NewKnowledge() {
         .split(',')
         .map((s) => s.trim())
         .filter((s) => s !== ''),
+      sourceType: fromOcr ? 'ocr' : 'manual',
     });
     router.back();
   };
@@ -69,6 +75,17 @@ export default function NewKnowledge() {
         minHeight={140}
         maxHeight={260}
       />
+
+      {/* 🔴 원문이 비어 있을 때만 그린다. 이미 쓰고 있는 사람에게 다른 입력 수단을 권하면
+          그건 도움이 아니라 방해다(기둥 1). 사진에서 온 텍스트가 이미 들어와 있어도 안 그린다. */}
+      {content === '' && (
+        <Button
+          label={t('ocr.entry')}
+          variant="ghost"
+          onPress={() => router.push('/knowledge/scan')}
+          style={{ marginBottom: spacing.lg }}
+        />
+      )}
 
       <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
         {t('knowledge.field.book')}
