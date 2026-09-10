@@ -10,11 +10,11 @@
 
 ## 1. 문서 목록
 
-**16개** (세는 법: `ls docs/*.md | wc -l`)
+**17개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **17건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **18건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
@@ -27,7 +27,8 @@
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
 | [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 · 가드 7축 | ✅ 2026-09-09 **구현·실측 완료** |
-| [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 | ✅ 2026-09-09 |
+| [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 · **업로드 키스토어**(§5) · **AAB**(§6) · **내부 테스트 업로드**(§7) | ✅ 2026-09-10 |
+| [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18** — JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -40,7 +41,7 @@
 | `VAULT_SYSTEM.md` (암호화 백업 금고) | Phase 12 (v1.1) — 조각 `server/` 복사 승계 | ❌ |
 | `LEGAL_SYSTEM.md` | Phase 11 — 처리방침 · 약관 · Play 데이터 보안 | ❌ |
 | `STORE_LISTING.md` | Phase 11 | ❌ |
-| `OTA_SYSTEM.md` | OTA 도입 시 | ❌ |
+| ~~`OTA_SYSTEM.md`~~ | ~~OTA 도입 시~~ | ✅ **2026-09-10 신설** — 위 목록으로 옮겼다 |
 | `POLISH_BACKLOG.md` | 첫 "이건 아닌데 지금은 넘어간다" | ❌ |
 | `COMMUNITY_SYSTEM.md` | 3차 | 🚫 |
 
@@ -65,6 +66,8 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 언어 설정 화면 (`en`·`ko`) | ✅ | 🔴 **Phase 6 에서 당겼다**(2026-09-09) — 안 보는 언어는 깨진다. `I18N_SYSTEM.md` §2.1 |
 | 복습 v1 — FSRS · 기본 복습 · 오늘의 복습 · 홈 | ✅ | Phase 3(2026-09-09). 🔴 AI 없이 성립하는지는 **사용자 판정이 남았다**(PLAN Phase 3 ★) |
 | 로컬 알림 | ❌ | Phase 4. 🔴 **실기기 다일차 검증이 완료 기준** |
+| **OTA (expo-updates)** | 🔨 | 결정 #18(2026-09-10). 배선·가드 ✅ / 🔴 **내부 테스트 빌드에 실려 나가기 전까지는 존재하지 않는다** · [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) |
+| **업로드 키 서명** (config plugin) | ✅ | 2026-09-10. 🔴 `prebuild` 가 지우므로 플러그인으로 배선 · [`BUILD.md`](./BUILD.md) §5 |
 | OCR | ❌ | Phase 5. ⚠ 미결정 C · 🔴 온디바이스 |
 | 검색 · 통계 | ❌ | Phase 6 |
 | 공지 · 점검 · 버전 게이트 · 문의 | ❌ | Phase 7 (common_server) |
@@ -90,7 +93,11 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | Anthropic API 키 | ❌ | 🔴 서버 env에만 |
 | RevenueCat + 스토어 상품(월/연) | ❌ | Phase 10 |
 | Google Sign-In OAuth 클라이언트 | ❌ | Play 서명 키 SHA-1 필요 |
-| Play 콘솔 앱 · 비공개 테스트 | ❌ | 테스터 요건 `common/CLOSED_TESTING.md` |
+| 🔴 **Play 콘솔 앱 생성** | ❌ | **지금 막고 있는 것.** 사용자만 가능(약관 동의) · 경로 `u/1` · ⚠ 패키지명이 영구 고정된다 |
+| 🔴 **서비스 계정에 Re:Read 앱 추가** | ❌ | 키는 있다. 🔴 새 앱은 안 딸려 온다 → 안 넣으면 **403** (`common/PLAY_RELEASE_AUTOMATION.md` §4) |
+| 내부 테스트 트랙 · 테스터 | ❌ | 내부 테스트는 우리뿐이면 된다(12명×14일은 **비공개** 요건) |
+| ~~EAS 프로젝트~~ | ✅ 2026-09-10 | `@shs00925/reread` · `8785afeb-…` |
+| ~~업로드 키스토어~~ | ✅ 2026-09-10 | `secrets/reread-upload.jks` · SHA1 `44:0E:B4:…` |
 | 처리방침 · 약관 게시 (EN · KO) | ❌ | Phase 11 |
 | 상표 확인 "Re:Read" | ❓ | 🔴 **사용자 확인 필요** — 스토어 등록 전에 |
 | `common/DEV_ALLOCATION.md` Re:Read 행 | ❌ | Metro 8091 · 서버 3500 · Supabase 248xx |
@@ -108,7 +115,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 여덟을 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 아홉을 순서대로 돌린다
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
@@ -118,6 +125,7 @@ npm run check:docs    # 문서에 박힌 개수 ⇄ 실제 세기 대조
 npm run check:db      # 🔴 로컬 스키마·삭제 규칙 — 실물 SQLite(node:sqlite)에 세워서 잰다
 npm run check:review  # 복습 규칙 — 자정 경계 · 하루 상한 · 단서 우선순위(기기에서 재현이 어려운 축)
 npm run check:backup  # 🔴 백업 왕복 — 내보낸 파일을 빈 DB 에 되돌려 **행 단위로** 맞댄다
+npm run check:ota     # 🔴 OTA 설정 — 채널·runtimeVersion·버전 오염. **실패가 조용한 축**(OTA_SYSTEM §9)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
@@ -371,6 +379,19 @@ git check-ignore -q secrets/x.json && echo OK || echo 뚫림
 
 ⚠ **`.gitignore` 도 네 자리가 뚫려 있었다** — `secrets/` · `google-services.json` · 개인키(`id_rsa`·`*.pem`) ·
 `.env.production`(`.env` 는 막고 있었는데 `.env.*` 가 아니었다). 물려 보기 전에는 목록이 충분해 **보였다.**
+
+#### 🔴 다섯 번째 자리 — `*.env` (2026-09-10)
+
+| | |
+|---|---|
+| **증상** | 없다. 유출도 없었다(실제 파일은 저장소 밖 `C:/project/secrets/` 에 있다) |
+| **원인** | `.env` · `.env.*` 는 **파일명이 `.env` 로 시작하는 것만** 잡는다. 키스토어 값 파일이 `reread-upload.env` 라 **접두사가 붙어 통과**했다 |
+| **왜 안 걸렸나** | 🔴 위 네 자리를 고칠 때 **`.env` 계열은 닫혔다고 판정**했다. 그때 물려 본 15개 가짜 경로에 **접두사 붙은 `.env` 가 없었다** — 케이스가 현실을 안 덮었다 |
+| **수정** | `*.env` 추가. 대조군 양방향 확인(`foo.env`·`secrets/x.env` 무시 / `.env.example`·`app.json` 추적) |
+| **왜 중요한가** | 이 파일에 **업로드 키 비밀번호**가 있다. 저장소로 한 번만 복사되면 그대로 커밋되고, 🔴 **서명 키는 새면 되돌릴 방법이 키 교체뿐**이다(`common/BUILD_ARTIFACTS.md` §4) |
+
+★ **같은 교훈이 또 나왔다** — *"케이스가 현실을 안 덮으면 통과는 아무 뜻이 없다"*(위 CR 3차 판과 같은 축).
+그때는 CRLF 안의 줄 중간 CR 이었고 이번은 접두사 붙은 env 다. **닫았다고 적은 자리를 다시 물려 봤더니 뚫려 있었다.**
 
 ⚠ 저작권 축도 본다(독서 앱이라 열려 있다). 저장소에 든 "책 문장"은 예시 한 줄과 **제목·저자명**뿐이었다.
 

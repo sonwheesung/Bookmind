@@ -18,6 +18,10 @@ ios/
 .env
 .env.*
 !.env.example
+# 🔴 `.env*` 는 **파일명이 .env 로 시작하는 것만** 잡는다. `reread-upload.env` 같은
+#    접두사 있는 이름은 그대로 통과했다(2026-09-10 가짜 경로로 물려서 발견).
+#    키스토어 비밀번호가 이 형태라 실수로 저장소에 복사되면 그대로 커밋된다.
+*.env
 credentials/
 secrets/
 *.jks

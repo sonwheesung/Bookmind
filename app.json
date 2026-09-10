@@ -3,6 +3,14 @@
     "name": "Re:Read",
     "slug": "reread",
     "version": "0.1.0",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/8785afeb-e523-40c5-9b42-20593214aba6",
+      "checkAutomatically": "ON_LOAD",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    },
     "orientation": "portrait",
     "scheme": "reread",
     "userInterfaceStyle": "automatic",
@@ -34,11 +42,19 @@
           "icon": "./assets/icons/re-read-notification.png",
           "color": "#3A5A73"
         }
-      ]
+      ],
+      "./plugins/with-upload-signing.js"
     ],
     "experiments": {
       "typedRoutes": true
     },
-    "icon": "./assets/icons/icon.png"
+    "icon": "./assets/icons/icon.png",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8785afeb-e523-40c5-9b42-20593214aba6"
+      }
+    },
+    "owner": "shs00925"
   }
 }

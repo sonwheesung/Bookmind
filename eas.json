@@ -1,0 +1,15 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "submit": {
+    "internal": {
+      "android": {
+        "track": "internal",
+        "serviceAccountKeyPath": "../secrets/play-service-account.json",
+        "releaseStatus": "draft"
+      }
+    }
+  }
+}

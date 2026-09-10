@@ -306,6 +306,8 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 | 복습 알고리즘 | `ts-fsrs` | ❌ — §14 #5 |
 | OCR | ⚠ 미결정 C — **온디바이스가 기둥 2에서 도출된다** | ❌ |
 | 알림 | expo-notifications `~0.32.17` | 🔨 Phase 4(2026-09-09) — 🟢 **Expo Go 에서 로컬 알림 도달 확인**. 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) — 그 축은 미확인 |
+| **OTA** | expo-updates | 🔨 Phase 4(2026-09-10) — 결정 #18. 🔴 **네이티브 모듈이라 OTA 로 켤 수 없다** → 내부 테스트 첫 빌드에 실어야 한다. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 가드 `check:ota`([`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md)) |
+| 서명 | 업로드 키스토어 (`secrets/reread-upload.jks`) | 🔨 2026-09-10 — 🔴 `prebuild` 가 지우므로 **config plugin** 으로 배선한다([`docs/BUILD.md`](./docs/BUILD.md) §5) |
 | 구독 | react-native-purchases (RevenueCat) | ❌ |
 | 로그인 | @react-native-google-signin/google-signin | ❌ |
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID |
@@ -483,6 +485,17 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 ⚠ **둘 다 선택이다.** 제목만으로 책이 성립하는 규칙은 그대로다.
 🚫 **독서 목표(주 N권·월 N권)는 여전히 제외**다. 그건 사용자를 밀어붙이는 축이라 기둥 5 와 부딪힌다.
 
+**#18 OTA(expo-updates)를 내부 테스트 **첫 빌드**에 넣는다 (2026-09-10)** — Phase 11 항목을 앞당김.
+🔴 **근거는 편의가 아니라 소급 불가다.** `expo-updates` 는 네이티브 모듈이라 **OTA 로 OTA 를 켤 수 없다** —
+지금 빌드에 안 넣으면 그 빌드가 깔린 기기는 **영원히** 스토어 업데이트로만 고칠 수 있다.
+형제 둘이 그 대가를 실제로 치렀다(LinkMemo vc10 잔류자 · 조각은 vc21 에 와서야 탈출구가 생겼다).
+🟢 **우리는 사용자가 0 이라 그 대가를 0 으로 치를 수 있고, 이 창은 한 번만 열린다.**
+🟢 부수 이득: Phase 4 의 남은 축(알림 실기기 다일차)을 관찰하는 중에 JS 결함을 **재빌드 없이** 고친다.
+대가: ① 업로드 키스토어를 지금 만들어야 한다(잃으면 앱을 영구히 업데이트 못 한다 — `docs/BUILD.md` §5)
+② 🔴 **새 수탁자 Expo, Inc.(미국)가 생긴다** → 처리방침 고지 대상. 지금은 테스터가 우리뿐이라
+`common/CLOSED_TESTING.md` §3 으로 성립하고, **Phase 11 완료 기준에 행을 추가해 뒀다**(`docs/OTA_SYSTEM.md` §8).
+🚫 **앞당기는 것은 OTA 와 그 빌드뿐이다** — 스토어 등록정보·법무·연령 게이트·R8 은 Phase 11 에 그대로 남는다.
+
 ### ⚠ 미결정 (7건 — F 는 #13 으로 닫힘)
 
 | # | 무엇 | 왜 지금 못 정하나 | 언제까지 |
@@ -513,7 +526,11 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 | Anthropic API 키 | ❌ | 서버 env에만. 🔴 앱에 넣지 않는다 |
 | RevenueCat 프로젝트 + 상품 등록 | ❌ | 월간/연간 2종. 가격 ⚠ 미결정 B |
 | Google Sign-In OAuth 클라이언트 | ❌ | Play 서명 키 SHA-1 필요 |
-| Play 콘솔 앱 · 비공개 테스트 | ❌ | 테스터 요건은 `common/CLOSED_TESTING.md` |
+| 🔴 **Play 콘솔 앱 생성** (`com.vivacegames.reread`) | ❌ | **지금 막고 있는 것**(2026-09-10). 사용자만 가능(계정 로그인·약관 동의) · 경로는 🔴 `u/1` (`common/CLOSED_TESTING.md` §0). ⚠ **패키지명이 그 항목에 영구 고정된다** → 상표 확인과 같이 본다 |
+| 🔴 **서비스 계정에 Re:Read 앱 추가** + `앱을 테스트 트랙으로 출시` | ❌ | 키는 이미 있다(`secrets/play-service-account.json`). 🔴 **새 앱은 목록에 안 딸려 온다** — 안 넣으면 권한 회수와 **똑같은 403** 이다(`common/PLAY_RELEASE_AUTOMATION.md` §4) |
+| 내부 테스트 트랙 · 테스터 목록 | ❌ | 내부 테스트는 **우리뿐**이면 된다. 12명×14일은 **비공개** 테스트 요건이다(`common/CLOSED_TESTING.md`) |
+| ~~EAS 프로젝트~~ | ✅ **2026-09-10** | `@shs00925/reread` · `8785afeb-e523-40c5-9b42-20593214aba6`. OTA URL 의 근거값(`docs/OTA_SYSTEM.md` §4) |
+| ~~업로드 키스토어~~ | ✅ **2026-09-10** | `secrets/reread-upload.jks` · 🔴 잃으면 앱을 영구히 업데이트 못 한다(`docs/BUILD.md` §5) |
 | 처리방침·약관 게시 | ❌ | 글로벌이라 EN·KO 병기. `common/GLOBAL_DATA_COMPLIANCE.md` |
 | 🔴 **계정 삭제 안내 웹 URL** | ❌ | §4 — 앱 내 경로만으로는 **반려된다.** Play 콘솔에 등록 + 200 실측. 조각 `docs/delete-account.html` 참고 |
 | 상표 확인 — "Re:Read" | ❓ | 사용자 확인 필요. 흔한 단어 조합이라 선사용 여부 확인 |
@@ -564,6 +581,37 @@ common_server app_code `reread`. 레포 디렉터리 `Bookmind`는 경로일 뿐
 🔴 **다섯 다 `tsc`·`lint`·가드가 초록이었다.** 동작을 재는 검사는 전부 놓쳤고,
 **다른 층을 읽는 것**(바이트 · 기기 상태 · 번들 로그 · 실기기)이 잡았다.
 ★ 같은 문장이 하루에 다섯 번 나왔다 — **"확인했다" 와 "확인할 수 있는 상태였다" 는 다르다.**
+
+### 2026-09-10 — 내부 테스트 + OTA 배선 (결정 #18)
+
+**목적은 배포가 아니라 Phase 4 다.** 알림의 남은 축은 실기기 다일차 관찰인데, 손으로 설치한 APK 로 하면
+JS 결함을 고칠 때마다 **재설치가 관찰을 리셋한다**(예약이 날아가고 Doze 이력이 초기화된다).
+내부 테스트 트랙 + OTA 로 옮기면 그 리셋이 없어진다.
+
+- ✅ EAS 프로젝트 `@shs00925/reread` (`8785afeb-…`) · **업로드 키스토어**(`secrets/reread-upload.jks`)
+- ✅ `expo-updates` · `app.json` `updates` 블록 · **서명 config plugin** · `eas.json` · `npm run build:aab`
+- ✅ **가드 `check:ota` 7축** — 변이 **10종 전부 발화**(판정 함수를 죽이면 **exit 2**)
+- ✅ 문서 [`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md) 신설 · [`docs/BUILD.md`](./docs/BUILD.md) §5~§7
+- ✅ **첫 AAB — `BUILD SUCCESSFUL in 20m 1s` · 53.4MB · vc1 `0.1.0`**.
+  🔴 서명 주체가 **업로드 키**임을 확인(`Owner: CN=Re:Read …` · SHA1 일치) · 채널·URL·ABI 4벌 확인.
+  보관 `D:\builds\Bookmind\reread-vc1.aab`(해시 대조)
+- 🔴 **막힌 곳: Play 콘솔에 앱이 없다.** `edits.insert` → **404 Package not found**.
+  대조군으로 확정했다 — 조각·LinkMemo 는 200(키는 멀쩡) · 일부러 넣은 없는 앱과 **응답이 글자까지 같다**.
+  즉 인가 문제가 아니라 **앱 부재**다. 앱 생성은 약관 동의라 **사용자만** 할 수 있다(§15)
+
+⚠ **나중에 속을 자리**: 이 서비스 계정은 RevenueCat 용(`revenuecat-play@…`)이라 읽기 권한이 상시다.
+조각이 그 때문에 **거짓 초록**에 속았다 — `edits.insert` 200 은 `앱을 테스트 트랙으로 출시` 를
+**증명하지 않는다**(별개 권한). 판정은 `eas submit` 이 실제로 통과하는 것으로만 한다.
+
+🔴 **왜 지금 하는가 — 미루는 비용이 다른 항목과 성질이 다르다.**
+`expo-updates` 는 네이티브 모듈이라 **OTA 로 OTA 를 켤 수 없다.** 지금 빌드에 안 넣으면
+그 빌드가 깔린 기기는 **영원히** 스토어 업데이트로만 고칠 수 있다. 형제 둘이 그 대가를 치렀고
+(LinkMemo vc10 잔류자 · 조각은 vc21 에 와서야 탈출구가 생겼다) **우리는 사용자가 0 이라 0 으로 치른다.**
+이 창은 한 번만 열린다.
+
+🚫 **함께 앞당긴 것은 OTA 와 그 빌드뿐이다.** 스토어 등록정보·법무 문서·연령 게이트·R8 은
+Phase 11 에 그대로 있다. 내부 테스트는 **테스터가 우리뿐**이라 그것들 없이 성립한다
+(`common/CLOSED_TESTING.md` §3).
 
 ### 🔴 지금 열려 있는 것
 
