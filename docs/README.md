@@ -10,11 +10,11 @@
 
 ## 1. 문서 목록
 
-**17개** (세는 법: `ls docs/*.md | wc -l`)
+**18개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **18건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **19건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **7건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
@@ -28,6 +28,7 @@
 | [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
 | [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 · 가드 7축 | ✅ 2026-09-09 **구현·실측 완료** |
 | [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 · **업로드 키스토어**(§5) · **AAB**(§6) · **내부 테스트 업로드**(§7) | ✅ 2026-09-10 |
+| [`STATS_SYSTEM.md`](./STATS_SYSTEM.md) | 🔴 **성적표가 아니다** — 저장·복습·기억률·연속 학습일. 파생값은 저장하지 않는다 · 기둥 5 가 모든 결정을 가른다 · 가드 **7축** | 🔨 2026-09-10 |
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
@@ -43,6 +44,7 @@
 | `STORE_LISTING.md` | Phase 11 | ❌ |
 | ~~`OTA_SYSTEM.md`~~ | ~~OTA 도입 시~~ | ✅ **2026-09-10 신설**(위 목록으로 옮겼다) |
 | `POLISH_BACKLOG.md` | 첫 "이건 아닌데 지금은 넘어간다" | ❌ |
+| ~~`STATS_SYSTEM.md`~~ | ~~Phase 6~~ | ✅ **2026-09-10 신설**(위 목록으로 옮겼다) |
 | `COMMUNITY_SYSTEM.md` | 3차 | 🚫 |
 
 ---
@@ -66,11 +68,11 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 지식 카드 · 내 생각(1:N) · 태그 | ✅ | Phase 2(2026-09-09). 에뮬 E2E 로 CRUD 전 구간 확인 |
 | 언어 설정 화면 (`en`·`ko`) | ✅ | 🔴 **Phase 6 에서 당겼다**(2026-09-09) — 안 보는 언어는 깨진다. `I18N_SYSTEM.md` §2.1 |
 | 복습 v1 — FSRS · 기본 복습 · 오늘의 복습 · 홈 | ✅ | Phase 3(2026-09-09). 🔴 AI 없이 성립하는지는 **사용자 판정이 남았다**(PLAN Phase 3 ★) |
-| 로컬 알림 | ❌ | Phase 4. 🔴 **실기기 다일차 검증이 완료 기준** |
+| 로컬 알림 | 🔨 | Phase 4. 예약·도달·아이콘 ✅ · 🔴 **실기기 다일차 검증이 완료 기준**이고 그 축은 열려 있다 |
 | **OTA (expo-updates)** | ✅ | 결정 #18(2026-09-10). 배선·가드·게시 전부 ✅. 🔴 **이제 실제로 존재한다.** 첫 페이로드 발행은 사용자 지시 대기 · [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) |
 | **업로드 키 서명** (config plugin) | ✅ | 2026-09-10. 🔴 `prebuild` 가 지우므로 플러그인으로 배선 · [`BUILD.md`](./BUILD.md) §5 |
-| OCR | ❌ | Phase 5. ⚠ 미결정 C · 🔴 온디바이스 |
-| 검색 · 통계 | ❌ | Phase 6 |
+| 검색 · 통계 | ✅ | **2026-09-10.** 결정 #19 로 Phase 5 보다 먼저 했다. 🟢 순수 JS 라 **OTA 로 나간다** |
+| OCR | ❌ | Phase 5. ⚠ 미결정 C · 🔴 온디바이스 → 네이티브 모듈 → 재설치 → **알림 관찰이 리셋된다**. 그래서 뒤로 미뤘다 |
 | 공지 · 점검 · 버전 게이트 · 문의 | ❌ | Phase 7 (common_server) |
 | 구글 로그인 · 탈퇴 | ❌ | Phase 7. 🔴 같은 커밋에 |
 | AI 분석 · 회상 질문 | ❌ | Phase 8 (Premium) |
@@ -117,7 +119,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 아홉을 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 열하나를 순서대로 돌린다
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
@@ -128,6 +130,8 @@ npm run check:db      # 🔴 로컬 스키마·삭제 규칙 — 실물 SQLite(n
 npm run check:review  # 복습 규칙 — 자정 경계 · 하루 상한 · 단서 우선순위(기기에서 재현이 어려운 축)
 npm run check:backup  # 🔴 백업 왕복 — 내보낸 파일을 빈 DB 에 되돌려 **행 단위로** 맞댄다
 npm run check:ota     # 🔴 OTA 설정(채널·runtimeVersion·버전 오염). **실패가 조용한 축**(OTA_SYSTEM §9)
+npm run check:search  # 검색 네 축 · tombstone · 🔴 LIKE 와일드카드 이스케이프(KNOWLEDGE §6.5)
+npm run check:stats   # 통계 — 기억률 분모 0 · 🔴 연속일의 "오늘" 경계(STATS §5)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```

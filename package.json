@@ -20,8 +20,10 @@
     "check:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-review.mjs",
     "check:backup": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-backup.mjs",
     "check:ota": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-ota.mjs",
+    "check:search": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-search.mjs",
+    "check:stats": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-stats.mjs",
     "check:play-access": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-play-access.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota",
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota && npm run check:search && npm run check:stats",
     "build:aab": "bash scripts/build-aab.sh",
     "icons": "node scripts/make-icons.mjs"
   },

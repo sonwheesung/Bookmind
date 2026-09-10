@@ -24,7 +24,8 @@
     "cta": "Save a passage",
     "meta": {
       "books": "Books {{count}}",
-      "knowledge": "Passages {{count}}"
+      "knowledge": "Passages {{count}}",
+      "streak": "Streak {{count}} days"
     }
   },
   "knowledge": {
@@ -169,6 +170,30 @@
       "invalidFile": "This is not a backup file, or it is damaged.",
       "newerApp": "This file was made by a newer version. Update the app, then import it."
     }
+  },
+  "search": {
+    "title": "Search",
+    "placeholder": "Passages, thoughts, tags, book titles",
+    "empty": "Nothing matched.",
+    "axis": {
+      "content": "Passage",
+      "thought": "My thought",
+      "tag": "Tag",
+      "book": "Book"
+    }
+  },
+  "stats": {
+    "title": "Stats",
+    "empty": "Numbers appear here once you save your first passage.",
+    "tags": "By topic",
+    "label": {
+      "saved": "Saved",
+      "review": "Reviews",
+      "streak": "Streak"
+    },
+    "savedValue": "Passages {{knowledge}} · Books {{books}} · Thoughts {{thoughts}}",
+    "reviewValue": "{{count}} times · Recalled {{percent}}%",
+    "streakValue": "{{count}} days"
   },
   "reminder": {
     "title": "Review reminder",

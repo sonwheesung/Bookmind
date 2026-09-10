@@ -24,7 +24,8 @@
     "cta": "문장 저장하기",
     "meta": {
       "books": "책 {{count}}",
-      "knowledge": "문장 {{count}}"
+      "knowledge": "문장 {{count}}",
+      "streak": "연속 {{count}}일"
     }
   },
   "knowledge": {
@@ -169,6 +170,30 @@
       "invalidFile": "백업 파일이 아니거나 손상되었습니다.",
       "newerApp": "더 최신 버전에서 만든 파일입니다. 앱을 업데이트한 뒤 가져오세요."
     }
+  },
+  "search": {
+    "title": "검색",
+    "placeholder": "문장 · 내 생각 · 태그 · 책 제목",
+    "empty": "찾는 문장이 없습니다.",
+    "axis": {
+      "content": "원문",
+      "thought": "내 생각",
+      "tag": "태그",
+      "book": "책"
+    }
+  },
+  "stats": {
+    "title": "통계",
+    "empty": "첫 문장을 저장하면 여기에 숫자가 생깁니다.",
+    "tags": "분야별",
+    "label": {
+      "saved": "저장",
+      "review": "복습",
+      "streak": "연속 학습일"
+    },
+    "savedValue": "문장 {{knowledge}} · 책 {{books}} · 생각 {{thoughts}}",
+    "reviewValue": "{{count}}회 · 기억률 {{percent}}%",
+    "streakValue": "{{count}}일"
   },
   "reminder": {
     "title": "복습 알림",

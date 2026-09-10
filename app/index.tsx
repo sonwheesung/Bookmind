@@ -5,9 +5,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
-import { countBooks } from '@/features/books/repo';
-import { countKnowledge, listRecent } from '@/features/knowledge/repo';
+import { listRecent } from '@/features/knowledge/repo';
 import { dueCount } from '@/features/review/repo';
+import { loadStats } from '@/features/stats/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
 
@@ -28,13 +28,14 @@ export default function Home() {
   const { t } = useTranslation();
   const { palette, spacing, typography } = useTheme();
 
+  // 🔴 `loadStats()` 가 책·문장 수를 이미 센다. 같은 것을 두 번 세지 않는다(`STATS_SYSTEM.md` §2)
   const { data } = useDbQuery(() => ({
     recent: listRecent(3),
-    books: countBooks(),
-    knowledge: countKnowledge(),
+    stats: loadStats(),
     due: dueCount(),
   }));
 
+  const { books, knowledge, streak } = data.stats;
   const hasDue = data.due > 0;
   const divider = { height: StyleSheet.hairlineWidth, backgroundColor: palette.border };
   const meta = [typography.caption, { color: palette.textMuted }];
@@ -44,14 +45,28 @@ export default function Home() {
       <Header
         title={t('app.name')}
         right={
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('settings.title')}
-            onPress={() => router.push('/settings')}
-            hitSlop={12}
-          >
-            <Text style={[typography.label, { color: palette.textMuted }]}>{t('settings.title')}</Text>
-          </Pressable>
+          <View style={[styles.metaRow, { gap: spacing.md }]}>
+            {/* 🔴 문장이 하나도 없으면 검색을 안 그린다 — 빈 방으로 가는 문이다
+                (`KNOWLEDGE_SYSTEM.md` §6.6) */}
+            {knowledge > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('search.title')}
+                onPress={() => router.push('/search')}
+                hitSlop={12}
+              >
+                <Text style={[typography.label, { color: palette.textMuted }]}>{t('search.title')}</Text>
+              </Pressable>
+            )}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('settings.title')}
+              onPress={() => router.push('/settings')}
+              hitSlop={12}
+            >
+              <Text style={[typography.label, { color: palette.textMuted }]}>{t('settings.title')}</Text>
+            </Pressable>
+          </View>
         }
       />
 
@@ -132,14 +147,22 @@ export default function Home() {
           🔴 상자를 걷어내되 **누를 수 있게** 남긴다. 시안은 정보로만 두자고 했는데,
              그러면 홈에서 책 목록·문장 목록으로 가는 유일한 길이 사라진다(§3 수정 채택).
           🚫 신규 사용자에게 `책 0 · 문장 0` 을 보여주지 않는다 — 성취 대시보드가 된다. */}
-      {(data.books > 0 || data.knowledge > 0) && (
+      {(books > 0 || knowledge > 0) && (
         <View style={[styles.metaRow, { marginTop: spacing.xl }]}>
           <Pressable onPress={() => router.push('/books')} hitSlop={10}>
-            <Text style={meta}>{t('home.meta.books', { count: data.books })}</Text>
+            <Text style={meta}>{t('home.meta.books', { count: books })}</Text>
           </Pressable>
           <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
           <Pressable onPress={() => router.push('/knowledge')} hitSlop={10}>
-            <Text style={meta}>{t('home.meta.knowledge', { count: data.knowledge })}</Text>
+            <Text style={meta}>{t('home.meta.knowledge', { count: knowledge })}</Text>
+          </Pressable>
+          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
+          {/* 🔴 연속일이 0 이면 `연속 0일` 이 아니라 `통계` 다(`STATS_SYSTEM.md` §4.1).
+              0 을 적어 두면 다음에 "오늘 하면 1일!" 이 붙고, 그건 기둥 5 가 막는 그것이다. */}
+          <Pressable accessibilityLabel={t('stats.title')} onPress={() => router.push('/stats')} hitSlop={10}>
+            <Text style={meta}>
+              {streak > 0 ? t('home.meta.streak', { count: streak }) : t('stats.title')}
+            </Text>
           </Pressable>
         </View>
       )}
