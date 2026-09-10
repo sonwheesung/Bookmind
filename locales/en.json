@@ -195,6 +195,50 @@
     "reviewValue": "{{count}} times · Recalled {{percent}}%",
     "streakValue": "{{count}} days"
   },
+  "practice": {
+    "title": "Practices",
+    "todayTitle": "Today's practice",
+    "closedTitle": "Finished",
+    "empty": "Nothing here yet.",
+    "create": "New practice",
+    "createAction": "Create",
+    "createFromKnowledge": "Turn this passage into a practice",
+    "fromKnowledge": "From this passage",
+    "titleLabel": "What will you do?",
+    "titlePlaceholder": "Put my phone on the desk before bed",
+    "repeatLabel": "How often",
+    "startsToday": "Starts today.",
+    "streak": "{{count}} days in a row",
+    "stop": "Stop this practice",
+    "resume": "Start again",
+    "deleteConfirmTitle": "Delete this practice?",
+    "deleteConfirmBody": "The practice and its check-ins are removed. This cannot be undone.",
+    "repeat": {
+      "daily": "Every day",
+      "weekdays": "Weekdays",
+      "weekly": "Pick days"
+    },
+    "state": {
+      "running": "Running",
+      "upcoming": "Not started",
+      "ended": "Finished",
+      "stopped": "Stopped"
+    },
+    "weekday": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "suggest": {
+      "body": "You could try this one in daily life.",
+      "accept": "Try it",
+      "skip": "Skip"
+    }
+  },
   "reminder": {
     "title": "Review reminder",
     "hint": "Only on days with passages to revisit. Once a day.",

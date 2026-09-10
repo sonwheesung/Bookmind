@@ -4,26 +4,13 @@
  * 🔴 **여기서 틀리면 화면은 멀쩡한데 숫자만 조용히 틀린다.** 이 프로젝트가 하루에 다섯 번 만난
  *    바로 그 모양이라(`CLAUDE.md` §16) 계산을 순수 모듈로 빼고 가드가 경계를 전수로 잰다.
  *
- * 🔴 "하루"는 **기기 로컬 자정 고정**이다(`REVIEW_SYSTEM.md` §2.1). 로케일을 따르지 않는다.
+ * 🔴 "하루"의 셈법은 `lib/day.ts` 하나다. 실천도 같은 것을 쓴다. 두 곳에서 하루를 다르게
+ *    자르면 사용자가 한 화면에서 서로 다른 연속일을 본다(`PRACTICE_SYSTEM.md` §6.1).
  */
+// 🔴 상대 경로다. `@/` 별칭은 Metro·tsc 만 알고 node 는 모른다(가드가 이 파일을 직접 import 한다).
+import { localDayKey, previousDayKey, type DayKey } from '../../lib/day.ts';
 
-/** UTC ISO → 그 시각이 속한 **로컬 날짜** 키(`YYYY-MM-DD`) */
-export function localDayKey(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) throw new Error(`시각을 못 읽었다: ${iso}`);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-/** 로컬 날짜 키에서 하루 뺀 키 */
-export function previousDayKey(key: string): string {
-  const [y, m, d] = key.split('-').map(Number);
-  if (y === undefined || m === undefined || d === undefined) throw new Error(`날짜 키가 이상하다: ${key}`);
-  const prev = new Date(y, m - 1, d - 1);
-  return localDayKey(prev.toISOString());
-}
+export { localDayKey, previousDayKey };
 
 /**
  * 기억률 = `again` 이 아닌 비율. **분모가 0이면 `null`**(§3.2).
@@ -46,7 +33,7 @@ export function retentionRate(total: number, again: number): number | null {
  *    이 규칙이 없으면 어제까지 열흘을 이어온 사람이 아침 8시에 앱을 열었을 뿐인데 `0일` 을 본다.
  *    사실도 아니고 기둥 5 와도 부딪힌다. **하루가 끝나기 전에는 그 하루를 실패로 세지 않는다.**
  */
-export function streakDays(activeDays: Iterable<string>, todayKey: string): number {
+export function streakDays(activeDays: Iterable<DayKey>, todayKey: DayKey): number {
   const days = activeDays instanceof Set ? activeDays : new Set(activeDays);
   // 오늘 했으면 오늘부터, 아니면 어제부터 거슬러 센다. 어제도 없으면 0이다
   let cursor = days.has(todayKey) ? todayKey : previousDayKey(todayKey);

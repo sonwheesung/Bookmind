@@ -12,7 +12,8 @@ import { randomUUID } from 'node:crypto';
 
 import { runMigrations } from '../db/migrate.ts';
 import { buildCount, buildInsert } from '../db/sql.ts';
-import { localDayKey, previousDayKey, retentionRate, streakDays } from '../features/stats/compute.ts';
+import { localDayKey, previousDayKey } from '../lib/day.ts';
+import { retentionRate, streakDays } from '../features/stats/compute.ts';
 import { activityTimesQuery, reviewTallyQuery, tagDistributionQuery } from '../features/stats/sql.ts';
 
 // ── 🔴 SELF-TEST ─────────────────────────────────────────────────────

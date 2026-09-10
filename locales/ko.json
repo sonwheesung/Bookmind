@@ -195,6 +195,50 @@
     "reviewValue": "{{count}}회 · 기억률 {{percent}}%",
     "streakValue": "{{count}}일"
   },
+  "practice": {
+    "title": "실천",
+    "todayTitle": "오늘의 실천",
+    "closedTitle": "지난 실천",
+    "empty": "아직 없습니다.",
+    "create": "실천 만들기",
+    "createAction": "만들기",
+    "createFromKnowledge": "이 문장으로 실천 만들기",
+    "fromKnowledge": "이 문장에서",
+    "titleLabel": "무엇을 하시겠어요?",
+    "titlePlaceholder": "자기 전에 스마트폰을 책상에 놓는다",
+    "repeatLabel": "반복",
+    "startsToday": "오늘부터 시작합니다.",
+    "streak": "{{count}}일 연속",
+    "stop": "그만두기",
+    "resume": "다시 시작하기",
+    "deleteConfirmTitle": "이 실천을 지울까요?",
+    "deleteConfirmBody": "실천과 체크 기록이 함께 사라집니다. 되돌릴 수 없습니다.",
+    "repeat": {
+      "daily": "매일",
+      "weekdays": "평일",
+      "weekly": "요일 고르기"
+    },
+    "state": {
+      "running": "진행 중",
+      "upcoming": "시작 전",
+      "ended": "종료됨",
+      "stopped": "그만두었음"
+    },
+    "weekday": {
+      "mon": "월",
+      "tue": "화",
+      "wed": "수",
+      "thu": "목",
+      "fri": "금",
+      "sat": "토",
+      "sun": "일"
+    },
+    "suggest": {
+      "body": "이 내용을 생활에서 해볼 수 있습니다.",
+      "accept": "실천해보기",
+      "skip": "넘어가기"
+    }
+  },
   "reminder": {
     "title": "복습 알림",
     "hint": "복습할 문장이 있는 날에만 알립니다. 하루 한 번입니다.",

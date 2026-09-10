@@ -79,6 +79,7 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 
 - 컬럼을 **바꾸거나 지우지 않는다.** 덧붙인다.
 - **v3 (2026-09-09)** — `review_schedules.learning_steps`. 🔴 결함 수정(`REVIEW_SYSTEM.md` §1.2).
+- **v5 (2026-09-10)** — `knowledge.practice_skipped_at`. 🔴 **적을 칸이 없던 규칙을 닫는다**(`PRACTICE_SYSTEM.md` §1.1).
 - **v4 (2026-09-09)** — `books.cover_color`. 표지 자리표시자 색을 **고정**하기 위해 저장한다.
 - **v2 (2026-09-09)** — `books.total_pages` · `books.read_pages`(결정 #17).
   🟢 **Expand-only 러너의 첫 실전이었다.** `ALTER TABLE ... ADD COLUMN` 두 줄이고 기존 행은 NULL 로 남는다 —
@@ -126,6 +127,7 @@ tombstone 은 행을 남기므로 UNIQUE 제약과 정면으로 부딪힌다. �
 | `page` | TEXT | | 페이지. 정수가 아니라 TEXT("123p", "3장") |
 | `source_type` | TEXT | O | `manual` \| `ocr` \| `paste` \| (2차)`voice` |
 | `lang` | TEXT | | 원문 언어(BCP-47). 미상이면 NULL |
+| `practice_skipped_at` | TEXT | | 🔴 v5 추가. 실천 제안에 **[넘어가기]를 누른 시각**. NULL 이면 아직 안 물어봤거나 만들었다는 뜻이다(`PRACTICE_SYSTEM.md` §1.1) |
 | `created_at` / `updated_at` / `deleted_at` | TEXT | | |
 
 ### thoughts
@@ -211,6 +213,11 @@ FSRS 카드 상태. **지식당 1행**(PK = `knowledge_id`).
 유일한 입력이고, 지우면 되돌릴 수 없다. 지식을 지워도 로그는 남긴다.
 
 ### practices
+
+🔴 **`active` 는 사용자의 스위치이지 만료 표시가 아니다**(2026-09-10 확정 · `PRACTICE_SYSTEM.md` §2.1).
+"그만두기"를 누르면 0 이 된다. **종료일이 지났는지는 `ended_at` 으로 매번 판정한다.**
+날짜가 지났다고 컬럼을 고쳐 놓으면 그건 저장된 파생값이고, §4 가 금지하는 그것이다.
+
 
 🔴 **`knowledge`와 분리한다**(기둥 4, 기획서 §29).
 

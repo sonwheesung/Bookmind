@@ -244,6 +244,18 @@ const V4 = `
 ALTER TABLE books ADD COLUMN cover_color TEXT;
 `;
 
-export const MIGRATIONS: readonly string[] = [V1, V2, V3, V4];
+/**
+ * v5 — 실천 제안에 [넘어가기]를 누른 시각 (2026-09-10 · `PRACTICE_SYSTEM.md` §1.1).
+ *
+ * 🔴 **규칙은 2026-09-08 부터 문서에 있었는데 적을 칸이 없었다.** Phase 9 착수 전 대조에서 나왔다.
+ *    규칙만 있고 저장할 자리가 없으면 그 규칙은 코드에서 조용히 사라진다.
+ * 🔴 표가 아니라 **컬럼**인 이유: 카드 한 장에 하나뿐이고, 카드가 지워지면 함께 지워져야 하고,
+ *    백업에서 카드가 돌아오면 그 결정도 함께 돌아와야 한다. 컬럼이면 셋이 공짜로 성립한다.
+ */
+const V5 = `
+ALTER TABLE knowledge ADD COLUMN practice_skipped_at TEXT;
+`;
+
+export const MIGRATIONS: readonly string[] = [V1, V2, V3, V4, V5];
 
 /** 시드 없음 — 태그·카테고리를 우리가 정하지 않는다(`docs/PLAN.md` Phase 1). */

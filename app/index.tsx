@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { WeekRow } from '@/components/WeekRow';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { listRecent } from '@/features/knowledge/repo';
+import { listToday, toggleCheck } from '@/features/practice/repo';
 import { dueCount } from '@/features/review/repo';
 import { loadStats } from '@/features/stats/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
@@ -29,10 +31,11 @@ export default function Home() {
   const { palette, spacing, typography } = useTheme();
 
   // 🔴 `loadStats()` 가 책·문장 수를 이미 센다. 같은 것을 두 번 세지 않는다(`STATS_SYSTEM.md` §2)
-  const { data } = useDbQuery(() => ({
+  const { data, reload } = useDbQuery(() => ({
     recent: listRecent(3),
     stats: loadStats(),
     due: dueCount(),
+    practices: listToday(),
   }));
 
   const { books, knowledge, streak } = data.stats;
@@ -100,6 +103,51 @@ export default function Home() {
 
       <View style={[divider, { marginBottom: spacing.section }]} />
 
+      {/* ── 오늘의 실천 ────────────────────────────────────────────────
+          🔴 **실천이 0개면 이 영역을 통째로 안 그린다**(`PRACTICE_SYSTEM.md` §3).
+             안 만든 것이 정상이다(기둥 4). 빈 상자를 두면 그때부터 그건 할 일 목록이 된다.
+          🚫 "오늘 끊깁니다" 류 문구를 붙이지 않는다(§4 · 기둥 5). */}
+      {data.practices.length > 0 && (
+        <View style={{ marginBottom: spacing.section }}>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/practice')} hitSlop={8}>
+            <Text style={[typography.section, { color: palette.text, marginBottom: spacing.md }]}>
+              {t('practice.todayTitle')}
+            </Text>
+          </Pressable>
+
+          {data.practices.map((p, i) => (
+            <View key={p.id} style={{ marginTop: i > 0 ? spacing.xl : 0 }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push(`/practice/${p.id}`)}
+                style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+              >
+                <Text style={[typography.thought, { color: palette.text }]} numberOfLines={2}>
+                  {p.title}
+                </Text>
+              </Pressable>
+              <View style={{ marginTop: spacing.sm }}>
+                <WeekRow
+                  cells={p.cells}
+                  onToggle={(day) => {
+                    // 🔴 `day` 는 누른 칸의 날짜다. "오늘"로 넘기면 아무 날이나 오늘이 된다
+                    toggleCheck(p.id, day);
+                    reload();
+                  }}
+                />
+              </View>
+              {p.streak > 0 && (
+                <Text style={[...meta, { marginTop: spacing.sm }]}>
+                  {t('practice.streak', { count: p.streak })}
+                </Text>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
+
+      {data.practices.length > 0 && <View style={[divider, { marginBottom: spacing.section }]} />}
+
       {/* ── Recent ────────────────────────────────────────────────────
           🔴 카드가 아니다. 그래도 **항목 전체가 터치 영역**이다 —
              시각적으로 카드가 아닌 것과 기능적으로 목록인 것은 다른 축이다. */}
@@ -164,6 +212,17 @@ export default function Home() {
               {streak > 0 ? t('home.meta.streak', { count: streak }) : t('stats.title')}
             </Text>
           </Pressable>
+          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
+          {/* 🔴 실천이 0개여도 이 줄은 남는다(`PRACTICE_SYSTEM.md` §7 "홈에서 직접 생성 경로").
+              위쪽 `오늘의 실천` 블록은 0개면 사라지므로, 안 두면 만들 길이 지식 카드 하나뿐이 된다.
+              🚫 조용한 글자 하나다. 만들라고 권하는 문구를 붙이지 않는다(§4). */}
+          <Pressable
+            accessibilityLabel={t('practice.title')}
+            onPress={() => router.push('/practice')}
+            hitSlop={10}
+          >
+            <Text style={meta}>{t('practice.title')}</Text>
+          </Pressable>
         </View>
       )}
     </Screen>
@@ -171,5 +230,5 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  metaRow: { flexDirection: 'row', alignItems: 'center' },
+  metaRow: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap' },
 });

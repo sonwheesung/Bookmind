@@ -21,7 +21,7 @@
 | [`KNOWLEDGE_SYSTEM.md`](./KNOWLEDGE_SYSTEM.md) | 책 · 수집(입력/OCR) · 지식 카드 · 내 생각 · 태그 · 검색 · 홈 | ✅ 2026-09-08 |
 | [`REVIEW_SYSTEM.md`](./REVIEW_SYSTEM.md) | 🔴 **제품의 급소** — FSRS · 두 층의 복습 · 회상 질문 5종 · 오늘의 복습 · 알림 · 4등급 라벨 | ✅ 2026-09-09 |
 | [`AI_SYSTEM.md`](./AI_SYSTEM.md) | 분석 · 질문 생성 · 프록시 무저장 · 콘텐츠 유형 5종 · 비용 방어 · 고지 문안 | ✅ 2026-09-08 |
-| [`PRACTICE_SYSTEM.md`](./PRACTICE_SYSTEM.md) | 실천 생성(사용자 확정) · 체크 · 연속일 · **지식과의 분리** | ✅ 2026-09-08 |
+| [`PRACTICE_SYSTEM.md`](./PRACTICE_SYSTEM.md) | 실천 생성(사용자 확정) · 체크 · 연속일 · **지식과의 분리**. 🔴 [넘어가기]가 남는 자리(§1.1) · `active` 는 스위치다(§2.1) | ✅ 2026-09-10 |
 | [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) | 구독 단독(광고 없음) · 티어 · 해지 후 동작 · 엔타이틀먼트 · 법적 의무 | ✅ 2026-09-08 |
 | [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 **6축** | ✅ 2026-09-09 |
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
@@ -76,7 +76,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 공지 · 점검 · 버전 게이트 · 문의 | ❌ | Phase 7 (common_server) |
 | 구글 로그인 · 탈퇴 | ❌ | Phase 7. 🔴 같은 커밋에 |
 | AI 분석 · 회상 질문 | ❌ | Phase 8 (Premium) |
-| 실천 | ❌ | Phase 9 (Premium) |
+| 실천 | ✅ | **2026-09-10.** 🔴 사용자가 직접 쓰는 실천은 **무료**다(결정 #16). AI 제안만 Premium |
 | 구독 (RevenueCat · 무료 한도) | ❌ | Phase 10. ⚠ 미결정 A · B |
 | 백업 / 복원 | ❌ | Phase 12 (v1.1). 🔴 출시 직후 최우선 |
 | 광고 | 🚫 | 안 한다 — `MONETIZATION_SYSTEM.md` §1 |
@@ -119,7 +119,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 열하나를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 열둘을 순서대로 돌린다
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
@@ -132,6 +132,7 @@ npm run check:backup  # 🔴 백업 왕복 — 내보낸 파일을 빈 DB 에 �
 npm run check:ota     # 🔴 OTA 설정(채널·runtimeVersion·버전 오염). **실패가 조용한 축**(OTA_SYSTEM §9)
 npm run check:search  # 검색 네 축 · tombstone · 🔴 LIKE 와일드카드 이스케이프(KNOWLEDGE §6.5)
 npm run check:stats   # 통계 — 기억률 분모 0 · 🔴 연속일의 "오늘" 경계(STATS §5)
+npm run check:practice # 실천 — 반복 규칙 · 🔴 weekdays 가 주말에 안 끊기나 · 넘어가기(PRACTICE §9)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```

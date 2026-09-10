@@ -20,6 +20,7 @@ import {
   removeThought,
   thoughtsOf,
 } from '@/features/knowledge/repo';
+import { shouldSuggest, skipSuggestion } from '@/features/practice/repo';
 import { tagsOf } from '@/features/tags/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
@@ -45,6 +46,7 @@ export default function KnowledgeDetail() {
       thoughts: row === undefined ? [] : thoughtsOf(id),
       tags: row === undefined ? [] : tagsOf(id),
       books: listBooks(),
+      suggest: row === undefined ? false : shouldSuggest(id),
     };
   });
 
@@ -285,6 +287,46 @@ export default function KnowledgeDetail() {
         }}
         style={{ marginBottom: spacing.xxl }}
       />
+
+      {/* ── 실천 (`docs/PRACTICE_SYSTEM.md` §1) ────────────────────────
+          🔴 배너는 AI 가 `actionability='high'` 로 본 카드에만 뜬다. [넘어가기] 를 누르면
+             **영구적**이라 같은 카드에 다시 안 뜬다(§1.1). 반복하면 제안이 아니라 압박이다.
+          🚫 아래 [이 문장으로 실천 만들기] 는 배너가 아니라 **도구**다. 조용한 글자 하나이고
+             권유 문구를 붙이지 않는다(§4 "실천 생성을 유도하는 반복 배너" 금지). */}
+      {data.suggest && (
+        <Card>
+          <Text style={[typography.thought, { color: palette.text }]}>{t('practice.suggest.body')}</Text>
+          <View style={[styles.row, { gap: spacing.sm, marginTop: spacing.md }]}>
+            <View style={styles.grow}>
+              <Button
+                label={t('practice.suggest.accept')}
+                onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
+              />
+            </View>
+            <View style={styles.grow}>
+              <Button
+                label={t('practice.suggest.skip')}
+                variant="ghost"
+                onPress={() => {
+                  skipSuggestion(id);
+                  reload();
+                }}
+              />
+            </View>
+          </View>
+        </Card>
+      )}
+
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
+        hitSlop={8}
+        style={{ marginBottom: spacing.xxl }}
+      >
+        <Text style={[typography.caption, { color: palette.textMuted }]}>
+          {t('practice.createFromKnowledge')}
+        </Text>
+      </Pressable>
 
       <Button label={t('common.delete')} variant="danger" onPress={confirmDelete} />
       <View style={{ height: spacing.xl }} />
