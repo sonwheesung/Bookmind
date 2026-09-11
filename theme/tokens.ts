@@ -57,6 +57,10 @@ type Palette = {
   danger: string;
   /** 모달 뒤를 덮는 색. 🔴 두 테마 모두 **어둡게** 둔다. 밝게 덮으면 뒤가 안 죽는다 */
   backdrop: string;
+  /** 사진 위에서 **고른** 줄. 형광펜 자리다(OCR §2.2) */
+  highlight: string;
+  /** 사진 위에서 **아직 안 고른** 줄. 🔴 있다는 것만 알리고 읽기를 방해하지 않는다 */
+  highlightIdle: string;
 };
 
 export const lightPalette: Palette = {
@@ -69,6 +73,8 @@ export const lightPalette: Palette = {
   onAccent: '#FFFFFF',
   danger: '#A8422F',
   backdrop: 'rgba(28, 26, 23, 0.45)',
+  highlight: 'rgba(58, 90, 115, 0.30)',
+  highlightIdle: 'rgba(58, 90, 115, 0.10)',
 };
 
 export const darkPalette: Palette = {
@@ -81,6 +87,8 @@ export const darkPalette: Palette = {
   onAccent: '#16150F',
   danger: '#E0836E',
   backdrop: 'rgba(0, 0, 0, 0.6)',
+  highlight: 'rgba(143, 179, 204, 0.34)',
+  highlightIdle: 'rgba(143, 179, 204, 0.12)',
 };
 
 export type { Palette };

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * check:ocr — OCR 여덟 축(`docs/KNOWLEDGE_SYSTEM.md` §2.3).
+ * check:ocr — OCR 열 축(`docs/KNOWLEDGE_SYSTEM.md` §2.3).
  *
  * ⚠ **인식 정확도는 잴 수 없다.** 모델은 네이티브에 있고 node 에 없다.
  *    여기서 재는 것은 **우리 코드가 정하는 것**뿐이다: 스크립트 · 줄 합치기 · 저장 가능 · 정리 ·
@@ -276,6 +276,24 @@ check(!needsFallback(collectLines([framed(at('가', 0, 0, 10, 10))]).missingFram
 const twoBlocks = collectLines([framed(at('a', 0, 0, 10, 10)), framed(at('b', 0, 20, 10, 10))]);
 check(new Set(twoBlocks.lines.map((l) => l.id)).size === 2, `⑧ id 가 겹친다: ${ids(twoBlocks.lines)}`);
 
+// ── 🔴 ⑨ 화면이 판정을 거치나 (결정 #22) ──
+//
+// 🔴 순수 함수를 만들어 두고 화면이 안 쓰면 아무것도 안 지킨 것이다.
+const scan = readFileSync(join(ROOT, 'app', 'knowledge', 'scan.tsx'), 'utf8');
+check(scan.includes('scaleBoxes('), '⑨ 🔴 화면이 `scaleBoxes` 를 안 쓴다(좌표를 직접 계산하고 있다)');
+check(scan.includes('displayHeight('), '⑨ 🔴 화면이 `displayHeight` 를 안 쓴다(배율이 둘이 된다)');
+check(scan.includes('joinSelected('), '⑨ 🔴 화면이 `joinSelected` 를 안 쓴다');
+// 🔴 옛 경로: 인식 결과를 통째로 편집 칸에 부어 넣던 코드. 그게 결정 #22 가 뒤집은 그것이다
+check(
+  !/setText\(\s*out\s*\)/.test(scan),
+  '⑨ 🔴 화면이 인식 결과를 통째로 편집 칸에 붓는다(결정 #22 이전 코드다)',
+);
+check(/setText\(\s*out\s*\)/.test('setText(out)'), '⑨ 🔴 옛 코드를 찾는 정규식이 아무것도 안 잡는다');
+
+// ── 🔴 ⑩ 폴백이 화면까지 이어지나 ──
+check(scan.includes('needsFallback('), '⑩ 🔴 화면이 `needsFallback` 을 안 쓴다');
+check(scan.includes('fallbackText'), '⑩ 🔴 화면이 폴백 텍스트를 안 쓴다(그 줄을 가져올 길이 없다)');
+
 if (bad.length > 0) {
   console.error(`\ncheck:ocr 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -286,6 +304,6 @@ console.log(
   `\ncheck:ocr OK — 스크립트 기본값 10종 · 빈 결과 · 🔴 줄 합치기(CJK 무공백 · 라틴 공백) ·` +
     `\n  🔴 앨범 원본 보호 · 네트워크 0건(소스 ${ocrFiles.length}개)` +
     `\n  🔴 읽기 순서(입력을 뒤섞어 잼 · 해상도 8배에도 같은 순서) · 좌표 배율(폭 0 이면 안 그린다) ·` +
-    `\n  🔴 좌표 없는 줄 폴백(그 문장을 잃지 않는다)` +
+    `\n  🔴 좌표 없는 줄 폴백(그 문장을 잃지 않는다) · 화면 배선(scaleBoxes·displayHeight·joinSelected·폴백)` +
     `\n  ⚠ 인식 정확도는 못 잰다. 그건 빌드에서만 본다\n`,
 );

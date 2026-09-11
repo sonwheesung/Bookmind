@@ -10,33 +10,73 @@
 import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 
-import { cleanupTarget, joinBlocks, type OcrBlock, type Script } from './compute';
+import {
+  cleanupTarget,
+  collectLines,
+  joinBlocks,
+  type OcrBlock,
+  type Script,
+  type SelectableLine,
+} from './compute';
 
-export { SCRIPTS, canSaveText, scriptForLanguage, type Script } from './compute';
+export {
+  SCRIPTS,
+  canSaveSelection,
+  canSaveText,
+  displayHeight,
+  joinSelected,
+  needsFallback,
+  scaleBoxes,
+  scriptForLanguage,
+  type ScaledBox,
+  type Script,
+  type SelectableLine,
+} from './compute';
 
-export type PickResult = { readonly uri: string } | { readonly canceled: true };
+/**
+ * 고른 사진. 🔴 **크기를 같이 들고 온다** — 좌표를 표시 크기로 환산하려면 원본 폭이 있어야 한다(§2.2.1).
+ */
+export type Picked = { readonly uri: string; readonly width: number; readonly height: number };
+export type PickResult = Picked | { readonly canceled: true };
+
+/** 🔴 `quality: 1` 로 받는다. 압축하면 좌표가 원본과 어긋난다 */
+const pickOptions = (): ImagePicker.ImagePickerOptions => ({ mediaTypes: ['images'], quality: 1 });
+
+function toPicked(r: ImagePicker.ImagePickerResult): PickResult {
+  const a = r.canceled ? undefined : r.assets[0];
+  if (a === undefined) return { canceled: true };
+  return { uri: a.uri, width: a.width ?? 0, height: a.height ?? 0 };
+}
 
 /** 카메라로 한 장. 🔴 권한이 없으면 던지지 않고 `canceled` 로 돌려준다 */
 export async function pickFromCamera(): Promise<PickResult> {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) return { canceled: true };
-  const r = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
-  const uri = r.canceled ? undefined : r.assets[0]?.uri;
-  return uri === undefined ? { canceled: true } : { uri };
+  return toPicked(await ImagePicker.launchCameraAsync(pickOptions()));
 }
 
 /** 앨범에서 한 장 */
 export async function pickFromLibrary(): Promise<PickResult> {
-  const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
-  const uri = r.canceled ? undefined : r.assets[0]?.uri;
-  return uri === undefined ? { canceled: true } : { uri };
+  return toPicked(await ImagePicker.launchImageLibraryAsync(pickOptions()));
+}
+
+/**
+ * 인식 결과 — **고를 수 있는 줄**과, 못 고르는 줄을 위한 **폴백 전체 텍스트**(§2.2).
+ *
+ * 🔴 `fallbackText` 는 언제나 만든다. `missingFrames` 가 0 이 아니면 화면이 그 길을 열어 준다.
+ *    좌표 없는 줄을 버리고 끝내면 **그 문장을 가져올 방법이 아예 없어진다.**
+ */
+export interface Recognized {
+  readonly lines: readonly SelectableLine[];
+  readonly missingFrames: number;
+  readonly fallbackText: string;
 }
 
 /**
  * 인식. 🔴 **네이티브가 없으면(Expo Go) 여기서 잡아 `null` 을 돌려준다.**
  * 화면이 빨간 오류가 아니라 "이 빌드에서는 안 됩니다"를 보여주게 하기 위해서다.
  */
-export async function recognize(uri: string, script: Script): Promise<string | null> {
+export async function recognize(uri: string, script: Script): Promise<Recognized | null> {
   try {
     // 🔴 지연 import. 최상위에서 부르면 Expo Go 가 **앱 시작 때** 죽는다
     const mod = await import('@react-native-ml-kit/text-recognition');
@@ -46,7 +86,9 @@ export async function recognize(uri: string, script: Script): Promise<string | n
     const result = (await TextRecognition.recognize(uri, scriptEnum[key] as never)) as unknown as {
       blocks?: readonly OcrBlock[];
     };
-    return joinBlocks(result.blocks ?? [], script);
+    const blocks = result.blocks ?? [];
+    const { lines, missingFrames } = collectLines(blocks);
+    return { lines, missingFrames, fallbackText: joinBlocks(blocks, script) };
   } catch {
     return null;
   }

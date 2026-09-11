@@ -209,6 +209,11 @@
     "emptyHint": "Nothing came out of this photo. You can type the passage instead.",
     "useText": "Use this text",
     "manual": "Type it instead",
+    "selectHint": "Only the lines you tap are brought over.",
+    "selectedCount": "Selected {{count}}",
+    "someUnselectable": "Lines without a position: {{count}}",
+    "useAll": "Use everything that was read",
+    "nothingSelected": "Nothing is selected yet.",
     "script": {
       "latin": "Latin",
       "korean": "Korean",

@@ -209,6 +209,11 @@
     "emptyHint": "이 사진에서는 글자가 나오지 않았습니다. 직접 입력해도 됩니다.",
     "useText": "이 문장으로 저장",
     "manual": "직접 입력하기",
+    "selectHint": "눌러서 고른 문장만 가져옵니다.",
+    "selectedCount": "고른 문장 {{count}}줄",
+    "someUnselectable": "위치를 못 찾아 고를 수 없는 줄 {{count}}개",
+    "useAll": "읽은 내용 전체 쓰기",
+    "nothingSelected": "아직 고른 문장이 없습니다.",
     "script": {
       "latin": "로마자",
       "korean": "한국어",
