@@ -323,6 +323,32 @@ heredoc 은 아무것도 해석하지 않으므로 겹이 하나도 없다.
 
 ---
 
+## 15. 🔴 `adb shell input text` 로 한글을 못 넣는다 (2026-09-11 · 갤럭시 S24)
+
+폰에 시드 데이터를 넣으려고 화면을 직접 운전하다가 막혔다.
+
+```
+input text "Habit123"      →  ✅ 그대로 들어간다
+input text "%s습관은…"      →  🔴 java.lang.NullPointerException:
+                                 Attempt to get length of null array
+```
+
+⚠ **조각 세션이 적어 둔 것과 실패 모양이 다르다.** `common/EMULATOR_POOL.md` §2.2 는
+*"한글 IME 가 켜져 있으면 글자를 **바꿔** 넣는다"*(`AAAAA` → `ㅁㅁㅁㅁㅁ`)라고 적어 뒀는데,
+이 폰에서는 **바뀌는 게 아니라 던지고 끝난다.** 아무것도 안 들어간다.
+
+🟢 **던지는 쪽이 차라리 낫다.** 바뀌어 들어가면 `uiautomator` 로 확인하기 전까지 모르고,
+그 사이에 틀린 내용이 저장된다. 예외는 그 자리에서 멈춘다.
+
+→ **그래서 한글 본문은 UI 로 넣지 않는다.** 우리 **백업 가져오기**로 넣는다
+(`BACKUP_SYSTEM.md` §4). 텍스트가 IME 를 아예 안 지나가고, 덤으로 **가져오기를 실기기에서 처음 밟았다**
+(그전까지 에뮬 실측뿐이었다 · 같은 문서 §9).
+
+⚠ `adb push` 할 때 Git Bash 가 `/sdcard/...` 를 `C:/Program Files/Git/sdcard/...` 로 바꾼다.
+`MSYS_NO_PATHCONV=1` 을 붙인다.
+
+---
+
 ## 6. 아직 안 밟은 것
 
 | | 왜 |
