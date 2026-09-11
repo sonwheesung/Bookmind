@@ -121,7 +121,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 **14개**를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **15개**를 순서대로 돌린다
                       #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
@@ -139,6 +139,7 @@ npm run check:practice # 실천 — 반복 규칙 · 🔴 weekdays 가 주말에
 npm run check:ocr     # OCR 여덟 축 — 스크립트 · 빈 결과 · 줄 합치기 · 이미지 정리 · 네트워크 0건
                       #   🔴 + 읽기 순서(뒤섞어 잼) · 좌표 배율 · 좌표 없는 줄 폴백(KNOWLEDGE §2.3)
 npm run check:books   # 🔴 책 정렬 — 등록 순서와 **반대로** 놓고 최근 사용순인지 잰다(KNOWLEDGE §4.0)
+npm run check:knowledge # 🔴 페이지 접사 — `3장` 에 `쪽` 을 붙이지 않나(실기기에서 `42p쪽` 이 떴다 · KNOWLEDGE §3)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```

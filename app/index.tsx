@@ -6,6 +6,7 @@ import { Button } from '@/components/Button';
 import { WeekRow } from '@/components/WeekRow';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { displayPage } from '@/features/knowledge/compute';
 import { listRecent } from '@/features/knowledge/repo';
 import { listToday, toggleCheck } from '@/features/practice/repo';
 import { dueCount } from '@/features/review/repo';
@@ -165,7 +166,8 @@ export default function Home() {
           const source = [
             k.bookTitle,
             k.bookAuthor,
-            k.page === null ? null : t('knowledge.pageShort', { page: k.page }),
+            // 🔴 숫자일 때만 `쪽`·`p.` 을 씌운다. `3장` 에 씌우면 `3장쪽` 이 된다(§3 · compute.ts)
+            displayPage(k.page, (p) => t('knowledge.pageShort', { page: p })),
           ]
             .filter((v) => v !== null && v !== '')
             .join(' · ');
