@@ -34,6 +34,11 @@ function countTables() {
   return (sec.match(/^### /gm) ?? []).length;
 }
 
+/** `npm run verify` 가 실제로 몇 개를 돌리나 */
+function verifyChainLength() {
+  return JSON.parse(read('package.json')).scripts.verify.split('&&').length;
+}
+
 const checks = [
   {
     what: '확정 결정',
@@ -60,6 +65,25 @@ const checks = [
     stated: stated(readme, /expo-sqlite \*\*(\d+)테이블\*\*/),
     actual: countTables(),
   },
+  // 🔴 아래 셋은 2026-09-11 재적재에서 **전부 틀린 채로** 발견돼 추가됐다.
+  //    그때까지 이 가드는 README 앵커만 봤고, 같은 수가 CLAUDE §16 에도 적혀 있는 것을 몰랐다.
+  //    ★ 한 사실이 두 곳에 적혀 있으면 대조 대상은 **둘 다**여야 한다. 한쪽만 재면 다른 쪽이 조용히 늙는다.
+  {
+    what: '확정 결정 (CLAUDE §16 요약)',
+    stated: stated(claude, /확정 결정 \*\*(\d+)건\*\*/),
+    actual: (claude.match(/^\*\*#/gm) ?? []).length,
+  },
+  {
+    what: '미결정 (CLAUDE §16 요약)',
+    stated: stated(claude, /미결정 \*\*(\d+)건\*\*/),
+    actual: (claude.match(/^\| [A-Z] \|/gm) ?? []).length,
+  },
+  {
+    // 🔴 가드를 넷 더 만들고도 이 줄이 `열둘` 로 남아 있었다. 가드 개수는 **세면 나오는 수**다.
+    what: 'verify 체인 (README §3)',
+    stated: stated(readme, /아래 \*\*(\d+)개\*\*를 순서대로 돌린다/),
+    actual: verifyChainLength(),
+  },
 ];
 
 // ── 🔴 양성 대조 ───────────────────────────────────────────────────────
@@ -73,6 +97,10 @@ if (stated('앵커 없음', /결정 로그 \*\*(\d+)건\*\*/) !== null) {
 }
 if (countTables() === 0) {
   console.error('SELF-TEST FAIL: 테이블을 0개로 센다 — 절 분리가 깨졌다');
+  process.exit(2);
+}
+if (verifyChainLength() < 2) {
+  console.error('SELF-TEST FAIL: verify 체인을 1개로 센다 — && 분리가 깨졌다');
   process.exit(2);
 }
 // ──────────────────────────────────────────────────────────────────────

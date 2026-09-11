@@ -296,25 +296,25 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 
 | 영역 | 선택 | 상태 |
 |---|---|---|
-| 앱 | Expo SDK 54 · RN 0.81.5 · React 19.1.0 | ❌ 미설치 |
-| 언어 | TypeScript ~5.9 (`strict`, `any` 금지) | ❌ |
-| 라우팅 | expo-router 6 | ❌ |
-| 상태 | Zustand (+ persist) | ❌ |
+| 앱 | Expo SDK 54 · RN 0.81.5 · React 19.1.0 | ✅ Phase 0(2026-09-08) |
+| 언어 | TypeScript ~5.9 (`strict`, `any` 금지) | ✅ Phase 0 — `noUncheckedIndexedAccess` 까지 켰다 |
+| 라우팅 | expo-router 6 | ✅ Phase 0 — typed routes. ⚠ `.expo/types/router.d.ts` 는 **산출물**이라 이상하면 지우고 다시 만든다([`docs/BUILD.md`](./docs/BUILD.md) §2.1) |
+| 상태 | Zustand (+ persist) | ✅ Phase 0~4 — 언어·알림 설정을 AsyncStorage 로 보관 |
 | **로컬 DB** | **expo-sqlite** `~16.0.10` | ✅ Phase 1(2026-09-09) — 12표 · 러너 · 헬퍼 |
 | UUID | expo-crypto `~15.0.9` | ✅ Phase 1 — `randomUUID()`. 🚫 자동증가 정수 금지(결정 #8) |
 | 백업 파일 | expo-file-system `~19.0` · expo-sharing `~14.0` · expo-document-picker `~14.0` | ✅ Phase 2(2026-09-09) — 🟢 셋 다 Expo Go 내장이라 재빌드가 없었다 |
-| 복습 알고리즘 | `ts-fsrs` | ❌ — §14 #5 |
-| OCR | `@react-native-ml-kit/text-recognition` (ML Kit 온디바이스) | 🔨 Phase 5(2026-09-10) · 결정 #20. 🔴 네이티브 모듈이라 **Expo Go 에서 안 돈다** · 스크립트를 호출마다 고른다([`docs/KNOWLEDGE_SYSTEM.md`](./docs/KNOWLEDGE_SYSTEM.md) §2.1) |
+| 복습 알고리즘 | `ts-fsrs` `^5.4.2` | ✅ Phase 3(2026-09-09) · §14 #5. 🔴 학습 단계를 안 들고 다녀 간격이 영원히 안 자라던 결함을 고쳤다([`docs/REVIEW_SYSTEM.md`](./docs/REVIEW_SYSTEM.md) §1.2) |
+| OCR | `@react-native-ml-kit/text-recognition` (ML Kit 온디바이스) · `expo-image-picker` | 🔨 Phase 5(2026-09-10) · 결정 #20 — 화면·정리·저장 경로는 됐고 🔴 **인식은 미판정**이다. 네이티브 모듈이라 **Expo Go 에서 안 돈다** · 스크립트를 호출마다 고른다([`docs/KNOWLEDGE_SYSTEM.md`](./docs/KNOWLEDGE_SYSTEM.md) §2.1) |
 | 알림 | expo-notifications `~0.32.17` | 🔨 Phase 4(2026-09-09) — 🟢 **Expo Go 에서 로컬 알림 도달 확인**. 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) — 그 축은 미확인 |
-| **OTA** | expo-updates | 🔨 Phase 4(2026-09-10) · 결정 #18. 🔴 **네이티브 모듈이라 OTA 로 켤 수 없다** → 내부 테스트 첫 빌드에 실어야 한다. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 가드 `check:ota`([`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md)) |
-| 서명 | 업로드 키스토어 (`secrets/reread-upload.jks`) | 🔨 2026-09-10 · 🔴 `prebuild` 가 지우므로 **config plugin** 으로 배선한다([`docs/BUILD.md`](./docs/BUILD.md) §5) |
+| **OTA** | expo-updates `~29.0.20` | ✅ Phase 4(2026-09-10) · 결정 #18 — 배선·가드·게시까지 끝났다. 🔴 **네이티브 모듈이라 OTA 로 켤 수 없어서** 내부 테스트 첫 빌드에 실었다. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 가드 `check:ota`([`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md)). ⏸ 첫 페이로드 발행은 **사용자 지시 대기** |
+| 서명 | 업로드 키스토어 (`secrets/reread-upload.jks`) | ✅ 2026-09-10 — vc1·vc2 둘 다 **업로드 키로 서명된 것을 SHA1 로 확인**했다. 🔴 `prebuild` 가 지우므로 **config plugin** 으로 배선한다([`docs/BUILD.md`](./docs/BUILD.md) §5) |
 | 구독 | react-native-purchases (RevenueCat) | ❌ |
 | 로그인 | @react-native-google-signin/google-signin | ❌ |
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID |
-| 다국어 | i18next · react-i18next · expo-localization | ❌ |
-| 날짜 | dayjs | ❌ |
-| 아이콘 | lucide-react-native | ❌ |
-| 폰트 | **시스템 폰트**(번들 폰트 없음 — `assets/fonts/` 를 만들지 않는다) | ❌ — 결정 #13 |
+| 다국어 | i18next · react-i18next · expo-localization | ✅ Phase 0 — `en`/`ko` · 언어 설정 화면 · 가드 6축([`docs/I18N_SYSTEM.md`](./docs/I18N_SYSTEM.md) §5) |
+| 날짜 | dayjs | ❌ 미설치 — 🔴 **하루 경계는 `lib/day.ts`(순수)가 이미 맡고 있다.** dayjs 가 필요한 것은 **표시 포맷**뿐이라 아직 안 넣었다 |
+| 아이콘 | lucide-react-native | ❌ 미설치 — 시안 검수가 *"요소가 이미 많으니 더하기보다 빼는 쪽"* 으로 판단해 이번엔 안 넣었다([`docs/DESIGN_REVIEW.md`](./docs/DESIGN_REVIEW.md) §3) |
+| 폰트 | **시스템 폰트**(번들 폰트 없음 — `assets/fonts/` 를 만들지 않는다) | ✅ 지켜지고 있다 — 결정 #13. 번들에 폰트 참조 **0건**을 Phase 0 에서 코드로 확인했다 |
 | **Re:Read 서버** | Next.js(App Router) + Drizzle + Supabase Postgres · Vercel | ❌ — 조각 `server/`에서 복사 |
 | LLM | Anthropic API (모델 ⚠ 미결정 E) | ❌ |
 | 배포 | Expo EAS(앱) · Vercel(서버) · Supabase(DB) | ❌ |
@@ -567,14 +567,15 @@ Doze 이력을 초기화한다.** 그러면 Phase 4 의 남은 축(실기기 다
 
 ---
 
-## 16. 현재 상태 (2026-09-09 · 하루 종일 작업)
+## 16. 현재 상태 (2026-09-10 기준 · 아래는 날짜별 기록)
 
-**문서 체계 + 기획 검증 + Phase 0 + Phase 1 + Phase 2(CRUD) 완료.**
-에뮬레이터에서 화면 6개가 돌고, 저장·수정·삭제가 로컬 DB에 실제로 남는다.
+**Phase 0·1·2·6·9 완료. Phase 3·4·5 는 코드가 끝났고 실기기·사용자 판정만 남았다.**
+내부 테스트 트랙에 **vc2 `0.2.0`** 이 게시돼 있고, 저장·복습·실천·검색·통계가 에뮬레이터에서 전부 돌아간다.
+🔴 폰에는 아직 손으로 깐 vc1 이 있어서 **OCR 과 키보드가 미판정**이다(아래 "지금 열려 있는 것" 0번).
 
-- ✅ `CLAUDE.md` §1~§16 · `docs/` 12종 · 기획서 원문 보존 · 스킬 4종
+- ✅ `CLAUDE.md` §1~§16 · `docs/` 18종 · 기획서 원문 보존 · 스킬 4종
 - ✅ 서버 경계 확정(§6) — 실물 조사(common_server 스키마 · 조각 서버 스키마) 근거 포함
-- ✅ 확정 결정 **16건** · ⚠ 미결정 **7건** (세는 법은 [`docs/README.md`](./docs/README.md) §1)
+- ✅ 확정 결정 **21건** · ⚠ 미결정 **6건** (세는 법은 [`docs/README.md`](./docs/README.md) §1 · `check:docs` 가 대조한다)
 - ✅ **기획 검증(2026-09-08)** — `devils-advocate` 4렌즈 독립 심사.
   🔴 세 렌즈가 겹쳐 짚은 Phase 번호 드리프트 37곳 정정 · 결정 #14~#16 신설
 - ✅ **Phase 0(2026-09-08)** — Expo 부트 · 토큰 · i18n · 가드 3종(전부 SELF-TEST 내장).
@@ -735,6 +736,12 @@ OTA 가 붙어 있으니 **순수 JS 로 끝나는 것부터** 한다. 검색과
 
    🔴 **어제 것은 디버그 키, Play 배포본은 Play 앱 서명 키다.** 서명이 다르면 안드로이드가
    덮어쓰기를 거부한다(`docs/BUILD.md` §3). **지우고 Play 에서 새로 받아야 한다.**
+
+   🔴 **그 빌드에는 `expo-updates` 가 아예 없다**(2026-09-11 대조로 확인).
+   폰의 설치 시각은 2026-09-09 21:20 인데 OTA 배선은 **그 다음 날** 들어왔다(커밋 `15776ed`, 2026-09-10).
+   즉 그 기기는 **서명으로도 OTA 로도 닿지 않는다.** 고칠 통로가 0 이라 지우는 것이 유일한 길이다.
+   ★ 결정 #18 이 *"나중에 붙이면 이미 깔린 기기엔 영원히 안 닿는다"* 고 적어 둔 그 상황을
+   **우리 폰이 실물로 보여주고 있다.** 사용자가 0 이라 대가가 0 인 것도 그대로다.
    🟢 저장된 문장이 0개라 지워도 잃을 것이 없다. 그것까지 눈으로 확인했다.
    ⏸ 앱 삭제는 대표님 승인 대기 중이다.
 

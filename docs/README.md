@@ -17,18 +17,18 @@
 | [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **21건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **6건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
-| [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 v1 (expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-09 |
-| [`KNOWLEDGE_SYSTEM.md`](./KNOWLEDGE_SYSTEM.md) | 책 · 수집(입력/OCR) · 지식 카드 · 내 생각 · 태그 · 검색 · 홈 | ✅ 2026-09-08 |
+| [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 **v5**(expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-10 |
+| [`KNOWLEDGE_SYSTEM.md`](./KNOWLEDGE_SYSTEM.md) | 책 · 수집(입력/OCR) · 지식 카드 · 내 생각 · 태그 · 검색 · 홈. 🔴 책 고르기는 목록 + `+ 새 책 등록`(§1.1.1) · 정렬은 최근 사용순(§4.0) | ✅ 2026-09-10 |
 | [`REVIEW_SYSTEM.md`](./REVIEW_SYSTEM.md) | 🔴 **제품의 급소** — FSRS · 두 층의 복습 · 회상 질문 5종 · 오늘의 복습 · 알림 · 4등급 라벨 | ✅ 2026-09-09 |
 | [`AI_SYSTEM.md`](./AI_SYSTEM.md) | 분석 · 질문 생성 · 프록시 무저장 · 콘텐츠 유형 5종 · 비용 방어 · 고지 문안 | ✅ 2026-09-08 |
 | [`PRACTICE_SYSTEM.md`](./PRACTICE_SYSTEM.md) | 실천 생성(사용자 확정) · 체크 · 연속일 · **지식과의 분리**. 🔴 [넘어가기]가 남는 자리(§1.1) · `active` 는 스위치다(§2.1) | ✅ 2026-09-10 |
 | [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) | 구독 단독(광고 없음) · 티어 · 해지 후 동작 · 엔타이틀먼트 · 법적 의무 | ✅ 2026-09-08 |
 | [`I18N_SYSTEM.md`](./I18N_SYSTEM.md) | 글로벌 · en 기본 + ko · **세 개의 언어 축** · 키 규약 · 가드 **6축** | ✅ 2026-09-09 |
 | [`DESIGN_REVIEW.md`](./DESIGN_REVIEW.md) | 🔴 **ChatGPT 협업 창구**(고정 채팅 `Bookmind`) — 화면 시안 · UI/UX · **모든 문구 검수** · 채택/기각 기록 | ✅ 2026-09-09 |
-| [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다 | ✅ 2026-09-09 |
+| [`EDGE_CASES.md`](./EDGE_CASES.md) | 🔴 **실제로 밟아 본 것만** — 저장·상세·태그·삭제·다국어. 각 시스템 문서의 §엣지 케이스가 여기로 모인다. §12 무한 반복 · §13 백슬래시 | ✅ 2026-09-10 |
 | [`BACKUP_SYSTEM.md`](./BACKUP_SYSTEM.md) | 🔴 **결정 #15 · v1.0 · 무료** — 로컬 내보내기/가져오기(JSON 한 파일) · 병합/교체 규칙 · tombstone 처리 · 가드 7축 | ✅ 2026-09-09 **구현·실측 완료** |
 | [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 · **업로드 키스토어**(§5) · **AAB**(§6) · **내부 테스트 업로드**(§7) | ✅ 2026-09-10 |
-| [`STATS_SYSTEM.md`](./STATS_SYSTEM.md) | 🔴 **성적표가 아니다** — 저장·복습·기억률·연속 학습일. 파생값은 저장하지 않는다 · 기둥 5 가 모든 결정을 가른다 · 가드 **7축** | 🔨 2026-09-10 |
+| [`STATS_SYSTEM.md`](./STATS_SYSTEM.md) | 🔴 **성적표가 아니다** — 저장·복습·기억률·연속 학습일. 파생값은 저장하지 않는다 · 기둥 5 가 모든 결정을 가른다 · 가드 **7축** | ✅ 2026-09-10 |
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
@@ -51,7 +51,8 @@
 
 ## 2. 구현 현황
 
-**2026-09-10 기준. 문서 체계 + Phase 0~2 완료 · Phase 3 은 사용자 판정만 남았고 Phase 4 진행 중.**
+**2026-09-10 기준. Phase 0·1·2·6·9 완료 · Phase 3·4·5 는 코드가 끝나고 실기기·사용자 판정만 남았다.**
+🔴 혼자 만들 수 있는 기능은 여기서 끝났다. Phase 7·8·10·11 은 전부 사용자 계정과 키가 열려야 한다.
 아래 표가 착수 순서의 기준이 된다.
 Phase 정의는 [`PLAN.md`](./PLAN.md).
 
@@ -72,7 +73,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | **OTA (expo-updates)** | ✅ | 결정 #18(2026-09-10). 배선·가드·게시 전부 ✅. 🔴 **이제 실제로 존재한다.** 첫 페이로드 발행은 사용자 지시 대기 · [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) |
 | **업로드 키 서명** (config plugin) | ✅ | 2026-09-10. 🔴 `prebuild` 가 지우므로 플러그인으로 배선 · [`BUILD.md`](./BUILD.md) §5 |
 | 검색 · 통계 | ✅ | **2026-09-10.** 결정 #19 로 Phase 5 보다 먼저 했다. 🟢 순수 JS 라 **OTA 로 나간다** |
-| OCR | ❌ | Phase 5. ⚠ 미결정 C · 🔴 온디바이스 → 네이티브 모듈 → 재설치 → **알림 관찰이 리셋된다**. 그래서 뒤로 미뤘다 |
+| OCR | 🔨 | **2026-09-10.** 결정 #20(ML Kit 온디바이스) · #21(관찰 시작 전에 넣는다). 화면·스크립트 선택·이미지 정리까지 됐고 🔴 **인식은 미판정**이다. 네이티브 모듈이라 Expo Go 로는 원리상 못 본다 |
 | 공지 · 점검 · 버전 게이트 · 문의 | ❌ | Phase 7 (common_server) |
 | 구글 로그인 · 탈퇴 | ❌ | Phase 7. 🔴 같은 커밋에 |
 | AI 분석 · 회상 질문 | ❌ | Phase 8 (Premium) |
@@ -81,7 +82,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 백업 / 복원 | ❌ | Phase 12 (v1.1). 🔴 출시 직후 최우선 |
 | 광고 | 🚫 | 안 한다 — `MONETIZATION_SYSTEM.md` §1 |
 | ISBN 검색 · 음성 입력 | 🚫 | MVP 제외. 2차 |
-| 독서 진행률(%) | 🔨 | 🔴 **결정 #17 로 v1.0 에 들어왔다**(2026-09-09) |
+| 독서 진행률(%) | ✅ | 🔴 **결정 #17 로 v1.0 에 들어왔다**(2026-09-09). 총·읽은 페이지 두 값만 받고 비율은 매번 계산한다 |
 | 커뮤니티 | 🚫 | 3차 · `ARCHITECTURE.md` §7 |
 
 ### 서버 · 외부 (Re:Read 코드 밖 선행 작업)
@@ -100,6 +101,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | ~~서비스 계정에 Re:Read 앱 추가~~ | ✅ 2026-09-10 | 부여 → 업로드 → **회수**(권한 5 → 4) |
 | ~~내부 테스트 트랙 · 테스터~~ | ✅ 2026-09-10 | `사장님 검증 전용`(2명). 🔴 doply(41명)는 안 붙였다 |
 | 🔴 **첫 업로드 · 게시** | ✅ 2026-09-10 16:14 | `활성` · 내부 테스터에게 제공됨 · vc1 · 프로덕션 릴리스 0건 · [`BUILD.md`](./BUILD.md) §7 |
+| 🔴 **vc2 게시**(검색·통계·실천·OCR·책 select) | ✅ 2026-09-10 21:28 | `0.2.0` · 71.2MB · 권한을 켜고 올리고 게시하고 **회수**했다(4→5→4) · [`BUILD.md`](./BUILD.md) §6.1·§7.0.1 |
 | ~~EAS 프로젝트~~ | ✅ 2026-09-10 | `@shs00925/reread` · `8785afeb-…` |
 | ~~업로드 키스토어~~ | ✅ 2026-09-10 | `secrets/reread-upload.jks` · SHA1 `44:0E:B4:…` |
 | 처리방침 · 약관 게시 (EN · KO) | ❌ | Phase 11 |
@@ -119,7 +121,8 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 열둘을 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **14개**를 순서대로 돌린다
+                      #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
 npm run lint          # expo lint
@@ -133,6 +136,8 @@ npm run check:ota     # 🔴 OTA 설정(채널·runtimeVersion·버전 오염). 
 npm run check:search  # 검색 네 축 · tombstone · 🔴 LIKE 와일드카드 이스케이프(KNOWLEDGE §6.5)
 npm run check:stats   # 통계 — 기억률 분모 0 · 🔴 연속일의 "오늘" 경계(STATS §5)
 npm run check:practice # 실천 — 반복 규칙 · 🔴 weekdays 가 주말에 안 끊기나 · 넘어가기(PRACTICE §9)
+npm run check:ocr     # OCR — 스크립트 기본값 · 빈 결과 잠금 · 🔴 줄 합치기 · 이미지 정리 · 네트워크 0건(KNOWLEDGE §2.3)
+npm run check:books   # 🔴 책 정렬 — 등록 순서와 **반대로** 놓고 최근 사용순인지 잰다(KNOWLEDGE §4.0)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
