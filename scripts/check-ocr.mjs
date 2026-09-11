@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * check:ocr — OCR 다섯 축(`docs/KNOWLEDGE_SYSTEM.md` §2.3).
+ * check:ocr — OCR 여덟 축(`docs/KNOWLEDGE_SYSTEM.md` §2.3).
  *
  * ⚠ **인식 정확도는 잴 수 없다.** 모델은 네이티브에 있고 node 에 없다.
- *    여기서 재는 것은 **우리 코드가 정하는 것**뿐이다: 스크립트 · 줄 합치기 · 저장 가능 · 정리 · 네트워크.
+ *    여기서 재는 것은 **우리 코드가 정하는 것**뿐이다: 스크립트 · 줄 합치기 · 저장 가능 · 정리 ·
+ *    네트워크 · 읽기 순서 · 좌표 배율 · 좌표 없는 줄 폴백(뒤의 셋은 결정 #22 로 생겼다).
  *
  * 🔴 그래서 이 가드는 "OCR 이 잘 된다"를 증명하지 않는다. 그건 빌드에서만 본다(`BUILD.md`).
  *    증명하는 것은 **모델이 잘 읽어 줘도 우리가 망가뜨리지 않는다**이다.
@@ -16,16 +17,32 @@ import { fileURLToPath } from 'node:url';
 
 import {
   SCRIPTS,
+  canSaveSelection,
   canSaveText,
   cleanupTarget,
+  collectLines,
+  displayHeight,
   joinBlocks,
+  joinSelected,
   lineJoiner,
+  needsFallback,
+  readingOrder,
+  scaleBoxes,
   scriptForLanguage,
 } from '../features/ocr/compute.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const block = (...lines) => ({ lines: lines.map((text) => ({ text })) });
+
+/** 좌표가 있는 줄. `k` 는 해상도 배수(같은 배치를 픽셀만 키운다) */
+const at = (text, left, top, width, height, k = 1) => ({
+  text,
+  frame: { left: left * k, top: top * k, width: width * k, height: height * k },
+});
+const framed = (...lines) => ({ lines });
+const ids = (lines) => lines.map((l) => l.id).join(',');
+const texts = (lines) => lines.map((l) => l.text).join('|');
 
 // ── 🔴 SELF-TEST ─────────────────────────────────────────────────────
 function selfTest() {
@@ -51,6 +68,29 @@ function selfTest() {
 
   // ④ 합치기가 **무언가를 만들어 내는가**(빈 문자열만 돌려주는 함수가 아닌가)
   if (joinBlocks([block('가')], 'korean') !== '가') fail('한 줄도 못 잇는다');
+
+  // ⑤ 🔴 양성 대조 — 줄 모으기가 **실제로 줄을 만들어 내는가**.
+  //    늘 빈 배열을 돌려주는 함수는 축 ⑥⑦⑧ 의 절반을 통과한다
+  const one = collectLines([framed(at('가', 0, 0, 10, 10))]);
+  if (one.lines.length !== 1) fail('좌표가 멀쩡한 줄을 못 모은다');
+  if (one.missingFrames !== 0) fail('멀쩡한 줄을 좌표 없는 것으로 센다');
+
+  // ⑥ 🔴 양성 대조 — 정렬이 **순서를 바꿀 수 있는가**. 입력을 그대로 돌려주는 함수를 배제한다
+  const shuffled = [at('아래', 0, 100, 50, 20), at('위', 0, 0, 50, 20)].map((l, i) => ({
+    id: String(i),
+    text: l.text,
+    frame: l.frame,
+  }));
+  if (texts(readingOrder(shuffled)) !== '위|아래') fail('정렬이 순서를 바꾸지 못한다');
+
+  // ⑦ 🔴 양성 대조 — 배율이 **값을 실제로 바꾸는가**. 원본을 그대로 돌려주는 함수를 배제한다
+  const box = scaleBoxes([{ id: 'a', text: 'x', frame: { left: 10, top: 20, width: 30, height: 40 } }], 100, 50);
+  if (box.length !== 1) fail('박스를 하나도 안 만든다');
+  if (box[0].left === 10) fail('배율이 좌표를 안 바꾼다(늘 원본을 돌려준다)');
+
+  // ⑧ 폴백 판정이 **양쪽을 다 낼 수 있는가**
+  if (needsFallback(0) !== false) fail('빠진 줄이 없는데 폴백이 필요하다고 한다');
+  if (needsFallback(1) !== true) fail('빠진 줄이 있는데 폴백이 필요 없다고 한다');
 }
 
 // ── 본검사 ───────────────────────────────────────────────────────────
@@ -142,6 +182,100 @@ for (const f of ocrFiles) {
 // 🔴 양성 대조: 정규식이 실제로 무언가를 잡는가
 check(NET.test('const r = await fetch("x")'), '⑤ 🔴 네트워크 정규식이 아무것도 안 잡는다');
 
+// ── 🔴 ⑥ 읽기 순서 (결정 #22 · §2.2) ──
+//
+// 🔴 **입력을 일부러 뒤섞어 넣는다.** 이미 정렬된 입력으로 재면 정렬을 통째로 없애도 초록이 유지된다.
+//    이 프로젝트가 같은 자리를 세 번 밟았다(`100%` 이스케이프 · `weekCells` 월요일 · 그리고 여기).
+const page = collectLines([
+  framed(
+    at('셋째 줄', 40, 200, 300, 30),
+    at('첫째 줄', 40, 100, 300, 30),
+    at('둘째 줄 오른쪽', 200, 150, 140, 30),
+    at('둘째 줄 왼쪽', 40, 152, 150, 30),
+  ),
+]);
+check(page.lines.length === 4, `⑥ 줄을 다 못 모았다: ${page.lines.length}`);
+const ordered = texts(readingOrder(page.lines));
+check(
+  ordered === '첫째 줄|둘째 줄 왼쪽|둘째 줄 오른쪽|셋째 줄',
+  `⑥ 🔴 읽기 순서가 틀렸다: ${ordered}`,
+);
+
+// 🔴 같은 줄 판정이 **해상도에 딸리지 않는다.** 책담은 고정 10px 을 썼고, 그 값은 사진 크기에 딸린다.
+//    같은 배치를 픽셀만 여덟 배로 키워 같은 순서가 나오는지 잰다.
+const big = collectLines([
+  framed(
+    at('셋째 줄', 40, 200, 300, 30, 8),
+    at('첫째 줄', 40, 100, 300, 30, 8),
+    at('둘째 줄 오른쪽', 200, 150, 140, 30, 8),
+    at('둘째 줄 왼쪽', 40, 152, 150, 30, 8),
+  ),
+]);
+check(
+  texts(readingOrder(big.lines)) === ordered,
+  `⑥ 🔴 해상도가 바뀌자 읽기 순서가 달라졌다: ${texts(readingOrder(big.lines))}`,
+);
+
+// 고른 것만 나온다 · 스크립트별 구분자를 지킨다
+const sel = new Set([page.lines[1].id, page.lines[0].id]);
+check(
+  joinSelected(page.lines, sel, 'korean') === '첫째 줄셋째 줄',
+  `⑥ 한국어에 없던 띄어쓰기가 생겼다: ${JSON.stringify(joinSelected(page.lines, sel, 'korean'))}`,
+);
+check(
+  joinSelected(page.lines, sel, 'latin') === '첫째 줄 셋째 줄',
+  `⑥ 라틴에서 낱말이 붙었다: ${JSON.stringify(joinSelected(page.lines, sel, 'latin'))}`,
+);
+check(joinSelected(page.lines, new Set(), 'korean') === '', '⑥ 아무것도 안 골랐는데 글이 나온다');
+check(!canSaveSelection(page.lines, new Set(), 'korean'), '⑥ 🔴 하나도 안 골랐는데 저장이 열린다');
+check(canSaveSelection(page.lines, sel, 'korean'), '⑥ 골랐는데 저장이 막힌다');
+// 🔴 없는 id 를 골라도 조용히 통과하지 않는다(빈 결과 → 저장 잠김)
+check(!canSaveSelection(page.lines, new Set(['없는-id']), 'korean'), '⑥ 없는 id 로 저장이 열린다');
+
+// ── 🔴 ⑦ 좌표 배율 (§2.2.1) ──
+const boxes = scaleBoxes(page.lines, 1000, 500);
+check(boxes.length === 4, `⑦ 박스 수가 안 맞는다: ${boxes.length}`);
+const first = boxes.find((b) => b.id === page.lines[1].id);
+check(first !== undefined, '⑦ id 가 박스에 안 실린다');
+check(
+  first.left === 20 && first.top === 50 && first.width === 150 && first.height === 15,
+  `⑦ 🔴 환산이 틀렸다: ${JSON.stringify(first)}`,
+);
+// 🔴 배치 전(폭 0)에는 아무것도 그리지 않는다. 안 그러면 박스가 왼쪽 위에 뭉친다
+check(scaleBoxes(page.lines, 1000, 0).length === 0, '⑦ 🔴 표시 폭이 0 인데 박스를 그린다');
+check(scaleBoxes(page.lines, 0, 500).length === 0, '⑦ 🔴 원본 폭이 0 인데 박스를 그린다');
+// 🔴 표시 높이가 박스와 **같은 배율**을 쓴다. 다르면 사진과 박스가 어긋난다
+check(displayHeight(1000, 2000, 500) === 1000, `⑦ 표시 높이가 틀렸다: ${displayHeight(1000, 2000, 500)}`);
+check(displayHeight(0, 2000, 500) === 0, '⑦ 원본 폭이 0 인데 높이가 나온다');
+const k = displayHeight(1000, 1000, 500) / 1000;
+check(
+  Math.abs(boxes[0].left - page.lines[0].frame.left * k) < 1e-9,
+  '⑦ 🔴 박스 배율과 표시 높이 배율이 다르다',
+);
+
+// ── 🔴 ⑧ 좌표 없는 줄 폴백 (§2.2) ──
+const mixed = [
+  framed(
+    at('좌표 있다', 40, 100, 300, 30),
+    { text: '좌표가 없다' },
+    { text: '너비가 0 이다', frame: { left: 0, top: 0, width: 0, height: 10 } },
+  ),
+];
+const m = collectLines(mixed);
+check(m.lines.length === 1, `⑧ 고를 수 있는 줄 수가 틀렸다: ${m.lines.length}`);
+check(m.missingFrames === 2, `⑧ 🔴 빠진 줄을 안 센다: ${m.missingFrames}`);
+check(needsFallback(m.missingFrames), '⑧ 🔴 빠진 줄이 있는데 폴백을 안 켠다');
+// 🔴 그 문장을 **가져올 길이 남아 있어야** 한다. 폴백 경로(전체 텍스트)에 그대로 있다
+const fallbackText = joinBlocks(mixed, 'korean');
+check(
+  fallbackText.includes('좌표가 없다') && fallbackText.includes('너비가 0 이다'),
+  `⑧ 🔴 좌표 없는 줄이 폴백에서도 사라졌다: ${JSON.stringify(fallbackText)}`,
+);
+check(!needsFallback(collectLines([framed(at('가', 0, 0, 10, 10))]).missingFrames), '⑧ 멀쩡한데 폴백을 켠다');
+// id 가 블록을 넘어 겹치지 않는다
+const twoBlocks = collectLines([framed(at('a', 0, 0, 10, 10)), framed(at('b', 0, 20, 10, 10))]);
+check(new Set(twoBlocks.lines.map((l) => l.id)).size === 2, `⑧ id 가 겹친다: ${ids(twoBlocks.lines)}`);
+
 if (bad.length > 0) {
   console.error(`\ncheck:ocr 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -151,5 +285,7 @@ if (bad.length > 0) {
 console.log(
   `\ncheck:ocr OK — 스크립트 기본값 10종 · 빈 결과 · 🔴 줄 합치기(CJK 무공백 · 라틴 공백) ·` +
     `\n  🔴 앨범 원본 보호 · 네트워크 0건(소스 ${ocrFiles.length}개)` +
+    `\n  🔴 읽기 순서(입력을 뒤섞어 잼 · 해상도 8배에도 같은 순서) · 좌표 배율(폭 0 이면 안 그린다) ·` +
+    `\n  🔴 좌표 없는 줄 폴백(그 문장을 잃지 않는다)` +
     `\n  ⚠ 인식 정확도는 못 잰다. 그건 빌드에서만 본다\n`,
 );

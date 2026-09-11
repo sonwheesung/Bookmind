@@ -14,7 +14,7 @@
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **21건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **6건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **22건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **6건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 **v5**(expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-10 |
@@ -136,7 +136,8 @@ npm run check:ota     # 🔴 OTA 설정(채널·runtimeVersion·버전 오염). 
 npm run check:search  # 검색 네 축 · tombstone · 🔴 LIKE 와일드카드 이스케이프(KNOWLEDGE §6.5)
 npm run check:stats   # 통계 — 기억률 분모 0 · 🔴 연속일의 "오늘" 경계(STATS §5)
 npm run check:practice # 실천 — 반복 규칙 · 🔴 weekdays 가 주말에 안 끊기나 · 넘어가기(PRACTICE §9)
-npm run check:ocr     # OCR — 스크립트 기본값 · 빈 결과 잠금 · 🔴 줄 합치기 · 이미지 정리 · 네트워크 0건(KNOWLEDGE §2.3)
+npm run check:ocr     # OCR 여덟 축 — 스크립트 · 빈 결과 · 줄 합치기 · 이미지 정리 · 네트워크 0건
+                      #   🔴 + 읽기 순서(뒤섞어 잼) · 좌표 배율 · 좌표 없는 줄 폴백(KNOWLEDGE §2.3)
 npm run check:books   # 🔴 책 정렬 — 등록 순서와 **반대로** 놓고 최근 사용순인지 잰다(KNOWLEDGE §4.0)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
