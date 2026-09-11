@@ -10,7 +10,7 @@
 
 ## 1. 문서 목록
 
-**18개** (세는 법: `ls docs/*.md | wc -l`)
+**19개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
@@ -30,6 +30,7 @@
 | [`BUILD.md`](./BUILD.md) | 🔴 **어떤 빌드를 쓸 것인가**(개발 vs 릴리스) · `ANDROID_HOME` · 무선 디버깅 설치 · Metro 함정 · **업로드 키스토어**(§5) · **AAB**(§6) · **내부 테스트 업로드**(§7) | ✅ 2026-09-10 |
 | [`STATS_SYSTEM.md`](./STATS_SYSTEM.md) | 🔴 **성적표가 아니다** — 저장·복습·기억률·연속 학습일. 파생값은 저장하지 않는다 · 기둥 5 가 모든 결정을 가른다 · 가드 **7축** | ✅ 2026-09-10 |
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
+| [`STORE_LISTING.md`](./STORE_LISTING.md) | 🔴 **비공개 테스트의 관문** — 앱 설정 **11항목**의 답 · 데이터 보안 실측 근거 · 등록정보 문구(en·ko) · 권한 결함(§4) · 막고 있는 것과 누가 하나(§9) | ✅ 2026-09-11 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -41,7 +42,7 @@
 | `UI_GUIDE.md` | 첫 화면 전(Phase 0~2) — 토큰 · 공통 컴포넌트 · **UI 금지 목록** | ❌ |
 | `VAULT_SYSTEM.md` (암호화 백업 금고) | Phase 12 (v1.1) — 조각 `server/` 복사 승계 | ❌ |
 | `LEGAL_SYSTEM.md` | Phase 11 — 처리방침 · 약관 · Play 데이터 보안 | ❌ |
-| `STORE_LISTING.md` | Phase 11 | ❌ |
+| ~~`STORE_LISTING.md`~~ | ~~Phase 11~~ | ✅ **2026-09-11 신설**(위 목록으로 옮겼다). 🔴 **Phase 11 까지 못 미룬다** — 비공개 테스트가 이걸 선행으로 잠근다 |
 | ~~`OTA_SYSTEM.md`~~ | ~~OTA 도입 시~~ | ✅ **2026-09-10 신설**(위 목록으로 옮겼다) |
 | `POLISH_BACKLOG.md` | 첫 "이건 아닌데 지금은 넘어간다" | ❌ |
 | ~~`STATS_SYSTEM.md`~~ | ~~Phase 6~~ | ✅ **2026-09-10 신설**(위 목록으로 옮겼다) |
@@ -152,6 +153,21 @@ npm run check:play-access   # 🔴 서비스 계정이 Play 의 우리 앱에 �
 
 ⚠ **이건 판정이 아니라 단서다.** 200 이어도 업로드는 막힐 수 있다(별개 권한 · [`BUILD.md`](./BUILD.md) §7.0).
 그래서 `verify` 에 넣지 않았다. **가드가 아닌 것을 가드 목록에 넣으면 초록의 뜻이 흐려진다.**
+
+**빌드 산출물 가드(입력이 있어야 도는 것 · `verify` 에 안 들어간다)**
+
+```bash
+npm run check:aab -- D:/builds/Bookmind/reread-vc3.aab   # 🔴 AAB 의 **권한 집합**을 허용 목록과 대조
+```
+
+🔴 **이건 진단이 아니라 가드다.** 자체 검사가 내장돼 있고 변이 8종이 전부 발화한다.
+`verify` 에 안 넣는 이유는 성격이 달라서다. **AAB 가 없는 상태가 정상**이고, 없는 것을 통과로 세면
+그것도 거짓 초록이다. 그래서 경로를 안 주면 통과가 아니라 **exit 2** 로 죽는다.
+
+★ **왜 `app.json` 을 안 보고 AAB 를 여나**: `app.json` 의 `android.permissions` 는 `undefined` 였는데
+vc2 매니페스트에는 권한 **30개**가 들어 있었다(2026-09-11). 설정 파일을 재는 검사였다면
+*"우리는 아무 권한도 요청하지 않는다"* 로 읽고 초록이었을 것이다.
+**빌드 산출물을 재는 축은 소스를 재는 축이 원리적으로 못 본다**([`STORE_LISTING.md`](./STORE_LISTING.md) §4).
 
 ⚠ **`typecheck` 는 생성된 라우트 타입에 기댄다**(`app.json` `typedRoutes: true` → `.expo/types/router.d.ts`).
 `.expo/` 는 gitignore 라 **새로 받은 저장소에서는 그 파일이 없다** — 그 상태로 typecheck 를 돌리면

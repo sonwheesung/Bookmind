@@ -18,6 +18,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'assets', 'icons');
+/** 🔴 스토어 업로드용은 앱 번들에 안 들어간다. 그래서 `assets/icons` 와 자리를 가른다(`docs/STORE_LISTING.md` §7) */
+const STORE = join(ROOT, 'assets', 'store');
 
 /** `docs/DESIGN_REVIEW.md` §3 에서 확정한 값 */
 const PAPER = [0xfb, 0xfa, 0xf7]; // #FBFAF7
@@ -43,13 +45,18 @@ function chunk(type, data) {
   return Buffer.concat([len, body, crc]);
 }
 
-/** `px[y][x] = [r,g,b,a]` 를 PNG 파일로 */
-function writePng(path, size, px) {
-  const raw = Buffer.alloc(size * (size * 4 + 1));
+/**
+ * `px[y][x] = [r,g,b,a]` 를 PNG 파일로.
+ *
+ * 🔴 **정사각형만 받던 것을 폭·높이로 넓혔다**(2026-09-11). Play 그래픽 이미지가 1024×500 이라
+ *    정사각 전제가 깨진다. 아이콘 네 장은 `w === h` 로 그대로 지나간다.
+ */
+function writePng(path, w, h, px) {
+  const raw = Buffer.alloc(h * (w * 4 + 1));
   let p = 0;
-  for (let y = 0; y < size; y++) {
+  for (let y = 0; y < h; y++) {
     raw[p++] = 0; // filter: none
-    for (let x = 0; x < size; x++) {
+    for (let x = 0; x < w; x++) {
       const c = px[y][x];
       raw[p++] = c[0];
       raw[p++] = c[1];
@@ -58,8 +65,8 @@ function writePng(path, size, px) {
     }
   }
   const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
+  ihdr.writeUInt32BE(w, 0);
+  ihdr.writeUInt32BE(h, 4);
   ihdr[8] = 8; // bit depth
   ihdr[9] = 6; // RGBA
   const png = Buffer.concat([
@@ -117,19 +124,27 @@ function shapeCoverage(u, v, tight) {
   return false;
 }
 
-/** 4x 슈퍼샘플링. 🔴 96px 에서 계단이 보이면 알림 아이콘이 지저분해진다 */
-function render(size, fg, bg, tight) {
+/**
+ * 4x 슈퍼샘플링. 🔴 96px 에서 계단이 보이면 알림 아이콘이 지저분해진다.
+ *
+ * `mark` 는 도형이 놓일 **정사각 영역**을 픽셀로 준다(`{ size, cx, cy }`).
+ * 캔버스가 정사각이 아닐 때도 도형이 늘어나지 않게 하려고 좌표를 이 영역으로 정규화한다.
+ * 안 그러면 1024×500 그래픽에서 두 페이지가 납작해진다.
+ */
+function renderRect(w, h, fg, bg, tight, mark) {
   const px = [];
   const S = 4;
-  for (let y = 0; y < size; y++) {
+  const left = mark.cx - mark.size / 2;
+  const top = mark.cy - mark.size / 2;
+  for (let y = 0; y < h; y++) {
     const row = [];
-    for (let x = 0; x < size; x++) {
+    for (let x = 0; x < w; x++) {
       let hit = 0;
       for (let sy = 0; sy < S; sy++) {
         for (let sx = 0; sx < S; sx++) {
-          const u = (x + (sx + 0.5) / S) / size;
-          const v = (y + (sy + 0.5) / S) / size;
-          if (shapeCoverage(u, v, tight)) hit++;
+          const u = (x + (sx + 0.5) / S - left) / mark.size;
+          const v = (y + (sy + 0.5) / S - top) / mark.size;
+          if (u >= 0 && u <= 1 && v >= 0 && v <= 1 && shapeCoverage(u, v, tight)) hit++;
         }
       }
       const a = hit / (S * S);
@@ -149,31 +164,62 @@ function render(size, fg, bg, tight) {
   return px;
 }
 
+/** 정사각 캔버스 한 장. 도형이 캔버스를 꽉 채운다(기존 네 장이 쓰던 방식) */
+function render(size, fg, bg, tight) {
+  return renderRect(size, size, fg, bg, tight, { size, cx: size / 2, cy: size / 2 });
+}
+
 mkdirSync(OUT, { recursive: true });
+mkdirSync(STORE, { recursive: true });
 
 const made = [];
 // ① 런처 아이콘(적응형이 아닌 기기용) — 배경을 굽는다
-made.push(['icon.png', 1024, writePng(join(OUT, 'icon.png'), 1024, render(1024, PAPER, ACCENT, true))]);
+made.push([
+  'icons/icon.png',
+  '1024x1024',
+  writePng(join(OUT, 'icon.png'), 1024, 1024, render(1024, PAPER, ACCENT, true)),
+]);
 // ② 적응형 전경 — 🔴 투명 배경. 배경색은 app.json 이 지정한다
 made.push([
-  're-read-foreground.png',
-  1024,
-  writePng(join(OUT, 're-read-foreground.png'), 1024, render(1024, PAPER, null, false)),
+  'icons/re-read-foreground.png',
+  '1024x1024',
+  writePng(join(OUT, 're-read-foreground.png'), 1024, 1024, render(1024, PAPER, null, false)),
 ]);
 // ③ Android 13+ 테마 아이콘 — 🔴 흰 단색. 색은 OS 가 정한다
 made.push([
-  're-read-monochrome.png',
-  1024,
-  writePng(join(OUT, 're-read-monochrome.png'), 1024, render(1024, WHITE, null, false)),
+  'icons/re-read-monochrome.png',
+  '1024x1024',
+  writePng(join(OUT, 're-read-monochrome.png'), 1024, 1024, render(1024, WHITE, null, false)),
 ]);
 // ④ 알림 — 🔴 흰 실루엣 + 투명. 안드로이드는 알파만 쓰고 색을 버린다
 made.push([
-  're-read-notification.png',
-  96,
-  writePng(join(OUT, 're-read-notification.png'), 96, render(96, WHITE, null, true)),
+  'icons/re-read-notification.png',
+  '96x96',
+  writePng(join(OUT, 're-read-notification.png'), 96, 96, render(96, WHITE, null, true)),
 ]);
 
-for (const [name, size, bytes] of made) {
-  console.log(`  ${name.padEnd(26)} ${String(size).padStart(4)}px  ${String(bytes).padStart(7)} bytes`);
+// ⑤ Play 스토어 아이콘 — 🔴 **512×512 고정**이고 투명이면 거부된다. 그래서 배경을 굽는다(①과 같은 방식)
+made.push([
+  'store/play-icon-512.png',
+  '512x512',
+  writePng(join(STORE, 'play-icon-512.png'), 512, 512, render(512, PAPER, ACCENT, true)),
+]);
+
+// ⑥ Play 그래픽 이미지 — 🔴 **1024×500 고정**. 캔버스가 정사각이 아니므로 도형 영역을 따로 준다.
+//    ⚠ `tight: false` 는 도형이 영역의 66% 만 차지한다. 그래서 영역을 짧은 변보다 크게 잡아야
+//    실제로 그려지는 크기가 배너에 맞는다. 310 으로 뒀더니 눈에 띄게 작았다(2026-09-11 육안 확인).
+made.push([
+  'store/play-feature-1024x500.png',
+  '1024x500',
+  writePng(
+    join(STORE, 'play-feature-1024x500.png'),
+    1024,
+    500,
+    renderRect(1024, 500, PAPER, ACCENT, false, { size: 530, cx: 512, cy: 250 }),
+  ),
+]);
+
+for (const [name, dim, bytes] of made) {
+  console.log(`  ${name.padEnd(34)} ${dim.padStart(9)}  ${String(bytes).padStart(7)} bytes`);
 }
-console.log(`아이콘 ${made.length}장 생성 — ${OUT}`);
+console.log(`이미지 ${made.length}장 생성 — ${OUT} · ${STORE}`);

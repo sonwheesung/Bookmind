@@ -1,0 +1,301 @@
+# STORE_LISTING — Play 등록정보와 앱 설정 11항목
+
+> **용도**: 비공개 테스트 트랙을 열기 위해 Play 콘솔이 요구하는 **앱 설정 11항목**의 답을 한 곳에 확정한다.
+> 콘솔에 입력하는 사람이 이 문서만 보고 끝낼 수 있어야 한다.
+>
+> 작성 계기: 2026-09-11 사용자 지시 *"우선 비공개 테스트로 뚫어놓자"*. 프로덕션 전 **12명 × 14일** 요건의
+> 시계를 지금 시작해 두자는 판단이고, 14일은 캘린더 시간이라 개발로 줄일 수 없다.
+>
+> 짝 문서: 테스터 운영은 `C:\project\common\CLOSED_TESTING.md`, 업로드 절차는
+> `common/PLAY_RELEASE_AUTOMATION.md`, 지금 무엇이 어느 트랙에 있나는 `common/PLAY_CONSOLE_STATUS.md`.
+> 사업자·연락처 값의 단일 출처는 `common/BUSINESS_INFO.md`(**커밋 금지 파일**)이고 여기에 베껴 적지 않는다.
+
+---
+
+## 0. 한 줄
+
+**비공개 테스트는 앱 설정 11항목이 전부 끝나야 열린다.** 2026-09-11 콘솔 실측이고, 지금 **0/11**이다.
+
+---
+
+## 1. 🔴 관문 실측 (2026-09-11 · 읽기 전용 조회)
+
+대시보드 `비공개 테스트` 섹션이 자물쇠와 함께 이렇게 적어 놨다.
+
+```
+🔒 비공개 테스트를 시작하려면 앱 설정을 완료하세요.
+   비공개 테스트 트랙 설정
+     🔒 국가 및 지역 선택
+     🔒 테스터 선택
+   버전 생성 및 출시
+     🔒 새 버전 만들기
+```
+
+세 항목이 **전부 잠겨 있다.** 테스터를 고르는 것도, 버전을 올리는 것도 그 앞에서 막힌다.
+
+⚠ **`common/PLAY_RELEASE_AUTOMATION.md` §5.12 가 관문을 좁게 적어 뒀다.** 그 절은 *"스토어 등록정보가
+14일 시계의 선행 조건"* 이라고만 말하는데, 실제 화면은 **앱 설정 11항목 전부**를 선행으로 잠근다.
+등록정보는 그중 **한 항목**이다. 이 차이는 작업량을 몇 배로 가른다.
+
+🟢 반대로 **내부 테스트는 그 11항목 없이 성립했다.** 우리가 vc1·vc2 를 실제로 그렇게 올렸다.
+그래서 "내부 테스트가 됐으니 비공개도 되겠지"가 성립하지 않는다.
+
+---
+
+## 2. 앱 설정 11항목 — 우리 답
+
+| # | 항목 | 우리 답 | 근거 | 누가 |
+|---|---|---|---|---|
+| 1 | 개인정보처리방침 설정 | URL `https://vivace-games.com/reread/privacy` | §8. 🔴 **게시가 선행이다** | 사용자(배포) |
+| 2 | 로그인 세부정보 | **로그인 없음** | `CLAUDE.md` §4 · Phase 7 미착수라 배포본에 계정이 없다 | 세션 |
+| 3 | 광고 | **아니오** | 결정 #10. 실측으로 광고 SDK **0개** | 세션 |
+| 4 | 콘텐츠 등급 | IARC 설문 → **전체 이용가** 예상 | 사용자 콘텐츠 공유 없음 · 폭력물과 성인물 없음 | 🔴 사용자(설문 제출) |
+| 5 | 타겟층 | **13세 이상** | 형제 앱 통일. ⚠ 연령 게이트는 미결정 G 이고 Phase 7 이다 | 사용자 |
+| 6 | 데이터 보안 | **수집 없음 · 공유 없음** | §3 실측 | 사용자(저장) |
+| 7 | 정부 앱 | 아니오 | | 사용자 |
+| 8 | 금융 기능 | 아니오 | 결제 미구현(Phase 10) | 사용자 |
+| 9 | 건강 | 아니오 | | 사용자 |
+| 10 | 앱 카테고리 · 연락처 | **교육(Education)** · `support@vivace-games.com` | §7 | 사용자 |
+| 11 | 스토어 등록정보 | §5(en-US) · §6(ko) · §7(그래픽) | 기본 언어 en-US(결정 #7) | 세션 초안 → 사용자 입력 |
+
+🔴 **11번이 이미지를 요구한다.** 아이콘 512 · 그래픽 1024×500 · 휴대전화 스크린샷 최소 2장.
+셋 중 하나라도 없으면 저장이 안 되고, 저장이 안 되면 트랙이 안 열린다.
+
+---
+
+## 3. 데이터 보안 — 선언의 실측 근거
+
+🔴 **데이터 보안은 코드가 실제로 보내는 것을 적는 칸이다.** 그래서 기억이 아니라 소스를 재고, 잰 값을 여기 남긴다.
+
+| 무엇 | 어떻게 쟀나 | 결과 |
+|---|---|---|
+| 네트워크 호출 | `app/ features/ lib/ db/ components/ hooks/ theme/` 에서 `fetch`·`XMLHttpRequest`·`WebSocket`·`axios` 전수 | **0건** |
+| 분석·광고·크래시 SDK | `package.json` 의존성에서 admob·analytics·sentry·firebase·amplitude·purchases·segment | **0개** |
+| 광고 ID(`AD_ID`) | vc2 AAB 매니페스트 실물 | **선언 없음** |
+
+**결론: 수집 없음 · 공유 없음.** 책과 문장, 생각, 복습, 실천이 전부 `expo-sqlite` 에만 있고 기둥 2 그대로다.
+사진도 ML Kit 온디바이스라 기기를 안 떠나고, 인식이 끝나면 임시 파일을 지운다(`features/ocr/repo.ts`).
+
+⚠ **이 선언은 배포본 기준이라 Phase 7·8 에서 반드시 바뀐다.** 로그인이 붙으면 신원이, AI 가 붙으면
+원문이 프록시를 지나간다(결정 #14 의 대가). 그때 **선언과 처리방침을 같이** 고친다.
+
+---
+
+## 4. 🔴 권한 정리 — vc3 에 실어야 하는 것
+
+vc2 AAB 매니페스트를 직접 열어 봤더니 **독서 앱에 없어야 할 권한 둘**이 들어 있었다.
+
+| 권한 | 판정 | 출처 |
+|---|---|---|
+| `RECORD_AUDIO` | 🔴 **불필요** | 우리 코드와 플러그인, `node_modules` 매니페스트 어디에도 없다. 원격 AAR 에서 왔고 정확한 출처는 확인하지 않았다 |
+| `SYSTEM_ALERT_WINDOW` | 🔴 **불필요** | Expo bare 템플릿 기본값. 템플릿 자신이 `OPTIONAL PERMISSIONS, REMOVE WHATEVER YOU DO NOT NEED` 라고 적어 뒀고 우리가 안 지웠다 |
+| `READ/WRITE_EXTERNAL_STORAGE` | 🟡 검토 | `expo-file-system`·`expo-image-picker` 가 선언한다. 백업 파일과 사진 고르기에 쓰인다 |
+| `CAMERA` | 🟢 필요 | OCR(결정 #20) |
+| `POST_NOTIFICATIONS`·`RECEIVE_BOOT_COMPLETED`·`VIBRATE`·`WAKE_LOCK` | 🟢 필요 | 복습 알림(기둥 7) |
+| `INTERNET`·`ACCESS_NETWORK_STATE` | 🟢 필요 | OTA(`expo-updates`) |
+| `DUMP` | 🟢 무해 | 요청 권한이 아니라 리시버의 보호 속성이다 |
+| 런처 배지 계열 14종 | 🟢 무해 | `expo-notifications` 가 배지를 위해 선언한다 |
+
+**왜 지금 중요한가**: 스토어 페이지의 앱 권한 목록은 사용자가 설치 전에 본다.
+**독서 앱이 마이크와 다른 앱 위에 표시를 요구하면** 그 자리에서 설치를 접는다.
+심사에서 걸리지도 않고 콘솔에 오류로도 안 뜬다. 아무도 안 알려 주는 자리다.
+
+→ `app.json` 에 `android.blockedPermissions` 로 걷어내고, **가드가 AAB 를 직접 열어 재게** 한다(§4.1).
+
+### 4.1 왜 `app.json` 만 검사하면 안 되나
+
+★ 이 저장소가 네 번 배운 문장이 여기에도 그대로 적용된다.
+**검사가 재려는 것이 입력에서 이미 참이면 그 검사는 아무것도 안 지킨다.**
+`app.json` 에 `blockedPermissions` 가 적혀 있는지만 보는 검사는 적어 뒀다는 것을 잴 뿐이고,
+**그 값이 실제 빌드에서 먹었는지**는 안 잰다. 이번 건이 정확히 그 종류다.
+`app.json` 의 `android.permissions` 는 `undefined` 였는데도 매니페스트에는 28개가 들어 있었다.
+
+→ 판정은 **AAB 매니페스트**로 한다. `npm run check:aab -- <aab 경로>` 가 권한 집합을 허용 목록과 대조한다.
+`verify` 체인에는 넣지 않는다. AAB 가 없는 상태가 정상이기 때문이고, 없는 것을 통과로 세면 그것도 거짓 초록이다.
+
+---
+
+## 5. 등록정보 — 영어 (기본, en-US)
+
+⚠ **아래 문구는 배포본(vc2)이 실제로 하는 것만 말한다.** AI 분석과 회상 질문, 계정, 구독, 클라우드 백업은
+아직 없으므로 한 줄도 적지 않는다. 등록정보가 배포본보다 넓으면 그건 심사 반려 사유이고,
+무엇보다 사용자가 없는 기능을 기대하고 설치한다.
+
+### 5.1 앱 이름 (≤ 30자)
+
+```
+Re:Read
+```
+
+### 5.2 짧은 설명 (≤ 80자)
+
+```
+Keep one line from a book. Meet it again right before you forget it.
+```
+
+### 5.3 자세한 설명 (≤ 4,000자)
+
+```
+Read it. Remember it. Live it.
+
+You finish a book and a month later almost nothing is left. Re:Read is built for
+that gap. It is not an app for reading more books. It is an app for keeping more
+of the one you just read.
+
+SAVE WITHOUT BREAKING YOUR READING
+One line is enough. The book, the page, your own thought and tags are all optional,
+so saving never turns into paperwork. Type it, paste it, or photograph the page and
+tap only the lines you want.
+
+MEET IT AGAIN BEFORE YOU FORGET
+Re:Read schedules each note with FSRS, a modern spaced repetition algorithm, and
+reminds you locally. Review starts with recall: you try to remember first, then the
+original is revealed. You grade how it felt, not whether you were right. There is no
+score, no accuracy rate, and no pressure put on your memory.
+
+TURN A FEW OF THEM INTO ACTION
+Some lines are worth doing, not just remembering. Write a practice in your own words,
+set how often, and check it off on a simple weekly row. Most notes never become
+practices, and that is the intended shape.
+
+EVERYTHING STAYS ON YOUR PHONE
+No account. No sign-up. No ads. No servers holding your library. Your books, notes,
+thoughts, reviews and practices live in a local database on your device, and the app
+works completely offline, including text recognition from photos.
+
+Because your data is yours, you can export it to a single file any time and import it
+back on another phone. That is free and always will be.
+
+WHAT IS INSIDE
+- Books with reading status and page progress
+- Notes with source, page, your own thought, and tags
+- Text from photos, on device, with line by line selection
+- Spaced repetition review with local reminders
+- Practices with a weekly check row and streaks
+- Search across originals, thoughts and tags
+- Statistics for saving, reviewing and practicing
+- Export and import your whole library as one file
+- English and Korean
+
+WHAT RE:READ IS NOT
+It is not a reading tracker that pushes you to finish more books. It is not a quiz app
+that grades you. It is not a social feed. It is a quiet place for the few sentences
+that were worth stopping for.
+```
+
+---
+
+## 6. 등록정보 — 한국어 (ko-KR)
+
+### 6.1 앱 이름 (≤ 30자)
+
+```
+Re:Read
+```
+
+### 6.2 짧은 설명 (≤ 80자)
+
+```
+책에서 건진 한 줄을 저장하고, 잊을 때쯤 다시 만납니다.
+```
+
+### 6.3 자세한 설명 (≤ 4,000자)
+
+```
+읽고, 기억하고, 살아내기.
+
+책을 덮고 한 달이 지나면 남는 것이 거의 없습니다. Re:Read 는 그 틈을 메우려고 만들었습니다.
+책을 더 많이 읽게 하는 앱이 아닙니다. 방금 읽은 한 권에서 얻은 것을 더 오래 남기는 앱입니다.
+
+독서를 끊지 않고 저장합니다
+원문 한 줄이면 끝납니다. 책도 페이지도 내 생각도 태그도 전부 선택이라 저장이 일이 되지 않습니다.
+직접 쓰거나, 붙여 넣거나, 책장을 찍어서 원하는 줄만 짚으면 됩니다.
+
+잊을 때쯤 다시 만납니다
+저장한 문장은 FSRS 간격 반복 알고리즘이 일정을 잡고 기기 알림이 데려옵니다.
+복습은 회상으로 시작합니다. 먼저 떠올려 보고 그다음에 원문이 열립니다.
+맞았는지가 아니라 어떻게 떠올랐는지를 고르면 됩니다. 점수도, 정답률도, 기억을 압박하는 장치도 없습니다.
+
+그중 몇 개는 실천이 됩니다
+기억만으로 끝내기 아까운 문장이 있습니다. 내 문장으로 실천을 적고 주기를 정한 뒤 주간 칸에 체크합니다.
+대부분의 문장은 실천이 되지 않고, 그게 의도한 모양입니다.
+
+전부 이 기기 안에 있습니다
+계정이 없습니다. 가입도, 광고도, 기록을 들고 있는 서버도 없습니다.
+책과 문장, 생각, 복습, 실천이 기기의 로컬 데이터베이스에만 있고 앱은 완전히 오프라인으로 돕니다.
+사진에서 글자를 읽는 것도 기기 안에서 처리합니다.
+
+내 데이터니까 언제든 파일 하나로 내보내고 다른 기기에서 다시 불러올 수 있습니다.
+이 기능은 무료이고 앞으로도 무료입니다.
+
+들어 있는 것
+- 읽기 상태와 페이지 진행률이 있는 책 관리
+- 출처와 페이지, 내 생각, 태그가 붙는 문장 카드
+- 사진에서 글자 가져오기, 기기 안에서 처리, 줄 단위 선택
+- 간격 반복 복습과 기기 알림
+- 주간 체크와 연속일이 있는 실천
+- 원문과 생각, 태그를 함께 뒤지는 검색
+- 저장과 복습, 실천을 보여주는 통계
+- 전체를 파일 하나로 내보내기와 가져오기
+- 한국어와 영어
+
+Re:Read 가 아닌 것
+더 많이 읽으라고 밀어붙이는 독서 기록 앱이 아닙니다. 점수를 매기는 시험 앱이 아닙니다.
+소셜 피드도 아닙니다. 멈춰 설 만했던 몇 문장을 위한 조용한 자리입니다.
+```
+
+⏸ **두 언어 모두 ChatGPT 검수 대상이다.** 창구는 고정 채팅 `Bookmind` 하나이고(`docs/DESIGN_REVIEW.md`),
+🔴 **검수 요청은 사람이 한다**(`common/KOREAN_WRITING.md` §2).
+
+---
+
+## 7. 그래픽 에셋
+
+| 슬롯 | 규격 | 상태 | 비고 |
+|---|---|---|---|
+| 앱 아이콘 | 512×512 PNG | ✅ `assets/store/play-icon-512.png` | `npm run icons` 가 함께 낸다. 도형은 런처 아이콘과 같은 함수다 |
+| 그래픽 이미지 | 1024×500 PNG | ✅ `assets/store/play-feature-1024x500.png` | 브랜드 바탕에 아이콘 도형 |
+| 휴대전화 스크린샷 | 최소 2장 | 🔴 **없음** | §9. 기기가 있어야 찍는다 |
+
+🔴 **그래픽은 프로그램으로 그린다.** 아이콘을 그렇게 만든 이유가 그대로 적용된다(`scripts/make-icons.mjs` 서문).
+규격이 서로 다른 이미지를 손으로 만들면 한 장을 고칠 때 나머지가 어긋나고, 그 어긋남은 스토어에서만 보인다.
+
+⏸ 워드마크가 들어간 그래픽은 Phase 11 에서 다시 본다. 지금은 시계를 시작하는 것이 우선이고,
+빈약한 글자를 급히 그려 넣는 것보다 도형만 있는 쪽이 낫다.
+
+---
+
+## 8. 법무 URL
+
+| 항목 | 값 | 상태 |
+|---|---|---|
+| 개인정보처리방침 | `https://vivace-games.com/reread/privacy` | 🔴 **미게시** |
+| 이용약관 | `https://vivace-games.com/reread/terms` | 🟡 비공개 테스트에는 불필요. 구독(Phase 10) 전에 필요 |
+| 계정 삭제 안내 | **해당 없음** | 계정이 없다(`CLAUDE.md` §4). 로그인을 붙이는 순간 필요해진다 |
+
+게시 방식은 형제 앱을 승계한다. `vivace-games.com` 이 **배구 서버 Vercel** 에 연결돼 있어 거기서 서빙한다.
+실물은 `C:\project\volleyball\server\app\<앱>\privacy\page.tsx` 형태이고 SnoreLess 와 LinkMemo,
+Idea Repository 가 전부 그 모양이다. 🔴 **정본은 그 페이지가 아니라 우리 저장소의 `docs/legal/` 이다.**
+문구를 고칠 일이 생기면 이쪽을 먼저 고치고 페이지를 맞춘다.
+
+🔴 **다른 저장소를 건드리는 일이라 사용자 승인과 배포가 필요하다.**
+
+---
+
+## 9. 지금 막고 있는 것
+
+| # | 무엇 | 누가 | 왜 세션이 못 하나 |
+|---|---|---|---|
+| 1 | 스크린샷 2장 이상 | 🔴 **사용자** | 붙어 있는 기기가 Delvewarden 에뮬레이터 하나뿐이고 남의 것은 안 건드린다. 우리 AVD 폴더는 비어 있다. 폰 무선 디버깅을 열어 주면 세션이 찍는다 |
+| 2 | 처리방침 게시 | 🔴 **사용자** | 배구 서버 저장소 수정과 Vercel 배포 |
+| 3 | 콘텐츠 등급 IARC 설문 | 🔴 **사용자** | 제출 버튼은 사람이 누른다(`common/PLAY_CONSOLE_STATUS.md` §3) |
+| 4 | 앱 설정 11항목 저장 | 🔴 **사용자** | 같은 규칙. 관리형 게시가 꺼져 있으면 폼 저장이 곧 게시다 |
+| 5 | doply 테스터 41명 연결 | 🔴 **사용자** | 업체 계약. 12명 미만으로 떨어지면 14일 시계가 멈춘다 |
+| 6 | 상표 확인 `Re:Read` | 🔴 **사용자** | 등록정보를 공개하면 이름이 대외에 박힌다. 바꾸는 비용이 지금이 가장 싸다 |
+
+🟢 **세션이 끝낸 것**: 11항목의 답 확정(§2) · 데이터 보안 실측 근거(§3) · 권한 결함 발견(§4) ·
+등록정보 문구 두 언어(§5·§6) · 아이콘과 그래픽 이미지(§7).
+
+---
+
+*최종 갱신: 2026-09-11 — 신설. 콘솔 실측으로 관문이 앱 설정 11항목 전부임을 확인했고, vc2 AAB 에서 불필요한 권한 둘을 찾았다.*
