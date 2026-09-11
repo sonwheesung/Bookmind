@@ -31,6 +31,7 @@
 | [`STATS_SYSTEM.md`](./STATS_SYSTEM.md) | 🔴 **성적표가 아니다** — 저장·복습·기억률·연속 학습일. 파생값은 저장하지 않는다 · 기둥 5 가 모든 결정을 가른다 · 가드 **7축** | ✅ 2026-09-10 |
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`STORE_LISTING.md`](./STORE_LISTING.md) | 🔴 **비공개 테스트의 관문** — 앱 설정 **11항목**의 답 · 데이터 보안 실측 근거 · 등록정보 문구(en·ko) · 권한 결함(§4) · 막고 있는 것과 누가 하나(§9) | ✅ 2026-09-11 |
+| [`legal/PRIVACY.en.md`](./legal/PRIVACY.en.md) · [`.ko.md`](./legal/PRIVACY.ko.md) | 🔴 **개인정보 처리방침 정본**(영문이 정본) — 웹 게시본은 이 파일의 사본이다. 가드 `check:privacy` 가 배포본과 대조한다 | ✅ 2026-09-11 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -122,7 +123,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 **15개**를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **16개**를 순서대로 돌린다
                       #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
@@ -141,6 +142,8 @@ npm run check:ocr     # OCR 여덟 축 — 스크립트 · 빈 결과 · 줄 합
                       #   🔴 + 읽기 순서(뒤섞어 잼) · 좌표 배율 · 좌표 없는 줄 폴백(KNOWLEDGE §2.3)
 npm run check:books   # 🔴 책 정렬 — 등록 순서와 **반대로** 놓고 최근 사용순인지 잰다(KNOWLEDGE §4.0)
 npm run check:knowledge # 🔴 페이지 접사 — `3장` 에 `쪽` 을 붙이지 않나(실기기에서 `42p쪽` 이 떴다 · KNOWLEDGE §3)
+npm run check:privacy # 🔴 처리방침 ⇄ 배포본 — 방침이 "요청은 한 종류뿐"이라 적었는데 코드가 늘었나
+                      #   접속처를 app.json 과 소스에서 모아 방침의 수탁자 표와 대조한다(legal/PRIVACY.en.md)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```
