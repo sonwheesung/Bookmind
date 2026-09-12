@@ -68,6 +68,16 @@ echo ""
 echo "▶ OTA 배선 확인 (AAB 안의 병합 매니페스트)"
 unzip -p "$AAB" base/manifest/AndroidManifest.xml | grep -ao 'expo-channel-name' | head -1
 unzip -p "$AAB" base/manifest/AndroidManifest.xml | grep -ao 'https://u.expo.dev/[a-z0-9-]*' | head -1
+
+# ── ⑥ 🔴 권한 게이트 — 소스를 재는 가드가 원리적으로 못 보는 축 ───────────
+#    vc2 에 `RECORD_AUDIO` 와 `SYSTEM_ALERT_WINDOW` 가 들어 있었다(2026-09-11 발견).
+#    `app.json` 의 `android.permissions` 는 `undefined` 인데 실제 권한은 **30개**였다 —
+#    라이브러리 매니페스트와 Expo 템플릿이 병합된 결과는 **산출물에만** 있다.
+#    🔴 처리방침이 "다음 버전에서 제거한다"고 이용자에게 약속한 상태다. 그 약속을 여기서 지킨다.
+#    `docs/STORE_LISTING.md` §4 · `docs/legal/PRIVACY.en.md` §5
+echo ""
+echo "▶ 권한 게이트 (허용 목록 밖이면 빌드를 죽인다)"
+npm run --silent check:aab -- "$AAB"
 echo ""
 ls -la "$AAB"
 echo ""
