@@ -278,5 +278,17 @@
       "title": "Today's review",
       "body": "There are passages to revisit."
     }
+  },
+  "ageGate": {
+    "title": "What year were you born?",
+    "why": "We check your age once, before features that need an account. Saving and reviewing passages never require it.",
+    "notStored": "The year you pick is not saved. It is checked on this phone and discarded.",
+    "year": "{{year}}",
+    "blockedTitle": "You can't sign in yet",
+    "blockedBody": "Features that need an account are available from age {{min}}.",
+    "keepUsing": "Saving passages, reviews, and practice all keep working.",
+    "contact": "Contact: {{email}}",
+    "privacyLink": "Read the privacy policy",
+    "backToApp": "Back to Re:Read"
   }
 }

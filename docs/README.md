@@ -10,11 +10,11 @@
 
 ## 1. 문서 목록
 
-**20개** (세는 법: `ls docs/*.md | wc -l`)
+**21개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **24건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **6건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **25건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **5건**(세는 법: `grep -c "^\| [A-H] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · AI 프록시 · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 **v5**(expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-10 |
@@ -32,7 +32,8 @@
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`STORE_LISTING.md`](./STORE_LISTING.md) | 🔴 **비공개 테스트의 관문** — 앱 설정 **11항목**의 답 · 데이터 보안 실측 근거 · 등록정보 문구(en·ko) · 권한 결함(§4) · 막고 있는 것과 누가 하나(§9) | ✅ 2026-09-11 |
 | [`legal/PRIVACY.en.md`](./legal/PRIVACY.en.md) · [`.ko.md`](./legal/PRIVACY.ko.md) | 🔴 **개인정보 처리방침 정본**(영문이 정본) — 웹 게시본은 이 파일의 사본이다. 가드 `check:privacy` 가 배포본과 대조한다 | ✅ 2026-09-11 |
-| [`UI_GUIDE.md`](./UI_GUIDE.md) | 🔴 **화면을 만드는 법** — 토큰 · 공통 부품 **16개** · 공통 헬퍼 · **UI 금지 목록** · 가드 `check:ui` 8축. 같은 모양을 두 화면이 따로 그리지 않는다 | ✅ 2026-09-13 |
+| [`AUTH_SYSTEM.md`](./AUTH_SYSTEM.md) | 🔴 **신원과 연령** — 연령 게이트(결정 #25 · 조각 방식 · 부팅에 서되 벽이 아니다 · 생년 미저장) · 구글 로그인·탈퇴(Phase 7) · 가드 `check:age-gate` | ✅ 2026-09-14 |
+| [`UI_GUIDE.md`](./UI_GUIDE.md) | 🔴 **화면을 만드는 법** — 토큰 · 공통 부품 **17개** · 공통 헬퍼 · **UI 금지 목록** · 가드 `check:ui` 8축. 같은 모양을 두 화면이 따로 그리지 않는다 | ✅ 2026-09-13 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -78,6 +79,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 검색 · 통계 | ✅ | **2026-09-10.** 결정 #19 로 Phase 5 보다 먼저 했다. 🟢 순수 JS 라 **OTA 로 나간다** |
 | OCR | 🔨 | **2026-09-10.** 결정 #20(ML Kit 온디바이스) · #21(관찰 시작 전에 넣는다). 화면·스크립트 선택·이미지 정리까지 됐고 🔴 **인식은 미판정**이다. 네이티브 모듈이라 Expo Go 로는 원리상 못 본다 |
 | 공지 · 점검 · 버전 게이트 · 문의 | ❌ | Phase 7 (common_server) |
+| **연령 게이트** | 🔨 | 2026-09-14 결정 #25 · 조각 방식. 부팅에 서되 벽이 아니다 · 가드 ✅ · ⏸ 에뮬 실동작 · 🔴 Phase 7 에서 `signIn()` 맨 앞에 한 번 더 건다([`AUTH_SYSTEM.md`](./AUTH_SYSTEM.md)) |
 | 구글 로그인 · 탈퇴 | ❌ | Phase 7. 🔴 같은 커밋에 |
 | AI 분석 · 회상 질문 | ❌ | Phase 8 (Premium) |
 | 실천 | ✅ | **2026-09-10.** 🔴 사용자가 직접 쓰는 실천은 **무료**다(결정 #16). AI 제안만 Premium |
@@ -124,7 +126,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 **17개**를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **18개**를 순서대로 돌린다
                       #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
@@ -147,6 +149,7 @@ npm run check:privacy # 🔴 처리방침 ⇄ 배포본 — 방침이 "요청은
                       #   접속처를 app.json 과 소스에서 모아 방침의 수탁자 표와 대조한다(legal/PRIVACY.en.md)
 npm run check:ui      # 🔴 화면이 공통 부품을 우회했나 — typography 직접 조립 · 색 코드 · 확인창 · 날짜 · 태그 나누기
                       #   + 부품 목록 ⇄ UI_GUIDE §2 표 · 헬퍼 경계(UI_GUIDE §6)
+npm run check:age-gate # 🔴 연령 게이트 — 지역 × 출생연도 경계 전수 · 보수 판정식 · 생년 미저장 · 부팅 배선(AUTH_SYSTEM §1.8)
 
 npm run format:check  # prettier (코드만 — 마크다운은 .prettierignore 로 제외)
 ```

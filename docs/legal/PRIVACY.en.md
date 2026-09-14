@@ -1,6 +1,6 @@
 # Re:Read — Privacy Policy
 
-**Effective date: 11 September 2026** · Version 1.0
+**Effective date: 14 September 2026** · Version 1.1
 
 This English text is the **canonical version**. A Korean translation is available at
 [`PRIVACY.ko.md`](./PRIVACY.ko.md); if the two ever disagree, this version governs.
@@ -192,9 +192,19 @@ We do not charge for these requests and we do not require an account to make one
 ## 9. Children
 
 Re:Read is intended for users aged 13 and over and is not directed at children. We do not knowingly
-collect personal information from children. Because the app has no account and collects no profile,
-we have no way to identify a user's age from the data we hold. If you believe a child has provided
-personal information to us, contact us and we will act on it.
+collect personal information from children.
+
+**Age check on this device.** The first time the app opens, it asks for your year of birth. The year is
+checked on your phone and then discarded; it is never saved and never sent to us. The app keeps only the
+result on your phone: when the check happened, the age threshold that applied, and the version of the
+rule. The threshold follows the region set on your device: 16 in the European Economic Area, the United
+Kingdom and Switzerland, 14 in the Republic of Korea, 13 elsewhere, and 16 if the region cannot be read.
+If the threshold is not met, features that need an account are not available; saving passages, reviewing
+and practice keep working. The app asks again after one year. Closing the question without answering
+saves nothing, so it is asked again the next time the app opens.
+
+Because the app has no account and sends no profile, this result never reaches us. If you believe a child
+has provided personal information to us, contact us and we will act on it.
 
 ---
 
