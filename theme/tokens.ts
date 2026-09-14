@@ -38,6 +38,8 @@ export const typography = {
   /** 내 생각 — 원문과 동등하게 둔다 (기둥 6) */
   thought: { fontSize: 16, lineHeight: 26, fontWeight: '400' },
   title: { fontSize: 22, lineHeight: 30, fontWeight: '700' },
+  /** 홈의 앱 이름 한 곳만. 🔴 다른 화면 제목에 쓰지 않는다(`docs/DESIGN_REVIEW.md` §3 · 2026-09-14) */
+  brand: { fontSize: 32, lineHeight: 40, fontWeight: '700' },
   /** 화면 안의 구획 제목. 🔴 이게 `label`(13·muted)이라 구획이 안 보였다(2026-09-09) */
   section: { fontSize: 18, lineHeight: 26, fontWeight: '600' },
   body: { fontSize: 15, lineHeight: 22, fontWeight: '400' },

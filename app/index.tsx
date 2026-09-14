@@ -64,6 +64,7 @@ export default function Home() {
     <Screen scroll>
       <Header
         title={t('app.name')}
+        variant="brand"
         right={
           <View style={[styles.metaRow, { gap: spacing.md }]}>
             {/* 🔴 문장이 하나도 없으면 검색을 안 그린다 — 빈 방으로 가는 문이다

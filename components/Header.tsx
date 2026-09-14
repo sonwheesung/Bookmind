@@ -9,9 +9,11 @@ type Props = {
   /** 뒤로가기를 둘 것인가. 홈에는 없다 */
   back?: boolean;
   right?: React.ReactNode;
+  /** 🔴 `brand` 는 홈의 앱 이름 한 곳만 쓴다. 상세 화면 제목까지 커지면 콘텐츠가 밀린다(`docs/DESIGN_REVIEW.md` §3) */
+  variant?: 'default' | 'brand';
 };
 
-export function Header({ title, back = false, right }: Props) {
+export function Header({ title, back = false, right, variant = 'default' }: Props) {
   const { spacing } = useTheme();
 
   return (
@@ -28,7 +30,7 @@ export function Header({ title, back = false, right }: Props) {
           </AppText>
         </Pressable>
       )}
-      <AppText variant="title" style={styles.title} numberOfLines={1}>
+      <AppText variant={variant === 'brand' ? 'brand' : 'title'} style={styles.title} numberOfLines={1}>
         {title}
       </AppText>
       {right}

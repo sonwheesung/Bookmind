@@ -389,7 +389,7 @@ check(scan.includes('fallbackText'), '⑩ 🔴 화면이 폴백 텍스트를 안
   check(scan.includes('recognizeAuto('), '⑫ 🔴 화면이 자동 읽기를 안 쓴다');
   check(
     scan.includes("t('ocr.otherScript')"),
-    '⑫ 🔴 자동이 헛짚은 날의 탈출구(다른 문자로 다시 읽기)가 화면에 없다',
+    '⑫ 🔴 자동이 헛짚은 날의 탈출구(다른 문자로 다시 인식)가 화면에 없다',
   );
 }
 

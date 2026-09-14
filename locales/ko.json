@@ -204,7 +204,7 @@
     "recognizing": "사진을 읽는 중입니다…",
     "unavailable": "이 빌드에서는 사진 읽기를 쓸 수 없습니다. 직접 입력해 주세요.",
     "scriptLabel": "문자",
-    "otherScript": "다른 문자로 다시 읽기",
+    "otherScript": "다른 문자로 다시 인식",
     "resultLabel": "읽은 내용",
     "empty": "읽힌 글자가 없습니다.",
     "emptyHint": "이 사진에서는 글자가 나오지 않았습니다. 직접 입력해도 됩니다.",
