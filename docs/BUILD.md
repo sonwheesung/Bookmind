@@ -348,6 +348,57 @@ vc1·vc2 에서도 같은 경고였다.
 네이티브에 안 들어가는 함정(`common/CLOSED_TESTING.md` 말미)은 이 스크립트에서는 성립하지 않는다.
 🔴 다만 **손으로 gradle 을 돌리면 그 함정이 되살아난다.** 스크립트를 거치지 않는 경로를 만들지 않는다.
 
+## 6.3 vc4 — 비공개 테스트 기간의 첫 AAB (2026-09-14)
+
+🔴 **이 빌드는 결정 #23 의 첫 실행이다.** 비공개 테스트 기간에는 OTA 를 안 내고 수정을 AAB 로 올린다
+(doply 의 2~3일 간격 업데이트 조건 · [`STORE_LISTING.md`](./STORE_LISTING.md) §8.6).
+
+| 무엇 | 값 |
+|---|---|
+| versionCode | 3 → **4** |
+| version | 0.3.0 → **0.4.0** |
+| runtimeVersion | `1.0.0` 고정(결정 #18 — 안 바꾼다) |
+| 네이티브 변경 | 없다(새 네이티브 의존성 0). 서명·권한·OTA 배선은 vc3 그대로여야 한다 |
+| JS 변경 | 공통 부품 이전(`UI_GUIDE.md`) · OCR 문자 자동 고르기(결정 #24) · 날짜는 기기 로케일 · 홈만 brand 헤더 32/40 · OCR 링크 문구 |
+| 보관 | `D:\builds\Bookmind\reread-vc4.aab`(`common/BUILD_ARTIFACTS.md` §1) |
+
+### 실측 (2026-09-14)
+
+| | vc3 | vc4 | |
+|---|---:|---:|---|
+| 빌드 시간 | 4m 34s | **14m 57s** | `rm -rf android` 뒤라 CMake 가 다시 돌았다(vc2 14m 49s 와 같은 급) |
+| AAB 크기 | 74,629,148 B | **74,628,976 B** | 차이 −172 바이트. JS 만 바뀐 빌드다 |
+| 권한 수 | 28 | 🟢 **28** | `check:aab` 허용 목록과 일치 |
+| versionCode · version | 3 · 0.3.0 | **4 · 0.4.0** | `android/app/build.gradle` 에서 확인 |
+| 서명 | 업로드 키 | **업로드 키** | SHA1 `44:0E:B4:48:…:C4:1C` 일치 |
+| OTA 배선 | 있음 | **있음** | `expo-channel-name` · `u.expo.dev/8785afeb-…` |
+| 보관 | | `D:\builds\Bookmind\reread-vc4.aab` | sha256 `55174367…23f1` 원본과 일치 |
+
+✅ **업로드 · `alpha` 트랙 · 2026-09-14** — `✔ Submitted your app to Google Play Store!`
+API 로 다시 읽었다: `alpha` = `0.4.0` · `completed` · versionCode `4`(vc3 을 대체). `production` 은 **비어 있다.**
+⚠ **출시 노트가 비어 있다**(`notes: []`). `eas submit` 은 노트를 안 넣는다. vc3 에는 en · ko 가 있었다.
+🧹 뒷정리(`common/BUILD_ARTIFACTS.md` §3.1): `android/` 2.0G → **481K**. `rm` 이 lint-cache 의 jar 하나에서 *Device or resource busy* 로 한 번 멈췄지만 나머지는 지워졌다.
+🚫 그 파일을 잡은 Gradle 데몬은 죽이지 않는다(`gradlew --stop` · `taskkill java` 금지 · 형제 빌드가 같은 데몬을 쓸 수 있다). 다음 빌드의 `rm -rf android` 가 치운다.
+🔴 **vc3 와 권한 수(28)가 같아야 한다.** 네이티브를 안 건드렸는데 권한이 늘면 라이브러리 병합이 바뀐 것이다.
+
+### 업로드 — 비공개 트랙에 **API 로 직접** (2026-09-14 사용자 위임)
+
+사용자: *"업로드는 너가 진행해주면 돼 … 비공개 테스트일 때는"* · *"브라우저 도구 말고 권한 열어서 늘 했던거"*.
+🔴 **브라우저로는 AAB 를 못 올린다.** 파일 입력이 10MB 상한이다(`common/PLAY_RELEASE_AUTOMATION.md` §1).
+→ 서비스 계정 + `eas submit` 으로 올린다. `앱을 테스트 트랙으로 출시` 권한은 **상시로 켜져 있다**(같은 문서 §4).
+
+```bash
+npx eas-cli submit --platform android --profile closed \
+  --path D:/builds/Bookmind/reread-vc4.aab --non-interactive
+```
+
+| 무엇 | 값 |
+|---|---|
+| 트랙 식별자 | **`alpha`** — 콘솔 이름이 아니라 **API 로 실측**했다(`edits.tracks.list` · 읽기 전용 · 편집본은 바로 지웠다). 그때 `alpha` 에는 vc3 `3 (0.3.0)` 이 `completed` 로 있었다 |
+| `eas.json` 프로필 | `closed` — `track: alpha` · `releaseStatus: completed`. 기존 `internal` 프로필은 그대로 둔다 |
+| 🔴 프로덕션 | `프로덕션으로 출시` 권한은 영구히 꺼져 있다. 이 위임은 **비공개 트랙까지**다 |
+| ⚠ 출시 노트 | `eas submit` 은 출시 노트를 안 넣는다. vc3 에는 en · ko 노트가 있었다 |
+
 ## 7. 내부 테스트 업로드
 
 ### 7.0.1 🔴 거짓 초록을 **두 번째로** 확인했다 (2026-09-10 저녁)
