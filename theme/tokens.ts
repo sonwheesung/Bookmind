@@ -61,6 +61,8 @@ type Palette = {
   highlight: string;
   /** 사진 위에서 **아직 안 고른** 줄. 🔴 있다는 것만 알리고 읽기를 방해하지 않는다 */
   highlightIdle: string;
+  /** 하단 탭에서 선택된 탭의 알약 배경. 🔴 accent 가 아니다 — 탭 바는 모든 화면에 붙어 있어 accent 가 둘이 된다 */
+  tabIndicator: string;
 };
 
 export const lightPalette: Palette = {
@@ -75,6 +77,7 @@ export const lightPalette: Palette = {
   backdrop: 'rgba(28, 26, 23, 0.45)',
   highlight: 'rgba(58, 90, 115, 0.30)',
   highlightIdle: 'rgba(58, 90, 115, 0.10)',
+  tabIndicator: '#ECE8DF',
 };
 
 export const darkPalette: Palette = {
@@ -89,6 +92,7 @@ export const darkPalette: Palette = {
   backdrop: 'rgba(0, 0, 0, 0.6)',
   highlight: 'rgba(143, 179, 204, 0.34)',
   highlightIdle: 'rgba(143, 179, 204, 0.12)',
+  tabIndicator: '#2E2C24',
 };
 
 /**

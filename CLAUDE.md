@@ -313,7 +313,7 @@ generation_parts · vault_blobs`)는 도메인을 하나도 모르므로 v1.1에
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID |
 | 다국어 | i18next · react-i18next · expo-localization | ✅ Phase 0 — `en`/`ko` · 언어 설정 화면 · 가드 6축([`docs/I18N_SYSTEM.md`](./docs/I18N_SYSTEM.md) §5) |
 | 날짜 | dayjs | ❌ 미설치 — 🔴 **하루 경계는 `lib/day.ts`(순수)가 이미 맡고 있다.** dayjs 가 필요한 것은 **표시 포맷**뿐이라 아직 안 넣었다 |
-| 아이콘 | lucide-react-native | ❌ 미설치 — 시안 검수가 *"요소가 이미 많으니 더하기보다 빼는 쪽"* 으로 판단해 이번엔 안 넣었다([`docs/DESIGN_REVIEW.md`](./docs/DESIGN_REVIEW.md) §3) |
+| 아이콘 | lucide-react-native · react-native-svg | 🔨 2026-09-14 **하단 탭 바에만** 쓴다(사용자 선택 · 참고한 Material 3 내비게이션 바와 iOS 탭 바가 모두 아이콘+글자다 · [`docs/DESIGN_REVIEW.md`](./docs/DESIGN_REVIEW.md) §3). 🔴 `react-native-svg` 는 **네이티브 모듈**이라 다음 AAB 에 실린다(OTA 불가). ~~9/9 "요소가 이미 많으니 더하기보다 빼는 쪽" 으로 안 넣었다~~ |
 | 폰트 | **시스템 폰트**(번들 폰트 없음 — `assets/fonts/` 를 만들지 않는다) | ✅ 지켜지고 있다 — 결정 #13. 번들에 폰트 참조 **0건**을 Phase 0 에서 코드로 확인했다 |
 | **Re:Read 서버** | Next.js(App Router) + Drizzle + Supabase Postgres · Vercel | ❌ — 조각 `server/`에서 복사 |
 | LLM | Anthropic API (모델 ⚠ 미결정 E) | ❌ |
