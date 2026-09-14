@@ -43,7 +43,11 @@
     },
     "list": {
       "title": "Passages",
-      "empty": "Nothing saved yet."
+      "empty": "Nothing saved yet.",
+      "sort": {
+        "recent": "Recent",
+        "book": "By book"
+      }
     },
     "detail": {
       "title": "Passage"
@@ -257,6 +261,10 @@
       "body": "You could try this one in daily life.",
       "accept": "Try it",
       "skip": "Skip"
+    },
+    "calendar": {
+      "prev": "Previous month",
+      "next": "Next month"
     }
   },
   "reminder": {

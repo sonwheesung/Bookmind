@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +8,7 @@ import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { Spacer } from '@/components/Spacer';
 import { listBooks } from '@/features/books/repo';
@@ -19,9 +21,10 @@ import { useTheme } from '@/theme';
  * 빠른 저장 — 🔴 **필수는 원문 하나다**(`docs/KNOWLEDGE_SYSTEM.md` §1.1, 기둥 1).
  *
  * 그래서 이 화면에서:
- *  · 저장 버튼은 **원문이 있으면 열린다.** 책·페이지·생각·태그는 비어도 된다
+ *  · 저장(위 오른쪽 ✓)은 **원문이 있으면 열린다.** 책·페이지·생각·태그는 비어도 된다
  *  · 책 선택은 칩 한 줄이고 기본값이 `책 없음`이다 — 고르라고 요구하지 않는다
  *  · 🚫 중복 문장 검사를 넣지 않는다(§8) — 흐름을 끊는 것이 더 나쁘다
+ * 🔄 2026-09-14 저장 버튼을 위 오른쪽 ✓ 로 옮겼다(사용자 지시). 키보드가 떠 있어도 가려지지 않는다.
  */
 export default function NewKnowledge() {
   const { t } = useTranslation();
@@ -62,7 +65,11 @@ export default function NewKnowledge() {
 
   return (
     <Screen scroll hasHeader={false}>
-      <Header title={t('knowledge.new.title')} back />
+      <Header
+        title={t('knowledge.new.title')}
+        back
+        right={<IconButton icon={Check} label={t('knowledge.save.action')} onPress={onSave} disabled={!canSave} />}
+      />
 
       <Field
         label={t('knowledge.field.passage')}
@@ -117,9 +124,6 @@ export default function NewKnowledge() {
         onChangeText={setTags}
         placeholder={t('knowledge.field.tagsHint')}
       />
-
-      <Button label={t('knowledge.save.action')} onPress={onSave} disabled={!canSave} />
-      <Spacer size="xxl" />
 
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
         {t('knowledge.save.hint')}

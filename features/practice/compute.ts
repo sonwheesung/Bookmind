@@ -7,7 +7,16 @@
  * 🔴 "하루"의 셈법은 `lib/day.ts` 하나다. 통계도 같은 것을 쓴다.
  */
 // 🔴 상대 경로다. `@/` 별칭은 Metro·tsc 만 알고 node 는 모른다(가드가 이 파일을 직접 import 한다).
-import { isoWeekday, mondayOf, nextDayKey, previousDayKey, type DayKey } from '../../lib/day.ts';
+import {
+  daysOfMonth,
+  isoWeekday,
+  mondayOf,
+  monthOf,
+  nextDayKey,
+  previousDayKey,
+  type DayKey,
+  type MonthKey,
+} from '../../lib/day.ts';
 
 export type RepeatKind = 'daily' | 'weekdays' | 'weekly';
 
@@ -148,13 +157,7 @@ export function weekCells(
   const cells: WeekCell[] = [];
   let day = mondayOf(today);
   for (let i = 0; i < 7; i += 1) {
-    const tooLate = window.endedDay !== null && day > window.endedDay;
-    cells.push({
-      day,
-      scheduled: repeat.days.includes(isoWeekday(day)),
-      done: done.has(day),
-      checkable: day <= today && day >= window.startedDay && !tooLate,
-    });
+    cells.push(cellOf(day, repeat, done, today, window));
     day = nextDayKey(day);
   }
   return cells;
@@ -166,4 +169,61 @@ export function canCheck(day: DayKey, today: DayKey, window: PracticeWindow): bo
   if (day < window.startedDay) return false;
   if (window.endedDay !== null && day > window.endedDay) return false;
   return true;
+}
+
+/** 한 칸의 판정. 🔴 주 칸과 달력이 **같은 함수**를 거친다. 둘이 같은 날을 다르게 보면 안 된다(§3.1) */
+function cellOf(
+  day: DayKey,
+  repeat: Repeat,
+  done: ReadonlySet<DayKey>,
+  today: DayKey,
+  window: PracticeWindow,
+): WeekCell {
+  return {
+    day,
+    scheduled: repeat.days.includes(isoWeekday(day)),
+    done: done.has(day),
+    checkable: canCheck(day, today, window),
+  };
+}
+
+/**
+ * 기록 달력 한 달(§3.1). 주는 월요일에 시작하고, `null` 은 그 달이 아닌 빈칸이다.
+ *
+ * 🔴 칸 수는 언제나 7 의 배수다. 앞 빈칸 = 1일의 요일 - 1, 뒤 빈칸은 마지막 주를 채운다.
+ */
+export function monthCells(
+  rule: string,
+  doneDays: Iterable<DayKey>,
+  today: DayKey,
+  window: PracticeWindow,
+  month: MonthKey,
+): (WeekCell | null)[] {
+  const done = doneDays instanceof Set ? doneDays : new Set(doneDays);
+  const repeat = parseRepeat(rule);
+  const days = daysOfMonth(month);
+  const first = days[0];
+  if (first === undefined) throw new Error(`날이 없는 달이다: ${month}`);
+
+  const cells: (WeekCell | null)[] = Array.from({ length: isoWeekday(first) - 1 }, () => null);
+  for (const day of days) cells.push(cellOf(day, repeat, done, today, window));
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
+}
+
+/**
+ * 달 넘기기 범위(§3.1).
+ *
+ * 🔴 시작한 달보다 앞, 이번 달(종료했으면 종료한 달)보다 뒤로 안 간다. 빈 달을 넘기게 하지 않는다.
+ * 🔴 시작 전 실천은 시작하는 달 하나다. 범위가 뒤집히면 화살표가 둘 다 열려 끝없이 넘어간다.
+ */
+export function calendarBounds(
+  startedDay: DayKey,
+  endedDay: DayKey | null,
+  today: DayKey,
+): { first: MonthKey; last: MonthKey } {
+  const first = monthOf(startedDay);
+  const lastDay = endedDay !== null && endedDay < today ? endedDay : today;
+  const last = monthOf(lastDay);
+  return { first, last: last < first ? first : last };
 }

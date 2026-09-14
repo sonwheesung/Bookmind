@@ -54,3 +54,55 @@ export function splitTagInput(raw: string): string[] {
     .map((s) => s.trim())
     .filter((s) => s !== '');
 }
+
+// ── 문장 목록 정렬 (§3.2 · 2026-09-14) ─────────────────────────────────
+
+export const KNOWLEDGE_SORTS = ['recent', 'book'] as const;
+export type KnowledgeSort = (typeof KNOWLEDGE_SORTS)[number];
+
+/** 기기에 저장된 정렬 값을 읽는다. 🔴 깨졌거나 모르는 값이면 `recent`(지금까지의 목록) */
+export function parseKnowledgeSort(v: unknown): KnowledgeSort {
+  return (KNOWLEDGE_SORTS as readonly unknown[]).includes(v) ? (v as KnowledgeSort) : 'recent';
+}
+
+export interface GroupableKnowledge {
+  readonly book_id: string | null;
+  /** 책을 못 찾으면(지워졌으면) `null` */
+  readonly bookTitle: string | null;
+  readonly created_at: string;
+}
+
+export interface BookGroup<T> {
+  /** `null` 이면 `책 없음` 구획이다 */
+  readonly bookId: string | null;
+  readonly title: string | null;
+  readonly items: readonly T[];
+}
+
+/**
+ * 책별 보기(§3.2).
+ *
+ * 🔴 구획 안은 **최신순**, 구획 순서는 그 책에 마지막으로 저장한 시각(§4.0 과 같은 규칙).
+ * 🔴 `책 없음` 은 **맨 아래**다. 제목을 못 찾는 책의 문장도 그리로 간다(이름 없는 구획을 만들지 않는다).
+ * 🔴 입력을 바꾸지 않는다.
+ */
+export function groupByBook<T extends GroupableKnowledge>(rows: readonly T[]): BookGroup<T>[] {
+  const sorted = [...rows].sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
+
+  const books = new Map<string, { title: string; items: T[] }>();
+  const loose: T[] = [];
+  for (const k of sorted) {
+    const title = k.bookTitle?.trim() ?? '';
+    if (k.book_id === null || title === '') {
+      loose.push(k);
+      continue;
+    }
+    const group = books.get(k.book_id);
+    if (group === undefined) books.set(k.book_id, { title: k.bookTitle ?? title, items: [k] });
+    else group.items.push(k);
+  }
+
+  const out: BookGroup<T>[] = [...books].map(([bookId, g]) => ({ bookId, title: g.title, items: g.items }));
+  if (loose.length > 0) out.push({ bookId: null, title: null, items: loose });
+  return out;
+}

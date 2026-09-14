@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check, Pencil, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -12,6 +13,7 @@ import { Chip } from '@/components/Chip';
 import { ChipRow } from '@/components/ChipRow';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { Spacer } from '@/components/Spacer';
 import { getBook, listBooks } from '@/features/books/repo';
@@ -40,6 +42,8 @@ import { useTheme } from '@/theme';
  * 🔴 내 생각은 원문과 **동등하게** 둔다(기둥 6). 다만 비어 있어도 카드는 완결이므로
  *    빈 상태 문구가 "안 써도 됩니다"다 — 채우라고 압박하지 않는다.
  * 🔴 AI 분석 블록은 없다. 없는 것을 "결제하면 보입니다"로 채우지 않는다(§3).
+ * 🔄 2026-09-14 수정 · 삭제 · 저장 · 취소를 위 오른쪽 아이콘으로 옮겼다(사용자 지시).
+ *    태그 추가 · 생각 추가 · 실천 제안은 **본문 안의 행동**이라 글자 버튼으로 남는다.
  */
 export default function KnowledgeDetail() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -88,6 +92,9 @@ export default function KnowledgeDetail() {
   };
 
   const applyEdit = () => {
+    // 🔴 새 문장 화면에만 있던 잠금이 여기 빠져 있었다 — 빈 원문으로 누르면
+    //    예외가 나고 사용자에게는 아무 일도 안 일어난 것처럼 보였다(2026-09-09 점검)
+    if (draft.trim() === '') return;
     editKnowledge(id, { content: draft, page: draftPage });
     setEditing(false);
     reload();
@@ -123,10 +130,27 @@ export default function KnowledgeDetail() {
 
   return (
     <Screen scroll>
-      <Header title={t('knowledge.detail.title')} back />
+      <Header
+        title={t('knowledge.detail.title')}
+        back
+        right={
+          editing ? (
+            <>
+              <IconButton icon={X} label={t('common.cancel')} onPress={() => setEditing(false)} />
+              <IconButton icon={Check} label={t('common.save')} onPress={applyEdit} disabled={draft.trim() === ''} />
+            </>
+          ) : (
+            <>
+              <IconButton icon={Pencil} label={t('common.edit')} onPress={startEdit} />
+              {/* 🔴 아이콘이 작아도 확인창을 거친다. 잘못 누르기 쉬운 자리다 */}
+              <IconButton icon={Trash2} label={t('common.delete')} onPress={confirmDelete} />
+            </>
+          )
+        }
+      />
 
       {editing ? (
-        <>
+        <View style={{ marginBottom: spacing.md }}>
           <Field
             label={t('knowledge.field.passage')}
             value={draft}
@@ -137,31 +161,19 @@ export default function KnowledgeDetail() {
             maxHeight={260}
           />
           <Field label={t('knowledge.field.page')} value={draftPage} onChangeText={setDraftPage} />
-          {/* 🔴 새 문장 화면에만 있던 잠금이 여기 빠져 있었다 — 빈 원문으로 누르면
-              예외가 나고 사용자에게는 아무 일도 안 일어난 것처럼 보였다(2026-09-09 점검) */}
-          <ButtonRow style={{ marginBottom: spacing.xl }}>
-            <Button label={t('common.save')} onPress={applyEdit} disabled={draft.trim() === ''} />
-            <Button label={t('common.cancel')} variant="ghost" onPress={() => setEditing(false)} />
-          </ButtonRow>
-        </>
+        </View>
       ) : (
-        <>
+        <View style={{ marginBottom: spacing.lg }}>
           <Card>
             <AppText variant="quote">{row.content}</AppText>
           </Card>
           {/* 🔴 카드인 것은 원문 하나다. 출처·태그는 메타데이터라 카드에서 뺀다(DESIGN_REVIEW §3) */}
           {source !== '' && (
-            <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.md }}>
+            <AppText variant="caption" tone="muted">
               {source}
             </AppText>
           )}
-          <Button
-            label={t('common.edit')}
-            variant="ghost"
-            onPress={startEdit}
-            style={{ marginBottom: spacing.xl }}
-          />
-        </>
+        </View>
       )}
 
       {/* 책 연결 — ⚠ 저장 후 유도는 한 번만이지만, 상세에서는 언제든 붙일 수 있어야 한다(§1.1) */}
@@ -302,14 +314,11 @@ export default function KnowledgeDetail() {
         accessibilityRole="button"
         onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
         hitSlop={8}
-        style={{ marginBottom: spacing.xxl }}
       >
         <AppText variant="caption" tone="muted">
           {t('practice.createFromKnowledge')}
         </AppText>
       </Pressable>
-
-      <Button label={t('common.delete')} variant="danger" onPress={confirmDelete} />
       <Spacer size="xl" />
     </Screen>
   );

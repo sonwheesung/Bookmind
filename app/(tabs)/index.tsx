@@ -52,6 +52,7 @@ export default function Home() {
           <Button
             label={t('home.today.action', { count: data.due })}
             onPress={() => router.push('/review')}
+            size="lg"
             style={{ marginBottom: spacing.md }}
           />
         ) : (
@@ -64,6 +65,8 @@ export default function Home() {
         <Button
           label={t('home.cta')}
           variant={hasDue ? 'ghost' : 'primary'}
+          // 🔄 2026-09-14 두 버튼을 조금 높였다(사용자 지시 · `DESIGN_REVIEW.md` §3)
+          size="lg"
           onPress={() => router.push('/knowledge/new')}
         />
       </View>

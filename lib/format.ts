@@ -18,3 +18,9 @@ export function joinMeta(parts: readonly (string | null | undefined)[]): string 
 export function formatDate(iso: string, lang: string): string {
   return new Date(iso).toLocaleDateString(lang);
 }
+
+/** 달 표시(`2026년 9월` · `September 2026`). 🔴 로케일은 **기기 로케일**이다(`formatDate` 와 같다) */
+export function formatMonth(month: string, lang: string): string {
+  const [y, m] = month.split('-').map(Number);
+  return new Date(y ?? Number.NaN, (m ?? Number.NaN) - 1, 1).toLocaleDateString(lang, { year: 'numeric', month: 'long' });
+}

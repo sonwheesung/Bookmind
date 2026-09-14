@@ -1,14 +1,15 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { Chip } from '@/components/Chip';
 import { ChipRow } from '@/components/ChipRow';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { getKnowledge } from '@/features/knowledge/repo';
 import { createPractice, todayKey } from '@/features/practice/repo';
@@ -19,10 +20,11 @@ import { useTheme } from '@/theme';
 /**
  * 실천 만들기 — `docs/PRACTICE_SYSTEM.md` §1 · §2.
  *
- * 🔴 **사용자가 [만들기] 를 눌러야 생긴다**(기둥 3). AI 제안이 들어와도 문장은 고칠 수 있고,
+ * 🔴 **사용자가 [만들기](위 오른쪽 ✓)를 눌러야 생긴다**(기둥 3). AI 제안이 들어와도 문장은 고칠 수 있고,
  *    고치지 않고 그대로 눌러도 그것은 **사용자의 결정**이다.
  * 🔴 원문과 실천은 **다른 문장이어도 된다**(기획서 §12). 그래서 원문을 미리 채우지 않고
  *    출처로만 보여준다. 채워 두면 사용자가 그 문장을 고치는 대신 그냥 저장한다.
+ * 🔄 2026-09-14 만들기 버튼을 위 오른쪽 ✓ 로 옮겼다(사용자 지시).
  */
 export default function NewPractice() {
   const params = useLocalSearchParams<{ knowledgeId?: string }>();
@@ -54,7 +56,11 @@ export default function NewPractice() {
 
   return (
     <Screen scroll>
-      <Header title={t('practice.create')} back />
+      <Header
+        title={t('practice.create')}
+        back
+        right={<IconButton icon={Check} label={t('practice.createAction')} onPress={save} disabled={!canSave} />}
+      />
 
       {source !== undefined && (
         /* 출처만 보여준다. 🔴 실천 문장에 원문을 미리 채우지 않는다 */
@@ -108,8 +114,6 @@ export default function NewPractice() {
       <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.xl }}>
         {t('practice.startsToday')}
       </AppText>
-
-      <Button label={t('practice.createAction')} onPress={save} disabled={!canSave} />
     </Screen>
   );
 }

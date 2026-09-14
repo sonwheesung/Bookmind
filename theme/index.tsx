@@ -1,7 +1,7 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 
-import { coverInk, darkPalette, lightPalette, radius, spacing, typography, type Palette } from './tokens';
+import { darkPalette, lightPalette, radius, spacing, typography, type Palette } from './tokens';
 
 type Theme = {
   palette: Palette;
@@ -32,5 +32,5 @@ export function useTheme(): Theme {
   return ctx;
 }
 
-export { spacing, radius, typography, coverInk };
+export { spacing, radius, typography };
 export type { Theme, Palette };

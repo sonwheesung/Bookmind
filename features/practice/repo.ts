@@ -13,11 +13,12 @@ import {
   softDelete,
   update,
 } from '@/db';
-import { fromDate, type DayKey } from '@/lib/day';
+import { fromDate, type DayKey, type MonthKey } from '@/lib/day';
 
 import {
   canCheck,
   isRunning,
+  monthCells,
   practiceState,
   practiceStreak,
   weekCells,
@@ -182,6 +183,13 @@ export function toggleCheck(id: string, day: DayKey, today: DayKey = todayKey())
 
   insert('practice_logs', { practice_id: id, date: day, done_at: new Date().toISOString() });
   return true;
+}
+
+/** 기록 달력의 한 달(§3.1). 판정은 `monthCells` 가 한다. 없는 실천이면 빈 배열 */
+export function practiceMonth(id: string, month: MonthKey, today: DayKey = todayKey()): (WeekCell | null)[] {
+  const row = selectOne<PracticeRow>('practices', { where: 'id = ?', params: [id] });
+  if (row === undefined) return [];
+  return monthCells(row.repeat_rule, doneDays(id), today, windowOf(row), month);
 }
 
 // ── 실천 제안 (§1 · §1.1) ────────────────────────────────────────────

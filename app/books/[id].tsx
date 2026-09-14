@@ -1,17 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Check, Pencil, Trash2, X } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { BookCover } from '@/components/BookCover';
-import { Button } from '@/components/Button';
-import { ButtonRow } from '@/components/ButtonRow';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { ChipRow } from '@/components/ChipRow';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { Spacer } from '@/components/Spacer';
 import { parsePages, progressPercent } from '@/features/books/progress';
@@ -29,6 +28,7 @@ import { useTheme } from '@/theme';
  * 🔴 집계 넷은 파생값이다 — 저장하지 않고 매번 센다.
  * 🔴 삭제 확인 문구에 "문장 N개는 그대로 남습니다"를 **반드시** 넣는다(§4.3).
  *    캐스케이드 삭제가 아니라는 사실을 사용자가 누르기 전에 알아야 한다.
+ * 🔄 2026-09-14 수정 · 삭제 · 저장 · 취소를 위 오른쪽 아이콘으로 옮기고 표지 자리를 지웠다(사용자 지시 · 선택).
  */
 export default function BookDetail() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -87,6 +87,9 @@ export default function BookDetail() {
   };
 
   const applyEdit = () => {
+    // 🔴 제목이 비면 저장을 잠근다 — 지식 상세에서 이 잠금이 빠져 조용한 먹통이 났었다
+    //    (2026-09-09 · docs/EDGE_CASES.md §2). 아이콘도 잠기지만 여기서 한 번 더 막는다
+    if (draftTitle.trim() === '') return;
     renameBook(id, {
       title: draftTitle,
       author: draftAuthor,
@@ -99,7 +102,29 @@ export default function BookDetail() {
 
   return (
     <Screen scroll>
-      <Header title={row.title} back />
+      <Header
+        title={row.title}
+        back
+        right={
+          editing ? (
+            <>
+              <IconButton icon={X} label={t('common.cancel')} onPress={() => setEditing(false)} />
+              <IconButton
+                icon={Check}
+                label={t('common.save')}
+                onPress={applyEdit}
+                disabled={draftTitle.trim() === ''}
+              />
+            </>
+          ) : (
+            <>
+              <IconButton icon={Pencil} label={t('common.edit')} onPress={startEdit} />
+              {/* 🔴 아이콘이 작아도 확인창을 거친다. 잘못 누르기 쉬운 자리다 */}
+              <IconButton icon={Trash2} label={t('common.delete')} onPress={confirmDelete} />
+            </>
+          )
+        }
+      />
 
       {editing ? (
         <>
@@ -117,31 +142,13 @@ export default function BookDetail() {
             onChangeText={setDraftRead}
             keyboardType="number-pad"
           />
-          {/* 🔴 제목이 비면 저장을 잠근다 — 지식 상세에서 이 잠금이 빠져 조용한 먹통이 났었다
-              (2026-09-09 · docs/EDGE_CASES.md §2). 같은 실수를 여기서 되풀이하지 않는다 */}
-          <ButtonRow style={{ marginBottom: spacing.xl }}>
-            <Button label={t('common.save')} onPress={applyEdit} disabled={draftTitle.trim() === ''} />
-            <Button label={t('common.cancel')} variant="ghost" onPress={() => setEditing(false)} />
-          </ButtonRow>
         </>
       ) : (
-        <>
-          <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.md }]}>
-            {/* 🔴 이미지 파일이 아니다 — 첫 글자 + 고정 색(DESIGN_REVIEW §3) */}
-            <BookCover book={row} />
-            {row.author !== null && (
-              <AppText tone="muted" style={styles.center}>
-                {row.author}
-              </AppText>
-            )}
-          </View>
-          <Button
-            label={t('common.edit')}
-            variant="ghost"
-            onPress={startEdit}
-            style={{ marginBottom: spacing.lg }}
-          />
-        </>
+        row.author !== null && (
+          <AppText tone="muted" style={{ marginBottom: spacing.lg }}>
+            {row.author}
+          </AppText>
+        )
       )}
 
       {/* ⚠ 상태 전이를 자동화하지 않는다 — 사용자가 누른 것만 바뀐다(§4.1) */}
@@ -210,8 +217,6 @@ export default function BookDetail() {
         ))
       )}
 
-      <Spacer size="xxl" />
-      <Button label={t('common.delete')} variant="danger" onPress={confirmDelete} />
       <Spacer size="xl" />
     </Screen>
   );
@@ -219,6 +224,4 @@ export default function BookDetail() {
 
 const styles = StyleSheet.create({
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  row: { flexDirection: 'row' },
-  center: { alignSelf: 'center' },
 });

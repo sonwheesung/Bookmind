@@ -89,3 +89,38 @@ export function daysBetween(from: DayKey, to: DayKey): DayKey[] {
   }
   return out;
 }
+
+/** 달 키 `YYYY-MM`. 문자열 비교가 곧 달 비교다(`PRACTICE_SYSTEM.md` §3.1 기록 달력) */
+export type MonthKey = string;
+
+function parseMonth(month: MonthKey): { y: number; m: number } {
+  const match = /^(\d{4})-(\d{2})$/.exec(month);
+  const y = Number(match?.[1]);
+  const m = Number(match?.[2]);
+  if (match === null || m < 1 || m > 12) throw new Error(`달 키가 이상하다: ${month}`);
+  return { y, m };
+}
+
+function monthKeyOf(d: Date): MonthKey {
+  return fromDate(d).slice(0, 7);
+}
+
+/** 그 날이 속한 달 */
+export function monthOf(key: DayKey): MonthKey {
+  return monthKeyOf(toDate(key));
+}
+
+/** 달 더하기. 🔴 해를 넘긴다(`2026-12` + 1 = `2027-01`). 넘김은 `Date` 가 맡는다 */
+export function addMonths(month: MonthKey, n: number): MonthKey {
+  if (!Number.isInteger(n)) throw new Error(`달 수가 정수가 아니다: ${n}`);
+  const { y, m } = parseMonth(month);
+  return monthKeyOf(new Date(y, m - 1 + n, 1));
+}
+
+/** 그 달의 날짜 키 전부(1일 … 말일). 🔴 윤년 2월은 29일이다 */
+export function daysOfMonth(month: MonthKey): DayKey[] {
+  const { y, m } = parseMonth(month);
+  // 다음 달의 0일 = 이번 달 말일
+  const count = new Date(y, m, 0).getDate();
+  return Array.from({ length: count }, (_, i) => `${month}-${String(i + 1).padStart(2, '0')}`);
+}

@@ -1,22 +1,34 @@
 import { router } from 'expo-router';
+import { ChartColumn, Plus, Search } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
+import { Chip } from '@/components/Chip';
+import { ChipRow } from '@/components/ChipRow';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { getBook } from '@/features/books/repo';
+import { groupByBook } from '@/features/knowledge/compute';
 import { listKnowledge } from '@/features/knowledge/repo';
+import { useKnowledgeSortStore } from '@/features/settings/knowledge-sort';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
-/** 문장 탭 — 지식 카드 목록(결정 #26 · 위쪽에 검색·통계). 출처가 없는 카드는 **출처 줄 자체가 없다**(`KNOWLEDGE_SYSTEM.md` §8). */
+/**
+ * 문장 탭 — 지식 카드 목록(결정 #26). 출처가 없는 카드는 **출처 줄 자체가 없다**(`KNOWLEDGE_SYSTEM.md` §8).
+ *
+ * 🔄 2026-09-14 검색 · 통계 · 저장을 위 오른쪽 아이콘으로 옮겼다(사용자 지시).
+ * 🔄 같은 날 **등록순 / 책별** 고르기를 넣었다. 고른 값은 기기에 남는다(§3.2).
+ */
 export default function KnowledgeList() {
   const { t } = useTranslation();
   const { spacing } = useTheme();
+  const sort = useKnowledgeSortStore((s) => s.sort);
+  const setSort = useKnowledgeSortStore((s) => s.setSort);
 
   const { data } = useDbQuery(() =>
     listKnowledge().map((k) => ({
@@ -25,70 +37,69 @@ export default function KnowledgeList() {
     })),
   );
 
+  type Item = (typeof data)[number];
+  const card = (k: Item, withBook: boolean) => {
+    // 🔴 페이지가 빈 문자열이어도 줄을 안 만든다(`joinMeta` 가 '' 를 준다).
+    //    책별 보기에서는 구획 제목이 책이라 카드에 책 이름을 또 쓰지 않는다
+    const source = joinMeta([withBook ? k.bookTitle : null, k.page]);
+    return (
+      <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
+        <AppText variant="thought" numberOfLines={4}>
+          {k.content}
+        </AppText>
+        {source !== '' && (
+          <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
+            {source}
+          </AppText>
+        )}
+      </Card>
+    );
+  };
+
   return (
     <Screen scroll tab>
       <Header
         title={t('knowledge.list.title')}
         right={
-          <View style={[styles.links, { gap: spacing.md }]}>
+          <>
             {/* 🔴 문장이 하나도 없으면 검색을 안 그린다 — 빈 방으로 가는 문이다(`KNOWLEDGE_SYSTEM.md` §6.6) */}
             {data.length > 0 && (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('search.title')}
-                onPress={() => router.push('/search')}
-                hitSlop={12}
-              >
-                <AppText variant="label" tone="muted">
-                  {t('search.title')}
-                </AppText>
-              </Pressable>
+              <IconButton icon={Search} label={t('search.title')} onPress={() => router.push('/search')} />
             )}
-            {/* 통계 진입점. 🔄 홈 아래 줄에서 옮겼다(결정 #26 · `STATS_SYSTEM.md` §4.1) */}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('stats.title')}
-              onPress={() => router.push('/stats')}
-              hitSlop={12}
-            >
-              <AppText variant="label" tone="muted">
-                {t('stats.title')}
-              </AppText>
-            </Pressable>
-          </View>
+            {/* 통계 진입점(결정 #26 · `STATS_SYSTEM.md` §4.1) */}
+            <IconButton icon={ChartColumn} label={t('stats.title')} onPress={() => router.push('/stats')} />
+            <IconButton icon={Plus} label={t('home.cta')} onPress={() => router.push('/knowledge/new')} />
+          </>
         }
-      />
-
-      <Button
-        label={t('home.cta')}
-        onPress={() => router.push('/knowledge/new')}
-        style={{ marginBottom: spacing.xl }}
       />
 
       {data.length === 0 ? (
         <AppText tone="muted">{t('knowledge.list.empty')}</AppText>
       ) : (
-        data.map((k) => {
-          // 🔴 페이지가 빈 문자열이어도 줄을 안 만든다(`joinMeta` 가 '' 를 준다)
-          const source = joinMeta([k.bookTitle, k.page]);
-          return (
-            <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
-              <AppText variant="thought" numberOfLines={4}>
-                {k.content}
-              </AppText>
-              {source !== '' && (
-                <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
-                  {source}
-                </AppText>
-              )}
-            </Card>
-          );
-        })
+        <>
+          {/* 🔴 문장이 0개면 고르기를 안 그린다(고를 것이 없다 · §3.2) */}
+          <ChipRow style={{ marginBottom: spacing.lg }}>
+            <Chip
+              label={t('knowledge.list.sort.recent')}
+              active={sort === 'recent'}
+              onPress={() => setSort('recent')}
+            />
+            <Chip label={t('knowledge.list.sort.book')} active={sort === 'book'} onPress={() => setSort('book')} />
+          </ChipRow>
+
+          {sort === 'book'
+            ? // 🔴 묶는 규칙은 `groupByBook` 한 곳이다. `책 없음` 은 맨 아래, 구획 안은 등록순이다
+              groupByBook(data).map((g, i) => (
+                <View key={g.bookId ?? 'none'} style={{ marginTop: i > 0 ? spacing.lg : 0 }}>
+                  <AppText variant="label" style={{ marginBottom: spacing.sm }}>
+                    {joinMeta([g.title ?? t('knowledge.book.none'), String(g.items.length)])}
+                  </AppText>
+                  {g.items.map((k) => card(k, false))}
+                </View>
+              ))
+            : data.map((k) => card(k, true))}
+        </>
       )}
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  links: { flexDirection: 'row', alignItems: 'center' },
-});

@@ -1,5 +1,8 @@
 /**
- * 책 표지 자리표시자 — `docs/DESIGN_REVIEW.md` §3 (2026-09-09 채택).
+ * 책 표지 색 — `docs/DESIGN_REVIEW.md` §3 (2026-09-09 채택).
+ *
+ * 🔄 2026-09-14 **화면의 표지 자리는 지웠다**(사용자 선택). 등록할 때 색을 정해 DB 에 두는 것만 남겼다.
+ *    2차의 표지 등록이 이 컬럼을 쓴다(Expand-only 라 컬럼을 지우지 않는다).
  *
  * 🔴 **이미지가 아니다.** 색 하나 + 제목 첫 글자다 — PNG·SVG·외부 API 가 전부 필요 없다.
  *    ISBN·표지 자동 등록은 국가별 도서 API 가 갈라져 글로벌에서 비싸 2차로 미뤘고(MVP 제외),
@@ -29,17 +32,3 @@ export function pickCoverColor(title: string): string {
   return COVER_COLORS[hash % COVER_COLORS.length]!;
 }
 
-/**
- * 표지에 넣을 글자 하나.
- * ⚠ 코드 유닛이 아니라 **코드 포인트**로 자른다 — 이모지 제목에서 반쪽 글자가 나가지 않게.
- */
-export function coverLetter(title: string): string {
-  const t = title.trim();
-  if (t === '') return '?';
-  return [...t][0]!;
-}
-
-/** 저장된 색이 없으면(v4 이전에 만든 책) 제목에서 같은 규칙으로 고른다 — 화면이 비지 않는다. */
-export function coverColorOf(book: { title: string; cover_color: string | null }): string {
-  return book.cover_color ?? pickCoverColor(book.title);
-}

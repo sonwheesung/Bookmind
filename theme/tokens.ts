@@ -49,6 +49,8 @@ type Palette = {
   bg: string;
   surface: string;
   border: string;
+  /** 구분선. 🔴 `border`(카드 테두리)보다 한 단계 진하다. 머리카락 선 `border` 가 너무 희미했다(2026-09-14 사용자 지적) */
+  divider: string;
   text: string;
   textMuted: string;
   accent: string;
@@ -69,6 +71,7 @@ export const lightPalette: Palette = {
   bg: '#FBFAF7',
   surface: '#FFFFFF',
   border: '#E7E3DA',
+  divider: '#CFC8BB',
   text: '#1C1A17',
   textMuted: '#6E6960',
   accent: '#3A5A73',
@@ -84,6 +87,7 @@ export const darkPalette: Palette = {
   bg: '#16150F',
   surface: '#211F19',
   border: '#38352C',
+  divider: '#4A463B',
   text: '#F2EFE7',
   textMuted: '#A09A8D',
   accent: '#8FB3CC',
@@ -94,12 +98,5 @@ export const darkPalette: Palette = {
   highlightIdle: 'rgba(143, 179, 204, 0.12)',
   tabIndicator: '#2E2C24',
 };
-
-/**
- * 테마와 무관한 고정색. 🔴 이름 없는 색 코드를 부품에 두지 않으려고 여기 모았다(`docs/UI_GUIDE.md` §1).
- *
- * 책 표지 글자. 표지 글자는 테마와 상관없이 늘 진한 색이다(`components/BookCover.tsx`).
- */
-export const coverInk = '#1C1A17';
 
 export type { Palette };

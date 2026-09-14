@@ -9,16 +9,30 @@
  */
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { runMigrations } from '../db/migrate.ts';
 import { buildInsert } from '../db/sql.ts';
-import { fromDate, isoWeekday, mondayOf, nextDayKey, previousDayKey } from '../lib/day.ts';
 import {
+  addMonths,
+  daysOfMonth,
+  fromDate,
+  isoWeekday,
+  mondayOf,
+  monthOf,
+  nextDayKey,
+  previousDayKey,
+} from '../lib/day.ts';
+import {
+  calendarBounds,
   canCheck,
   isScheduled,
   parseRepeat,
   practiceState,
   practiceStreak,
+  monthCells,
   weekCells,
 } from '../features/practice/compute.ts';
 import { doneDaysQuery, runningPracticesQuery, shouldSuggestQuery } from '../features/practice/sql.ts';
@@ -389,6 +403,103 @@ check(
   '과거 체크가 막혀 있다. 어제 했는데 오늘 켠 사람이 실제로 많다',
 );
 
+// ── ⑨ 기록 달력 (§3.1) ──
+//
+// 🔴 달의 첫 요일을 **서로 다르게** 고른다. 전부 월요일 시작인 달이면 앞 빈칸 계산을 지워도 초록이다.
+{
+  const calWin = { startedDay: '2026-09-07', endedDay: null, active: true };
+
+  // 2026-09 는 화요일 시작 · 30일 → 앞 1칸 + 30 + 뒤 4칸 = 35
+  const calSep = monthCells('daily', new Set(['2026-09-08']), MON, calWin, '2026-09');
+  check(calSep.length === 35, `⑨ 9월 칸이 ${calSep.length}개다(35)`);
+  check(calSep[0] === null && calSep[1]?.day === '2026-09-01', `⑨ 🔴 9월 1일이 화요일 칸이 아니다(${calSep[1]?.day})`);
+  check(
+    calSep[30]?.day === '2026-09-30' && calSep[31] === null && calSep[34] === null,
+    '⑨ 9월 말일 또는 뒤 빈칸이 틀렸다',
+  );
+
+  // 2026-11 은 일요일 시작 → 앞 6칸 · 6주
+  const calNov = monthCells('daily', [], MON, calWin, '2026-11');
+  check(
+    calNov.slice(0, 6).every((c) => c === null) && calNov[6]?.day === '2026-11-01',
+    '⑨ 🔴 일요일 시작 달의 1일이 일곱 번째 칸이 아니다',
+  );
+  check(calNov.length === 42, `⑨ 🔴 11월이 ${calNov.length}칸이다(42 · 뒤 빈칸이 마지막 주를 못 채운다)`);
+
+  // 2027-02 는 월요일 시작 · 28일 → 빈칸 없이 딱 4주
+  const calFeb = monthCells('daily', [], MON, calWin, '2027-02');
+  check(calFeb.length === 28 && calFeb.every((c) => c !== null), `⑨ 🔴 딱 맞는 달에 빈칸이 생긴다(${calFeb.length})`);
+  check(daysOfMonth('2028-02').length === 29, '⑨ 🔴 윤년 2월이 29일이 아니다');
+  check(daysOfMonth('2026-02').length === 28, '⑨ 평년 2월이 28일이 아니다');
+  check(daysOfMonth('2026-12').at(-1) === '2026-12-31', '⑨ 12월 말일이 틀렸다');
+
+  // 🔴 판정은 canCheck 하나다
+  const calByDay = new Map(calSep.filter((c) => c !== null).map((c) => [c.day, c]));
+  check(calByDay.get('2026-09-08')?.done === true, '⑨ 한 날이 달력에 안 비친다');
+  check(calByDay.get('2026-09-09')?.done === false, '⑨ 안 한 날이 한 날로 보인다');
+  check(calByDay.get('2026-09-08')?.checkable === true, '⑨ 🔴 지난 날을 달력에서 못 누른다(사용자 선택: 지난 날도 체크)');
+  check(calByDay.get('2026-09-06')?.checkable === false, '⑨ 🔴 시작일 이전을 달력에서 누를 수 있다');
+  check(calByDay.get(MON)?.checkable === true, '⑨ 오늘을 달력에서 못 누른다');
+  check(calByDay.get('2026-09-15')?.checkable === false, '⑨ 🔴 미래를 달력에서 누를 수 있다');
+  for (const c of calSep) {
+    if (c !== null && c.checkable !== canCheck(c.day, MON, calWin)) {
+      check(false, `⑨ 🔴 달력과 canCheck 가 ${c.day} 를 다르게 본다`);
+    }
+  }
+  const calEnded = monthCells('daily', [], MON, { ...calWin, endedDay: '2026-09-10' }, '2026-09');
+  check(
+    calEnded.find((c) => c?.day === '2026-09-11')?.checkable === false,
+    '⑨ 🔴 종료 뒤를 달력에서 누를 수 있다',
+  );
+  const calWd = monthCells('weekdays', [], MON, calWin, '2026-09');
+  check(
+    calWd.find((c) => c?.day === SAT)?.scheduled === false && calWd.find((c) => c?.day === THU)?.scheduled === true,
+    '⑨ 달력의 예정일이 반복 규칙과 다르다',
+  );
+
+  // 달 셈
+  check(monthOf('2026-09-14') === '2026-09', `⑨ monthOf: ${monthOf('2026-09-14')}`);
+  check(addMonths('2026-12', 1) === '2027-01', '⑨ 🔴 해를 넘기는 달 더하기가 틀렸다');
+  check(addMonths('2027-01', -1) === '2026-12', '⑨ 🔴 해를 넘기는 달 빼기가 틀렸다');
+  check(addMonths('2026-01', -13) === '2024-12', `⑨ 여러 달 거꾸로: ${addMonths('2026-01', -13)}`);
+  check(addMonths('2026-09', 0) === '2026-09', '⑨ 0 달 더하기가 달을 바꾼다');
+  for (const badMonth of ['2026-13', '2026-00', '2026-9', '', 'abcd-ef', '2026-09-01']) {
+    let threw = false;
+    try {
+      daysOfMonth(badMonth);
+    } catch {
+      threw = true;
+    }
+    check(threw, `⑨ 🔴 깨진 달 키 ${JSON.stringify(badMonth)} 를 조용히 받는다`);
+  }
+  for (const badN of [0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+    let threw = false;
+    try {
+      addMonths('2026-09', badN);
+    } catch {
+      threw = true;
+    }
+    check(threw, `⑨ 🔴 달 수 ${badN} 를 조용히 받는다`);
+  }
+
+  // 달 넘기기 범위
+  const b1 = calendarBounds('2026-07-20', null, MON);
+  check(b1.first === '2026-07' && b1.last === '2026-09', `⑨ 달 범위: ${JSON.stringify(b1)}`);
+  const b2 = calendarBounds('2026-07-20', '2026-08-10', MON);
+  check(b2.last === '2026-08', `⑨ 🔴 종료한 실천이 종료 뒤 달로 넘어간다: ${JSON.stringify(b2)}`);
+  const b3 = calendarBounds('2026-10-01', null, MON);
+  check(b3.first === '2026-10' && b3.last === '2026-10', `⑨ 🔴 시작 전 실천의 달 범위가 뒤집혔다: ${JSON.stringify(b3)}`);
+  const b4 = calendarBounds('2026-07-20', '2026-12-31', MON);
+  check(b4.last === '2026-09', `⑨ 🔴 종료일이 미래인데 미래 달로 넘어간다: ${JSON.stringify(b4)}`);
+
+  // 🔴 상세 화면이 달력을 그리나
+  const detail = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'app', 'practice', '[id].tsx'), 'utf8');
+  check(
+    detail.includes('<MonthCalendar') && detail.includes('calendarBounds(') && detail.includes('practiceMonth('),
+    '⑨ 🔴 실천 상세가 달력을 안 그린다',
+  );
+}
+
 // 오늘이 실제로 무슨 요일이든 `fromDate` 와 `isoWeekday` 가 맞물리나
 const realToday = fromDate(new Date());
 check(isoWeekday(realToday) >= 1 && isoWeekday(realToday) <= 7, '오늘 요일이 1~7 이 아니다');
@@ -401,6 +512,6 @@ if (bad.length > 0) {
 }
 console.log(
   `\ncheck:practice OK — 반복 3종 · 🔴 weekdays 주말 · 연속일 경계 · 시작일 ·` +
-    `\n  오늘의 실천 4조건 · 하루 1건과 되살리기 · 지식 삭제 · 🔴 넘어가기 3갈래 · 주 7칸` +
+    `\n  오늘의 실천 4조건 · 하루 1건과 되살리기 · 지식 삭제 · 🔴 넘어가기 3갈래 · 주 7칸 · ⑨ 기록 달력(요일 칸 · 7 의 배수 · canCheck 일치 · 달 범위)` +
     `\n  SELF-TEST 통과(요일·반복 규칙 양성 대조 포함)\n`,
 );

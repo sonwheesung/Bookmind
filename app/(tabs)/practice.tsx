@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
-import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
+import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { WeekRow } from '@/components/WeekRow';
 import { parseRepeat } from '@/features/practice/compute';
@@ -18,6 +19,7 @@ import { useTheme } from '@/theme';
  * 실천 탭 — `docs/PRACTICE_SYSTEM.md` §3 · §8 · 결정 #26.
  *
  * 🔄 2026-09-14 홈의 "오늘의 실천"(월~일 칸)을 여기로 옮겼다. 위는 오늘 체크할 것, 아래는 나머지다.
+ * 🔄 같은 날 실천 만들기를 위 오른쪽 `+` 로 옮겼다(사용자 지시). 지난 기록은 실천 상세의 달력에 있다(§3.1).
  * 🚫 성공률·달성 그래프를 두지 않는다(§4). 실천은 평가 대상이 아니다.
  * 🔴 `종료됨` 은 저장된 값이 아니라 **오늘과 견준 결과**다(§2.1).
  */
@@ -53,12 +55,9 @@ export default function PracticeTab() {
 
   return (
     <Screen scroll tab>
-      <Header title={t('practice.title')} />
-
-      <Button
-        label={t('practice.create')}
-        onPress={() => router.push('/practice/new')}
-        style={{ marginBottom: spacing.xl }}
+      <Header
+        title={t('practice.title')}
+        right={<IconButton icon={Plus} label={t('practice.create')} onPress={() => router.push('/practice/new')} />}
       />
 
       {data.all.length === 0 ? (

@@ -15,7 +15,14 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { canAffixPageUnit, displayPage, splitTagInput } from '../features/knowledge/compute.ts';
+import {
+  canAffixPageUnit,
+  displayPage,
+  groupByBook,
+  KNOWLEDGE_SORTS,
+  parseKnowledgeSort,
+  splitTagInput,
+} from '../features/knowledge/compute.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -103,6 +110,68 @@ check(
   }
 }
 
+// ── ⑥ 문장 목록 책별 묶음 · 정렬 값 (`docs/KNOWLEDGE_SYSTEM.md` §3.2) ──
+{
+  const k = (id, bookId, bookTitle, at) => ({ id, book_id: bookId, bookTitle, created_at: at });
+  const ids = (g) => (g === undefined ? '' : g.items.map((x) => x.id).join(','));
+  // 🔴 입력을 **오래된 순**으로 준다. 이미 최신순이면 구획 안 정렬을 지워도 초록이다
+  const rows = [
+    k('a1', 'A', '명상록', '2026-09-01T00:00:00Z'),
+    k('n1', null, null, '2026-09-02T00:00:00Z'),
+    k('b1', 'B', '논어', '2026-09-03T00:00:00Z'),
+    k('a2', 'A', '명상록', '2026-09-04T00:00:00Z'),
+    k('n2', null, null, '2026-09-05T00:00:00Z'),
+    // 책이 지워져 제목을 못 찾는 문장. 🔴 가장 최근이다(책 없음이 맨 아래인지 재려면 그래야 한다)
+    k('x1', 'GONE', null, '2026-09-06T00:00:00Z'),
+  ];
+  const snapshot = JSON.stringify(rows);
+  const groups = groupByBook(rows);
+  check(groups.length === 3, `⑥ 구획이 ${groups.length}개다(명상록 · 논어 · 책 없음)`);
+  check(
+    groups[0]?.bookId === 'A' && groups[1]?.bookId === 'B',
+    `⑥ 구획 순서가 마지막 저장 시각 순이 아니다: ${groups.map((g) => g.bookId).join(',')}`,
+  );
+  check(groups[0]?.title === '명상록', `⑥ 구획 제목이 책 제목이 아니다: ${groups[0]?.title}`);
+  check(ids(groups[0]) === 'a2,a1', `⑥ 🔴 구획 안이 최신순이 아니다: ${ids(groups[0])}`);
+  const last = groups[groups.length - 1];
+  check(
+    last?.bookId === null && last?.title === null,
+    '⑥ 🔴 `책 없음` 이 맨 아래가 아니다. 책 없는 문장이 가장 최근이어도 아래다',
+  );
+  check(ids(last) === 'x1,n2,n1', `⑥ 🔴 제목을 못 찾는 책의 문장이 책 없음으로 안 간다: ${ids(last)}`);
+  check(
+    groups.reduce((n, g) => n + g.items.length, 0) === rows.length,
+    '⑥ 🔴 묶다가 문장이 사라지거나 늘었다',
+  );
+  check(JSON.stringify(rows) === snapshot, '⑥ 🔴 groupByBook 이 입력 배열을 바꿨다');
+  check(groupByBook([]).length === 0, '⑥ 문장이 0 인데 구획이 생긴다');
+  const onlyLoose = groupByBook([k('n', null, null, '2026-09-01T00:00:00Z')]);
+  check(onlyLoose.length === 1 && onlyLoose[0]?.bookId === null, '⑥ 책 없는 문장만 있을 때 구획이 하나가 아니다');
+  const onlyBook = groupByBook([k('a', 'A', '명상록', '2026-09-01T00:00:00Z')]);
+  check(onlyBook.length === 1 && onlyBook[0]?.bookId === 'A', '⑥ 🔴 책 없음이 없는데 빈 책 없음 구획을 만든다');
+  check(
+    groupByBook([k('e', 'E', '  ', '2026-09-01T00:00:00Z')])[0]?.bookId === null,
+    '⑥ 빈 제목으로 이름 없는 구획을 만든다',
+  );
+
+  // 기기에 저장된 정렬 값
+  check(parseKnowledgeSort('book') === 'book', '⑥ 저장된 book 을 못 읽는다');
+  check(parseKnowledgeSort('recent') === 'recent', '⑥ 저장된 recent 를 못 읽는다');
+  for (const v of [undefined, null, '', 'BOOK', 'title', 0, 1, {}, ['book']]) {
+    check(parseKnowledgeSort(v) === 'recent', `⑥ 🔴 깨진 값 ${JSON.stringify(v)} 를 recent 로 안 돌린다`);
+  }
+  check(KNOWLEDGE_SORTS.length === 2, `⑥ 정렬이 ${KNOWLEDGE_SORTS.length}가지다`);
+
+  // 🔴 화면이 이 함수와 저장소를 거치나
+  const tab = read('app/(tabs)/knowledge.tsx');
+  check(tab.includes('groupByBook('), '⑥ 🔴 문장 탭이 groupByBook 을 안 쓴다(묶는 규칙이 화면에 따로 생긴다)');
+  check(tab.includes('useKnowledgeSortStore'), '⑥ 🔴 문장 탭이 고른 정렬을 기기에 안 저장한다');
+  check(
+    read('features/settings/knowledge-sort.ts').includes('parseKnowledgeSort('),
+    '⑥ 🔴 저장소가 복원할 때 값을 안 거른다',
+  );
+}
+
 if (bad.length > 0) {
   console.error(`\ncheck:knowledge 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -112,5 +181,6 @@ if (bad.length > 0) {
 console.log(
   `\ncheck:knowledge OK — 페이지 접사 ①숫자엔 씌운다 ②🔴 \`42p\`·\`3장\`·\`12-14\` 는 그대로 ` +
     `\n  ③빈 값은 null(출처 줄에서 걸러진다) ④화면이 판정을 거친다 ⑤태그 나누기(빈 태그 0 · 두 화면 같은 함수)` +
+    `\n  ⑥책별 묶음(🔴 책 없음 맨 아래 · 구획 안 최신순 · 제목 없는 책 · 입력 불변) · 정렬 값 복원(깨진 값 → recent)` +
     `\n  SELF-TEST 통과(판정이 갈라지는가 · 접사가 값을 바꾸는가)\n`,
 );

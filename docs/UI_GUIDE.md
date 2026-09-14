@@ -16,7 +16,7 @@
 |---|---|
 | 설계(이 문서) | ✅ 2026-09-13 |
 | 토큰 `theme/tokens.ts` · `useTheme()` | ✅ 2026-09-08 (Phase 0) |
-| 공통 부품 **17개**(§2) | ✅ 2026-09-14. 기존 9 + 새 7 + 연령 게이트 층(`AgeGate`) 1. 화면 16개와 기존 부품 5개가 이전을 마쳤다(§7.5) |
+| 공통 부품 **18개**(§2) | ✅ 2026-09-14. 기존 9 + 새 7 + 연령 게이트 층(`AgeGate`) 1 · 🔄 같은 날 `IconButton` · `MonthCalendar` 을 더하고 `BookCover` 를 지웠다. 화면 16개와 기존 부품 5개가 이전을 마쳤다(§7.5) |
 | 공통 헬퍼(§3) | ✅ 2026-09-14 |
 | 가드 `npm run check:ui`(§6) | ✅ 2026-09-14. `verify` 17번째 |
 | 헤더 로고 | 🔄 2026-09-14 — 같은 날 **홈 헤더 자체를 뺐다**(결정 #26). `brand` 토큰도 없앴다 |
@@ -29,29 +29,30 @@
 - 🔴 **화면에 숫자와 색을 직접 쓰지 않는다.** 여백은 `spacing`, 모서리는 `radius`, 색은 `palette`, 글자는 `typography`.
 - 🔴 **`fontFamily` 를 쓰지 않는다**(결정 #13). 타이포 토큰은 크기·굵기·행간만 가진다.
 - 색은 테마를 따라 바뀐다. **테마와 무관하게 고정인 색은 `tokens.ts` 에 이름을 붙여 둔다.**
-  지금 하나다: `coverInk`(책 표지 글자. 테마와 상관없이 늘 진한 색이다 · `components/BookCover.tsx`).
+  지금 **없다**. 🔄 `coverInk`(책 표지 글자)는 2026-09-14 표지 자리를 지우며 함께 지웠다.
 
 ## 2. 공통 부품
 
-**17개** (세는 법: `ls components/*.tsx | wc -l` · `check:ui` ⑦이 이 표와 파일을 대조한다)
+**18개** (세는 법: `ls components/*.tsx | wc -l` · `check:ui` ⑦이 이 표와 파일을 대조한다)
 
 | 부품 | 쓰는 자리 | 규칙 |
 |---|---|---|
 | `Screen` | 모든 화면의 바깥 | 🔴 화면에서 SafeAreaView·ScrollView 를 직접 쓰지 않는다. 키보드 가림도 여기서 처리한다 · 위 여백 = 인셋 + `spacing.lg`(2026-09-14) · 탭 화면은 `tab` 을 넘겨 아래 인셋을 탭 바에 맡긴다 |
-| `Header` | 화면 제목 · 뒤로 | 오른쪽 자리(`right`)는 조용한 글자 링크만. 버튼을 두지 않는다 · 🔴 **탭 화면은 뒤로가기가 없고 홈에는 Header 가 없다**(결정 #26 · 2026-09-14) |
+| `Header` | 화면 제목 · 뒤로 | 오른쪽 자리(`right`)는 **`IconButton` 만**(추가 · 저장 · 수정 · 삭제 · 취소 · 검색 · 통계 · 2026-09-14). 글자 버튼을 두지 않는다 · 🔴 **탭 화면은 뒤로가기가 없고 홈에는 Header 가 없다**(결정 #26 · 2026-09-14) |
 | `AppText` | 🔴 **화면의 모든 글자** | `variant`(타이포 토큰 이름) + `tone`(`text` · `muted` · `accent`). 화면에서 `[typography.x, { color }]` 를 조립하지 않는다 |
-| `Button` | 행동 | `primary` 는 화면에 **하나**. `danger` 는 되돌릴 수 없는 동작에만 |
+| `Button` | 본문 안의 행동 | `primary` 는 화면에 **하나**. `danger` 는 되돌릴 수 없는 동작에만 · 🔄 `size="lg"` 는 홈의 두 버튼만(2026-09-14) |
+| `IconButton` | 헤더 오른쪽의 행동(추가 · 저장 · 수정 · 삭제 · 취소 · 검색 · 통계) | Lucide 선 아이콘 22 · 누르는 자리 40 · 🔴 `label` 필수(글자가 없어 스크린리더가 읽을 이름이다) · 색은 글자색 하나 · 🔴 삭제도 확인창을 거친다 |
 | `ButtonRow` | 버튼 둘을 같은 폭으로 나란히 | 저장/취소 · 받기/넘어가기 · 카메라/앨범 |
 | `Card` | 원문 한 덩어리 · 누르는 목록 행 | 🔴 원문이 아닌 것을 카드에 넣지 않는다(§5) |
 | `Chip` | 하나 고르기 · 여러 개 고르기 · 지울 수 있는 태그 | 🔴 칩을 화면에서 `Pressable` 로 다시 그리지 않는다 |
 | `ChipRow` | 칩 여러 개를 줄바꿈으로 | 간격은 `spacing.sm` 고정 |
-| `Divider` | 구획 · 목록 행 사이 | 머리카락 선 한 줄. 여백은 `style` 로 준다 |
+| `Divider` | 구획 · 목록 행 사이 | 1dp 선 한 줄 · 색 `palette.divider`(🔄 2026-09-14 머리카락 선이 너무 희미했다). 여백은 `style` 로 준다 |
 | `Field` | 입력 한 칸 | 라벨에 "(선택)"을 붙이지 않는다(`KNOWLEDGE_SYSTEM.md` §1.1) |
 | `QuoteRow` | 카드 없이 구분선으로 나눈 문장 목록 | 홈 최근 저장 · 검색. 위 라벨·아래 출처는 **있을 때만** 그린다 |
-| `BookCover` | 책 표지 자리 | 이미지가 아니다. 첫 글자 + 고정 색 |
-| `BookLine` | 표지 + 제목 + 한 줄 설명 | 책 목록 · 책 고르기 |
+| `BookLine` | 제목 + 한 줄 설명 | 책 목록 · 책 고르기 · 🔄 표지 자리는 2026-09-14 지웠다(`DESIGN_REVIEW.md` §3) |
 | `BookSelect` | 책 연결 | 🔴 목록 안에 `+ 새 책 등록` 이 있다(`KNOWLEDGE_SYSTEM.md` §1.1.1) |
-| `WeekRow` | 실천의 이번 주 일곱 칸 | 못 한 날은 빈 동그라미. 붉은색 없음 |
+| `WeekRow` | 실천 탭의 이번 주 일곱 칸 | 못 한 날은 빈 동그라미. 붉은색 없음 |
+| `MonthCalendar` | 실천 상세의 한 달 기록 | 판정은 `monthCells` 가 하고 여기서는 그리기만 · 채운 동그라미 = 한 날 · 누를 수 없는 날은 흐리게 · 붉은색 없음(`PRACTICE_SYSTEM.md` §3.1) |
 | `AgeGate` | 부팅 연령 확인 모달(앱 전체를 덮는 층) | 🔴 중립 연도 목록 · 벽이 아니다 · 여러 화면이 쓰는 부품이 아니라 **한 곳만 그리는 층**이지만 화면이라 `components/` 에 둔다(`AUTH_SYSTEM.md` §1.6) |
 | `Spacer` | 화면 끝 여백 · 큰 구획 사이 빈 공간 | 높이는 `spacing` 이름으로만 |
 
@@ -60,14 +61,14 @@
 | 탭 | 파일 | 담는 것 |
 |---|---|---|
 | 홈 | `app/(tabs)/index.tsx` | 오늘의 복습 · 문장 저장 · 최근 저장 |
-| 문장 | `app/(tabs)/knowledge.tsx` | 문장 목록 · 위쪽에 검색 · 통계 |
+| 문장 | `app/(tabs)/knowledge.tsx` | 문장 목록(등록순 / 책별) · 위 오른쪽 아이콘 검색 · 통계 · 저장 |
 | 책 | `app/(tabs)/books.tsx` | 책 목록 |
 | 실천 | `app/(tabs)/practice.tsx` | 오늘의 실천(월~일 칸) · 나머지 실천 |
 | 설정 | `app/(tabs)/settings.tsx` | 언어 · 알림 · 백업 |
 
 - 상세·입력 화면(`knowledge/[id]` · `books/new` · `review` · `search` …)은 **탭 위에 쌓이는 스택**이고 뒤로가기가 있다.
 - 🔄 **아이콘 + 글자**다(2026-09-14 사용자 선택 · `DESIGN_REVIEW.md` §3). Lucide 선 아이콘 24 · 선택된 탭은 아이콘 뒤에 56×32 알약(`palette.tabIndicator`) · 바 높이 64 + 아래 인셋.
-  🔴 아이콘은 **탭 바에만** 쓴다. 화면 안으로 번지면 9/9 의 "더하기보다 빼는 쪽"이 무너진다.
+  🔄 아이콘은 **탭 바와 헤더 오른쪽(`IconButton`)에만** 쓴다(2026-09-14 사용자 지시). 본문 안의 행동은 글자 버튼이다. 본문까지 번지면 9/9 의 "더하기보다 빼는 쪽"이 무너진다.
 - 🔴 **활성 탭은 accent 가 아니라 진한 글자**다. 탭 바는 모든 화면에 붙어 있어 accent 를 쓰면 화면마다 accent 가 둘이 된다(§5).
 - ⏸ **실기기 화면 확인 전이다**(에뮬레이터 작업 중단 · vc6 설치 뒤 본다).
 
@@ -82,6 +83,9 @@
 | `WEEKDAY_KEYS` | `lib/day.ts` | 요일 i18n 키. 🔴 인덱스는 `isoWeekday - 1`(월=0) |
 | `splitTagInput(raw)` | `features/knowledge/compute.ts` | 쉼표로 쓴 태그 입력. 🔴 새 문장 화면과 상세 화면이 **같은 규칙**을 쓴다(§5 of `KNOWLEDGE_SYSTEM.md`) |
 | `parseRepeat(rule).kind` | `features/practice/compute.ts` | 반복 주기 라벨. 화면에서 `startsWith('weekly:')` 로 다시 판정하지 않는다 |
+| `formatMonth(month, deviceLocale())` | `lib/format.ts` | 달 이름(`2026년 9월`). 로케일 규칙은 `formatDate` 와 같다 |
+| `groupByBook(rows)` | `features/knowledge/compute.ts` | 문장 책별 보기. 🔴 `책 없음` 은 맨 아래 · 구획 안은 최신순(`KNOWLEDGE_SYSTEM.md` §3.2) |
+| `monthCells` · `calendarBounds` · `addMonths` | `features/practice/compute.ts` · `lib/day.ts` | 실천 기록 달력. 🔴 누를 수 있는지는 주 칸과 같은 `canCheck` 다(`PRACTICE_SYSTEM.md` §3.1) |
 
 ## 4. 언제 공통으로 빼나
 
