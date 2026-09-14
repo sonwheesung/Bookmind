@@ -1,7 +1,4 @@
 {
-  "app": {
-    "name": "Re:Read"
-  },
   "common": {
     "cancel": "취소",
     "delete": "삭제",
@@ -21,12 +18,7 @@
       "title": "최근 저장",
       "empty": "저장한 문장이 여기에 나타납니다."
     },
-    "cta": "문장 저장하기",
-    "meta": {
-      "books": "책 {{count}}",
-      "knowledge": "문장 {{count}}",
-      "streak": "연속 {{count}}일"
-    }
+    "cta": "문장 저장하기"
   },
   "knowledge": {
     "save": {
@@ -290,5 +282,8 @@
     "contact": "문의: {{email}}",
     "privacyLink": "개인정보 처리방침 보기",
     "backToApp": "Re:Read 로 돌아가기"
+  },
+  "tabs": {
+    "home": "홈"
   }
 }

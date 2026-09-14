@@ -11,6 +11,8 @@ type Props = {
   scroll?: boolean;
   /** 헤더가 있는 화면은 상단 인셋을 헤더가 먹는다 */
   hasHeader?: boolean;
+  /** 하단 탭 화면. 아래 인셋은 탭 바가 먹으므로 여기서 더하지 않는다(결정 #26) */
+  tab?: boolean;
   style?: ViewStyle;
 };
 
@@ -30,7 +32,7 @@ const FOCUS_MARGIN = 16;
  *    "처리했다"고 착각하기 딱 좋은 코드였고, 실제로 대표님 폰에서 입력창이 가려졌다.
  *    조각·Idea Repository 가 같은 버그를 겪고 푼 방식을 승계한다.
  */
-export function Screen({ children, scroll = false, hasHeader = false, style }: Props) {
+export function Screen({ children, scroll = false, hasHeader = false, tab = false, style }: Props) {
   const insets = useSafeAreaInsets();
   const { palette, spacing } = useTheme();
   const keyboard = useKeyboard();
@@ -86,8 +88,9 @@ export function Screen({ children, scroll = false, hasHeader = false, style }: P
   }, [scrollOverlap, keyboard.screenY, scroll]);
 
   const pad: ViewStyle = {
-    paddingTop: hasHeader ? 0 : insets.top,
-    paddingBottom: insets.bottom,
+    // 🔴 위 여백 = 인셋 + 16(2026-09-14 사용자 지시 "윗 쪽 여백 쫌 줘야할 것 같아 전체적으로"). 좌우와 같은 값이다
+    paddingTop: hasHeader ? 0 : insets.top + spacing.lg,
+    paddingBottom: tab ? 0 : insets.bottom,
     paddingLeft: Math.max(insets.left, spacing.lg),
     paddingRight: Math.max(insets.right, spacing.lg),
   };

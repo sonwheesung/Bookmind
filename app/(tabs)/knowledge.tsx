@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
@@ -12,7 +13,7 @@ import { useDbQuery } from '@/hooks/useDbQuery';
 import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
-/** 지식 카드 목록. 출처가 없는 카드는 **출처 줄 자체가 없다**(`KNOWLEDGE_SYSTEM.md` §8). */
+/** 문장 탭 — 지식 카드 목록(결정 #26 · 위쪽에 검색·통계). 출처가 없는 카드는 **출처 줄 자체가 없다**(`KNOWLEDGE_SYSTEM.md` §8). */
 export default function KnowledgeList() {
   const { t } = useTranslation();
   const { spacing } = useTheme();
@@ -25,8 +26,38 @@ export default function KnowledgeList() {
   );
 
   return (
-    <Screen scroll>
-      <Header title={t('knowledge.list.title')} back />
+    <Screen scroll tab>
+      <Header
+        title={t('knowledge.list.title')}
+        right={
+          <View style={[styles.links, { gap: spacing.md }]}>
+            {/* 🔴 문장이 하나도 없으면 검색을 안 그린다 — 빈 방으로 가는 문이다(`KNOWLEDGE_SYSTEM.md` §6.6) */}
+            {data.length > 0 && (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('search.title')}
+                onPress={() => router.push('/search')}
+                hitSlop={12}
+              >
+                <AppText variant="label" tone="muted">
+                  {t('search.title')}
+                </AppText>
+              </Pressable>
+            )}
+            {/* 통계 진입점. 🔄 홈 아래 줄에서 옮겼다(결정 #26 · `STATS_SYSTEM.md` §4.1) */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('stats.title')}
+              onPress={() => router.push('/stats')}
+              hitSlop={12}
+            >
+              <AppText variant="label" tone="muted">
+                {t('stats.title')}
+              </AppText>
+            </Pressable>
+          </View>
+        }
+      />
 
       <Button
         label={t('home.cta')}
@@ -57,3 +88,7 @@ export default function KnowledgeList() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  links: { flexDirection: 'row', alignItems: 'center' },
+});

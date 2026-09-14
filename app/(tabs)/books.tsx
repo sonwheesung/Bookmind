@@ -20,8 +20,8 @@ export default function BookList() {
   const { data } = useDbQuery(() => listBooks());
 
   return (
-    <Screen scroll>
-      <Header title={t('books.list.title')} back />
+    <Screen scroll tab>
+      <Header title={t('books.list.title')} />
 
       <Button
         label={t('books.new.title')}

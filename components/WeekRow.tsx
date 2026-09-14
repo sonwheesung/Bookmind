@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import type { WeekCell } from '@/features/practice/repo';
-import { WEEKDAY_KEYS } from '@/lib/day';
+import { WEEKDAY_KEYS, fromDate } from '@/lib/day';
 import { useTheme } from '@/theme';
 
 type Props = {
@@ -21,6 +21,8 @@ type Props = {
 export function WeekRow({ cells, onToggle }: Props) {
   const { t } = useTranslation();
   const { palette, spacing } = useTheme();
+  // 오늘 칸의 요일을 굵게 한다. 판정이 아니라 **표시**라 여기서 센다(누를 수 있는지는 compute.ts 의 checkable)
+  const today = fromDate(new Date());
 
   return (
     <View style={styles.row}>
@@ -29,6 +31,9 @@ export function WeekRow({ cells, onToggle }: Props) {
         const key = WEEKDAY_KEYS[i] ?? 'mon';
         const mark = c.done ? '●' : '○';
         const color = c.done ? palette.text : c.scheduled ? palette.textMuted : palette.border;
+        // 🔴 누를 수 없는 칸(미래 · 시작 전 · 종료 뒤)은 흐리게 — 모든 요일이 눌리는 것처럼 보였다(2026-09-14 사용자 지적)
+        const faded = !c.checkable;
+        const isToday = c.day === today;
         return (
           <Pressable
             key={c.day}
@@ -38,9 +43,9 @@ export function WeekRow({ cells, onToggle }: Props) {
             disabled={!c.checkable || onToggle === undefined}
             onPress={() => onToggle?.(c.day)}
             hitSlop={6}
-            style={({ pressed }) => [styles.cell, { opacity: pressed ? 0.6 : 1 }]}
+            style={({ pressed }) => [styles.cell, { opacity: faded ? 0.35 : pressed ? 0.6 : 1 }]}
           >
-            <AppText variant="caption" tone="muted">
+            <AppText variant={isToday ? 'label' : 'caption'} tone={isToday ? 'text' : 'muted'}>
               {t(`practice.weekday.${key}`)}
             </AppText>
             <AppText variant="section" style={{ color, marginTop: spacing.xs }}>

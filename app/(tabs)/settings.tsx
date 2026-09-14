@@ -79,8 +79,8 @@ export default function Settings() {
   );
 
   return (
-    <Screen scroll>
-      <Header title={t('settings.title')} back />
+    <Screen scroll tab>
+      <Header title={t('settings.title')} />
 
       {group(t('settings.language.title'), true)}
 

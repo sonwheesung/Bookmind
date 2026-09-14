@@ -65,12 +65,12 @@ check(displayPage('xii', en) === 'xii', `② 로마 숫자: ${displayPage('xii',
 check(displayPage(null, ko) === null, '③ null 이 null 이 아니다');
 check(displayPage('', ko) === null, '③ 빈 문자열이 null 이 아니다');
 check(displayPage('   ', ko) === null, '③ 공백만 있는 값이 null 이 아니다');
-// 🔴 빈 값이 null 이어야 홈의 출처 줄에서 걸러진다(`app/index.tsx` 가 null 을 버린다)
+// 🔴 빈 값이 null 이어야 홈의 출처 줄에서 걸러진다(`app/(tabs)/index.tsx` 가 null 을 버린다)
 
 // ── 🔴 ④ 화면이 판정을 거치나 ──
 //
 // 🔴 순수 함수를 만들어 두고 화면이 안 쓰면 아무것도 안 지킨 것이다. 소스에서 통로를 잰다.
-const home = read('app/index.tsx');
+const home = read('app/(tabs)/index.tsx');
 check(home.includes('displayPage('), '④ 🔴 홈이 `displayPage` 를 안 쓴다');
 check(
   !/t\('knowledge\.pageShort',\s*\{\s*page:\s*k\.page\s*\}\)/.test(home),

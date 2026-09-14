@@ -1,7 +1,4 @@
 {
-  "app": {
-    "name": "Re:Read"
-  },
   "common": {
     "cancel": "Cancel",
     "delete": "Delete",
@@ -21,12 +18,7 @@
       "title": "Recently saved",
       "empty": "Saved passages will appear here."
     },
-    "cta": "Save a passage",
-    "meta": {
-      "books": "Books {{count}}",
-      "knowledge": "Passages {{count}}",
-      "streak": "Streak {{count}} days"
-    }
+    "cta": "Save a passage"
   },
   "knowledge": {
     "save": {
@@ -290,5 +282,8 @@
     "contact": "Contact: {{email}}",
     "privacyLink": "Read the privacy policy",
     "backToApp": "Back to Re:Read"
+  },
+  "tabs": {
+    "home": "Home"
   }
 }

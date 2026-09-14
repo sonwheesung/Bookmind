@@ -56,6 +56,9 @@ export function AgeGate() {
     <Modal
       visible={visible}
       animationType="fade"
+      // 🔴 edge-to-edge 에서 다른 화면처럼 상태바 밑까지 덮고 Screen 이 인셋 + 16 을 준다(2026-09-14 사용자 지적 · AUTH_SYSTEM §1.6)
+      statusBarTranslucent
+      navigationBarTranslucent
       // 안드로이드 뒤로가기 = 닫기. 게이트는 앱을 못 쓰게 만드는 문이 아니다
       onRequestClose={() => settleAgeGate(false)}
     >
