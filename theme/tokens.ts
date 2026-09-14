@@ -91,4 +91,11 @@ export const darkPalette: Palette = {
   highlightIdle: 'rgba(143, 179, 204, 0.12)',
 };
 
+/**
+ * 테마와 무관한 고정색. 🔴 이름 없는 색 코드를 부품에 두지 않으려고 여기 모았다(`docs/UI_GUIDE.md` §1).
+ *
+ * 책 표지 글자. 표지 글자는 테마와 상관없이 늘 진한 색이다(`components/BookCover.tsx`).
+ */
+export const coverInk = '#1C1A17';
+
 export type { Palette };

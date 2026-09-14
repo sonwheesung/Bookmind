@@ -40,3 +40,17 @@ export function displayPage(page: string | null, affix: (p: string) => string): 
   if (t === '') return null;
   return canAffixPageUnit(t) ? affix(t) : t;
 }
+
+/**
+ * 태그 입력 칸(`철학, 습관`)을 이름 목록으로.
+ *
+ * 🔴 **새 문장 화면과 상세 화면이 같은 함수를 쓴다.** 화면마다 규칙이 다르면
+ *    사용자는 저장 화면에서 배운 것을 상세에서 다시 배워야 한다(`docs/UI_GUIDE.md` §3).
+ * ⚠ 같은 이름이 두 번 있어도 여기서 거르지 않는다. 두 화면에 있던 동작을 그대로 옮겼다.
+ */
+export function splitTagInput(raw: string): string[] {
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s !== '');
+}

@@ -10,7 +10,7 @@
 
 ## 1. 문서 목록
 
-**19개** (세는 법: `ls docs/*.md | wc -l`)
+**20개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
@@ -32,6 +32,7 @@
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`STORE_LISTING.md`](./STORE_LISTING.md) | 🔴 **비공개 테스트의 관문** — 앱 설정 **11항목**의 답 · 데이터 보안 실측 근거 · 등록정보 문구(en·ko) · 권한 결함(§4) · 막고 있는 것과 누가 하나(§9) | ✅ 2026-09-11 |
 | [`legal/PRIVACY.en.md`](./legal/PRIVACY.en.md) · [`.ko.md`](./legal/PRIVACY.ko.md) | 🔴 **개인정보 처리방침 정본**(영문이 정본) — 웹 게시본은 이 파일의 사본이다. 가드 `check:privacy` 가 배포본과 대조한다 | ✅ 2026-09-11 |
+| [`UI_GUIDE.md`](./UI_GUIDE.md) | 🔴 **화면을 만드는 법** — 토큰 · 공통 부품 **16개** · 공통 헬퍼 · **UI 금지 목록** · 가드 `check:ui`(설계만 · 아직 없다). 같은 모양을 두 화면이 따로 그리지 않는다 | ✅ 2026-09-13 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
 | [`ORIGINAL_BRIEF.md`](./ORIGINAL_BRIEF.md) | 🔴 **원본 기획서 원문 — 정본이 아니다** | ✅ 2026-09-08 |
 | [`../.claude/skills/README.md`](../.claude/skills/README.md) | 스킬 색인 — 이식 4종 · Phase 별 도입 예정 11종 · 안 가져오는 것과 이유 | ✅ 2026-09-08 |
@@ -40,7 +41,7 @@
 
 | 문서 | 언제 | 상태 |
 |---|---|---|
-| `UI_GUIDE.md` | 첫 화면 전(Phase 0~2) — 토큰 · 공통 컴포넌트 · **UI 금지 목록** | ❌ |
+| ~~`UI_GUIDE.md`~~ | ~~첫 화면 전(Phase 0~2)~~ | ✅ **2026-09-13 신설**(위 목록으로 옮겼다). 🔴 화면 13개가 생긴 뒤에야 썼고, 그사이 같은 칩을 두 화면이 손으로 다시 그렸다(`UI_GUIDE.md` §7.4) |
 | `VAULT_SYSTEM.md` (암호화 백업 금고) | Phase 12 (v1.1) — 조각 `server/` 복사 승계 | ❌ |
 | `LEGAL_SYSTEM.md` | Phase 11 — 처리방침 · 약관 · Play 데이터 보안 | ❌ |
 | ~~`STORE_LISTING.md`~~ | ~~Phase 11~~ | ✅ **2026-09-11 신설**(위 목록으로 옮겼다). 🔴 **Phase 11 까지 못 미룬다** — 비공개 테스트가 이걸 선행으로 잠근다 |
@@ -479,6 +480,7 @@ grep -c "Failed to start watch mode" <metro 로그>
 - **공통 기능(계정·구독·문의·공지)은 common_server, AI는 Re:Read 전용 `server/`.**
   🔴 조각 서버에 편입하지 않는 근거는 `ARCHITECTURE.md` §3.
 - 의존 방향: `app/`(라우트) → `features/` → `db/`·`lib/`·`theme/`. **역방향 import 금지.**
+- 🔴 **화면을 그리기 전에 [`UI_GUIDE.md`](./UI_GUIDE.md) §2 를 본다.** 있는 부품을 다시 그리지 않는다. 새 부품은 그 표에 적는 것까지가 완료다.
 - **모든 화면은 `components/Screen`으로 감싼다** — 화면에서 SafeAreaView·ScrollView를 직접 쓰지 않는다.
   세이프에어리어와 키보드 가림을 한 곳에서 처리한다(조각 승계).
     🔴 **키보드는 겹침을 재서 영역을 줄인다. 여백을 더하지 않는다**(`EDGE_CASES.md` §11).

@@ -61,6 +61,9 @@ export function isoWeekday(key: DayKey): number {
   return n === 0 ? 7 : n;
 }
 
+/** 요일 i18n 키(`practice.weekday.*`). 🔴 인덱스는 `isoWeekday(key) - 1` 이다(월=0 … 일=6) */
+export const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
+
 /** 그 날이 속한 주의 **월요일**. 주는 월요일에 시작한다(`PRACTICE_SYSTEM.md` §3 의 `월 화 수 …`) */
 export function mondayOf(key: DayKey): DayKey {
   let cursor = key;
