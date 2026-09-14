@@ -399,6 +399,74 @@ npx eas-cli submit --platform android --profile closed \
 | 🔴 프로덕션 | `프로덕션으로 출시` 권한은 영구히 꺼져 있다. 이 위임은 **비공개 트랙까지**다 |
 | ⚠ 출시 노트 | `eas submit` 은 출시 노트를 안 넣는다. vc3 에는 en · ko 노트가 있었다 |
 
+## 6.4 vc5 — 연령 게이트 (2026-09-14)
+
+사용자 지시 *"그냥 업로드 해버려"*. vc4 를 올린 **같은 날** 한 번 더 올린다(비공개 트랙 · 결정 #23 의 AAB 경로).
+
+| 무엇 | 값 |
+|---|---|
+| versionCode | 4 → **5** |
+| version | 0.4.0 → **0.5.0** |
+| runtimeVersion | `1.0.0` 고정 |
+| 네이티브 변경 | 없다. `expo-localization` · AsyncStorage 는 이미 들어 있다. 권한 수는 **28 그대로**여야 한다 |
+| JS 변경 | 연령 게이트(결정 #25 · `AUTH_SYSTEM.md`) · 처리방침 링크 상수 |
+| 보관 | `D:\builds\Bookmind\reread-vc5.aab` |
+| 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc5.aab --non-interactive` |
+
+🔴 **화면을 에뮬레이터로 확인하지 않고 올린다**(`AUTH_SYSTEM.md` §1.10 · 사용자 지시 · 메모리 부족).
+설치 직후 첫 실행에서 연령 모달이 뜨고 닫히는지를 가장 먼저 본다. 안 닫히면 저장·복습을 막는 결함이다.
+
+### 🔴 첫 시도는 `rm -rf android` 에서 죽었다
+
+```
+rm: cannot remove 'android/app/build/intermediates/lint-cache/lintVitalAnalyzeRelease/migrated-jars/…jar': Device or resource busy
+```
+
+vc4 빌드의 **Gradle 데몬이 lint-cache jar 하나를 잡고 있었다.** vc4 뒷정리 때 같은 파일에서 한 번 멈췄던 그것이다(§6.3).
+`set -e` 라 스크립트는 거기서 끝났는데 **백그라운드 작업은 exit 0 으로 보고됐다.** `| tee` 뒤의 `echo` 가 마지막 명령이었기 때문이다.
+★ **작업이 성공했다는 알림과 AAB 가 생겼다는 사실은 다르다.** 판정은 산출물 파일이 있는지로 한다.
+
+🚫 데몬은 죽이지 않는다(`gradlew --stop` · `taskkill java` 금지 · 형제 빌드가 같은 데몬을 쓸 수 있다).
+→ `build-aab.sh` 가 `rm` 실패를 **조건부로** 넘기게 했다. 남은 파일이 **전부 `android/app/build/` 아래(빌드 캐시)** 이면 그대로 prebuild 하고,
+그 밖의 파일이 하나라도 남으면 멈춘다. prebuild 는 비어 있는 자리에 템플릿을 새로 쓰므로 잠긴 캐시 한 개는 결과에 영향이 없다.
+
+### 🔴 두 번째 시도는 `expo prebuild` 에서 죽었다 — 조건부 통과만으로는 안 됐다
+
+```
+The android project is malformed, project files will be cleared and reinitialized.
+✖ Failed to delete android code: EBUSY: resource busy or locked, unlink '…LiveDataCoreIssueRegistry-…jar'
+```
+
+🔴 **prebuild 가 스스로 `android/` 를 지우려 한다.** 남은 파일이 캐시 하나여도 "망가진 프로젝트"로 보고 비우다가 같은 잠금에 걸린다.
+폴더 이름 바꾸기(`mv android android.locked-…`)도 *Permission denied* 였다. Windows 는 열린 핸들이 든 폴더를 옮기지 못한다.
+→ 🔴 **사용자 승인을 받고** Gradle 데몬(PID 23320 · 84MB)과 Kotlin 데몬(PID 28388 · 137MB) **둘만** PID 로 종료했다. 그때 java 프로세스는 그 둘뿐이었고 다른 빌드는 안 돌고 있었다.
+🚫 `gradlew --stop` · `taskkill //IM java.exe` 는 여전히 쓰지 않는다. 이번 종료는 **그 자리의 사용자 승인**이고 규칙이 바뀐 것이 아니다.
+
+#### 🔴 뿌리 — 릴리스 빌드마다 데몬이 **같은 jar 를 다시 잡는다**
+
+vc5 를 굽고 뒷정리를 하자 **같은 파일에서 또 멈췄다.** 이번에 잡은 것은 vc5 빌드가 새로 띄운 데몬이다.
+즉 이건 한 번의 사고가 아니라 **`bundleRelease` 가 끝날 때마다 남는 상태**이고, 다음 빌드의 `rm` 과 prebuild 를 매번 막는다.
+→ `build-aab.sh` 의 gradle 호출에 **`--no-daemon`** 을 붙였다. 빌드가 끝나면 그 JVM 이 내려가 잠금이 풀리고 메모리도 돌아온다.
+🟢 **남의 데몬을 건드리지 않고** 문제를 없애는 방법이다. 대가는 빌드마다 JVM 기동 몇 초다.
+⚠ vc5 가 띄운 데몬 하나는 **그대로 둔다**(유휴 3시간이면 스스로 내려간다). 다음 AAB 는 2~3일 뒤라 그때는 풀려 있다.
+★ `rm` 실패의 조건부 통과는 남겨 둔다. 잠긴 채 prebuild 까지 가면 **같은 EBUSY 로 분명하게 죽으므로** 조용한 실패가 아니다.
+
+### 실측 (2026-09-14)
+
+| | vc4 | vc5 | |
+|---|---:|---:|---|
+| 빌드 시간 | 14m 57s | **5m 8s** | 세 번째 시도. 앞의 두 번이 CMake 산출물을 남겨 두지 않았는데도 빨랐다(데몬 캐시가 아닌 gradle 로컬 캐시 효과로 보인다 · 확정 아님) |
+| AAB 크기 | 74,628,976 B | **74,634,675 B** | +5,699 B. 연령 게이트 JS 와 문구 |
+| 권한 수 | 28 | 🟢 **28** | `check:aab` 허용 목록과 일치 |
+| versionCode · version | 4 · 0.4.0 | **5 · 0.5.0** | `android/app/build.gradle` |
+| 서명 | 업로드 키 | **업로드 키** | SHA1 `44:0E:B4:48:…:C4:1C` 일치 |
+| OTA 배선 | 있음 | **있음** | |
+| 보관 | | `D:\builds\Bookmind\reread-vc5.aab` | sha256 `5cd4b784…7dc3` 원본과 일치 |
+
+✅ **업로드 · `alpha` 트랙 · 2026-09-14** — API 로 다시 읽었다: `alpha` = `0.5.0` · `completed` · versionCode `5`(vc4 를 대체). `production` 은 **비어 있다.**
+⚠ 출시 노트는 이번에도 비어 있다(`eas submit`).
+🔴 **연령 게이트 화면은 아무도 안 보고 나갔다**(`AUTH_SYSTEM.md` §1.10). 설치 직후 첫 실행에서 가장 먼저 본다.
+
 ## 7. 내부 테스트 업로드
 
 ### 7.0.1 🔴 거짓 초록을 **두 번째로** 확인했다 (2026-09-10 저녁)

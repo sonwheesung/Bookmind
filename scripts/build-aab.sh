@@ -26,7 +26,13 @@ npm run --silent verify
 
 # ── ② prebuild — 서명·OTA 값을 네이티브로 옮긴다 ──────────────────────────
 echo "▶ prebuild (android/ 를 새로 만든다)"
-rm -rf android
+if ! rm -rf android 2>/dev/null; then
+  # 🔴 Gradle 데몬이 lint-cache jar 를 잡고 있으면 rm 이 여기서 죽는다(2026-09-14 vc5 실측 · docs/BUILD.md §6.4).
+  #    데몬은 죽이지 않는다 — 형제 빌드가 같은 데몬을 쓸 수 있다. 남은 것이 빌드 캐시뿐이면 그대로 간다.
+  LEFT=$(find android -type f -not -path 'android/app/build/*' | wc -l)
+  [ "$LEFT" -eq 0 ] || { echo "🔴 android/ 에 빌드 캐시 밖 파일이 $LEFT 개 남았다 — 멈춘다"; exit 1; }
+  echo "  ⚠ 잠긴 빌드 캐시만 남았다($(find android -type f | wc -l)개) — 지우지 못한 채 prebuild 한다"
+fi
 REREAD_UPLOAD_STORE_FILE="$KEYSTORE_PATH" \
 REREAD_UPLOAD_STORE_PASSWORD="$STORE_PASSWORD" \
 REREAD_UPLOAD_KEY_ALIAS="$KEY_ALIAS" \
@@ -53,7 +59,10 @@ npm run --silent check:ota   # 이제 축 ⑦(네이티브 반영)까지 잰다
 
 # ── ④ AAB ─────────────────────────────────────────────────────────────────
 echo "▶ bundleRelease (ABI 를 좁히지 않는다 — 스토어용이다)"
-"$PWD/android/gradlew.bat" -p "$PWD/android" app:bundleRelease -x lint -x test --build-cache
+# 🔴 --no-daemon: 데몬이 남으면 lint-cache jar 를 계속 잡아 **다음 빌드의 rm 과 prebuild 가 EBUSY 로 죽는다**
+#    (2026-09-14 vc5 에서 두 번 · docs/BUILD.md §6.4). 빌드가 끝나면 JVM 이 내려가 잠금이 풀리고 메모리도 돌아온다.
+#    🚫 gradlew --stop 으로 풀지 않는다 — 형제 빌드가 같은 데몬을 쓸 수 있다.
+"$PWD/android/gradlew.bat" -p "$PWD/android" app:bundleRelease -x lint -x test --build-cache --no-daemon
 
 AAB=android/app/build/outputs/bundle/release/app-release.aab
 [ -f "$AAB" ] || { echo "🔴 AAB 가 안 만들어졌다"; exit 1; }
