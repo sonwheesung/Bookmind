@@ -1,14 +1,16 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { Spacer } from '@/components/Spacer';
 import { listBooks } from '@/features/books/repo';
+import { splitTagInput } from '@/features/knowledge/compute';
 import { saveKnowledge } from '@/features/knowledge/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { useTheme } from '@/theme';
@@ -23,7 +25,7 @@ import { useTheme } from '@/theme';
  */
 export default function NewKnowledge() {
   const { t } = useTranslation();
-  const { palette, radius, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data: books } = useDbQuery(() => listBooks());
 
@@ -51,10 +53,8 @@ export default function NewKnowledge() {
       bookId,
       page,
       thought,
-      tagNames: tags
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s !== ''),
+      // 🔴 상세 화면과 **같은 함수**로 나눈다(`docs/UI_GUIDE.md` §3)
+      tagNames: splitTagInput(tags),
       sourceType: fromOcr ? 'ocr' : 'manual',
     });
     router.back();
@@ -87,9 +87,9 @@ export default function NewKnowledge() {
         />
       )}
 
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+      <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
         {t('knowledge.field.book')}
-      </Text>
+      </AppText>
       {/* 🔴 칩이 아니라 목록이다(§1.1.1). 요점은 폭이 아니라 **`+ 새 책 등록`이 그 안에 있다**는 것이다.
           책이 0권일 때 칩만 있으면 이 화면에서 책을 만들 길이 없었다 */}
       <BookSelect
@@ -119,12 +119,12 @@ export default function NewKnowledge() {
       />
 
       <Button label={t('knowledge.save.action')} onPress={onSave} disabled={!canSave} />
-      <View style={{ height: spacing.xxl }} />
+      <Spacer size="xxl" />
 
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.md }]}>
+      <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
         {t('knowledge.save.hint')}
-      </Text>
-      <View style={{ height: spacing.xl, borderRadius: radius.sm }} />
+      </AppText>
+      <Spacer size="xl" />
     </Screen>
   );
 }

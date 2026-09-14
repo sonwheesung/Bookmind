@@ -204,6 +204,7 @@
     "recognizing": "Reading the photo…",
     "unavailable": "This build cannot read photos. Type the passage instead.",
     "scriptLabel": "Script",
+    "otherScript": "Read as a different script",
     "resultLabel": "What was read",
     "empty": "Nothing was read.",
     "emptyHint": "Nothing came out of this photo. You can type the passage instead.",

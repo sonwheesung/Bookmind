@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
+import { QuoteRow } from '@/components/QuoteRow';
 import { Screen } from '@/components/Screen';
 import { listRecent } from '@/features/knowledge/repo';
 import { searchKnowledge, type MatchAxis } from '@/features/search/repo';
@@ -24,7 +25,7 @@ const DEBOUNCE_MS = 350;
  */
 export default function SearchScreen() {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const [term, setTerm] = useState('');
   const [query, setQuery] = useState('');
@@ -40,8 +41,6 @@ export default function SearchScreen() {
   const { data: recent } = useDbQuery(() => listRecent(5));
 
   const searching = query.trim() !== '';
-  const divider = { height: StyleSheet.hairlineWidth, backgroundColor: palette.border };
-  const meta = [typography.caption, { color: palette.textMuted }];
 
   const axisLabel = (axes: readonly MatchAxis[]): string =>
     axes.map((a) => t(`search.axis.${a}`)).join(' · ');
@@ -54,51 +53,32 @@ export default function SearchScreen() {
 
       {!searching ? (
         <>
-          <Text style={[typography.section, { color: palette.text, marginBottom: spacing.xs }]}>
+          <AppText variant="section" style={{ marginBottom: spacing.xs }}>
             {t('home.recent.title')}
-          </Text>
+          </AppText>
           {recent.map((k, i) => (
-            <View key={k.id}>
-              {i > 0 && <View style={divider} />}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push(`/knowledge/${k.id}`)}
-                style={({ pressed }) => ({ paddingVertical: spacing.lg, opacity: pressed ? 0.6 : 1 })}
-              >
-                <Text style={[typography.quote, { color: palette.text }]} numberOfLines={3}>
-                  {k.content}
-                </Text>
-              </Pressable>
-            </View>
+            <QuoteRow
+              key={k.id}
+              divided={i > 0}
+              content={k.content}
+              onPress={() => router.push(`/knowledge/${k.id}`)}
+            />
           ))}
         </>
       ) : hits.length === 0 ? (
         /* 🚫 "다시 검색해 보세요" 같은 지시를 붙이지 않는다. 한 줄로 끝낸다 */
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('search.empty')}</Text>
+        <AppText tone="muted">{t('search.empty')}</AppText>
       ) : (
         /* 🚫 결과 개수를 크게 띄우지 않는다. `12건` 은 성취가 아니다 */
         hits.map((h, i) => (
-          <View key={h.id}>
-            {i > 0 && <View style={divider} />}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => router.push(`/knowledge/${h.id}`)}
-              style={({ pressed }) => ({ paddingVertical: spacing.lg, opacity: pressed ? 0.6 : 1 })}
-            >
-              <Text style={[typography.label, { color: palette.textMuted }]}>{axisLabel(h.axes)}</Text>
-              <Text
-                style={[typography.quote, { color: palette.text, marginTop: spacing.xs }]}
-                numberOfLines={3}
-              >
-                {h.content}
-              </Text>
-              {h.bookTitle !== null && (
-                <Text style={[...meta, { marginTop: spacing.xs }]} numberOfLines={1}>
-                  {h.bookTitle}
-                </Text>
-              )}
-            </Pressable>
-          </View>
+          <QuoteRow
+            key={h.id}
+            divided={i > 0}
+            label={axisLabel(h.axes)}
+            content={h.content}
+            source={h.bookTitle}
+            onPress={() => router.push(`/knowledge/${h.id}`)}
+          />
         ))
       )}
     </Screen>

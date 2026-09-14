@@ -1,16 +1,21 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
+import { ButtonRow } from '@/components/ButtonRow';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
+import { ChipRow } from '@/components/ChipRow';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { Spacer } from '@/components/Spacer';
 import { getBook, listBooks } from '@/features/books/repo';
+import { splitTagInput } from '@/features/knowledge/compute';
 import {
   addThought,
   attachTag,
@@ -24,6 +29,9 @@ import {
 import { shouldSuggest, skipSuggestion } from '@/features/practice/repo';
 import { tagsOf } from '@/features/tags/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { confirmDestructive } from '@/lib/confirm';
+import { joinMeta } from '@/lib/format';
+import { toggled } from '@/lib/set';
 import { useTheme } from '@/theme';
 
 /**
@@ -37,7 +45,7 @@ export default function KnowledgeDetail() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id;
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data, reload } = useDbQuery(() => {
     const row = getKnowledge(id);
@@ -59,23 +67,19 @@ export default function KnowledgeDetail() {
   // 이미 붙어 있는 태그를 다시 넣으면 조용히 아무 일도 안 일어나 "안 눌렸나"로 읽혔다
   const [tagNotice, setTagNotice] = useState(false);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
-  const toggleThought = (thoughtId: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(thoughtId)) next.delete(thoughtId);
-      else next.add(thoughtId);
-      return next;
-    });
+  const toggleThought = (thoughtId: string) => setExpanded((prev) => toggled(prev, thoughtId));
 
   if (data.row === undefined) {
     return (
       <Screen>
         <Header title={t('knowledge.detail.title')} back />
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('knowledge.list.empty')}</Text>
+        <AppText tone="muted">{t('knowledge.list.empty')}</AppText>
       </Screen>
     );
   }
   const row = data.row;
+  // 🔴 책도 페이지도 없으면(빈 문자열 포함) 출처 줄을 안 만든다(`joinMeta` 가 '' 를 준다)
+  const source = joinMeta([data.book?.title, row.page]);
 
   const startEdit = () => {
     setDraft(row.content);
@@ -95,33 +99,27 @@ export default function KnowledgeDetail() {
   };
 
   // 되돌릴 수 없는 동작에는 확인을 붙인다 — 문장·책 삭제에는 있는데 생각에만 없었다
-  const confirmRemoveThought = (thoughtId: string) => {
-    Alert.alert(t('knowledge.thoughts.removeTitle'), t('knowledge.thoughts.removeBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.remove'),
-        style: 'destructive',
-        onPress: () => {
-          removeThought(thoughtId);
-          reload();
-        },
+  const confirmRemoveThought = (thoughtId: string) =>
+    confirmDestructive({
+      title: t('knowledge.thoughts.removeTitle'),
+      body: t('knowledge.thoughts.removeBody'),
+      action: t('common.remove'),
+      onConfirm: () => {
+        removeThought(thoughtId);
+        reload();
       },
-    ]);
-  };
+    });
 
-  const confirmDelete = () => {
-    Alert.alert(t('knowledge.delete.title'), t('knowledge.delete.body'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          removeKnowledge(id);
-          router.back();
-        },
+  const confirmDelete = () =>
+    confirmDestructive({
+      title: t('knowledge.delete.title'),
+      body: t('knowledge.delete.body'),
+      action: t('common.delete'),
+      onConfirm: () => {
+        removeKnowledge(id);
+        router.back();
       },
-    ]);
-  };
+    });
 
   return (
     <Screen scroll>
@@ -139,33 +137,23 @@ export default function KnowledgeDetail() {
             maxHeight={260}
           />
           <Field label={t('knowledge.field.page')} value={draftPage} onChangeText={setDraftPage} />
-          <View style={[styles.row, { gap: spacing.md, marginBottom: spacing.xl }]}>
-            {/* 🔴 새 문장 화면에만 있던 잠금이 여기 빠져 있었다 — 빈 원문으로 누르면
-                예외가 나고 사용자에게는 아무 일도 안 일어난 것처럼 보였다(2026-09-09 점검) */}
-            <Button
-              label={t('common.save')}
-              onPress={applyEdit}
-              disabled={draft.trim() === ''}
-              style={styles.grow}
-            />
-            <Button
-              label={t('common.cancel')}
-              variant="ghost"
-              onPress={() => setEditing(false)}
-              style={styles.grow}
-            />
-          </View>
+          {/* 🔴 새 문장 화면에만 있던 잠금이 여기 빠져 있었다 — 빈 원문으로 누르면
+              예외가 나고 사용자에게는 아무 일도 안 일어난 것처럼 보였다(2026-09-09 점검) */}
+          <ButtonRow style={{ marginBottom: spacing.xl }}>
+            <Button label={t('common.save')} onPress={applyEdit} disabled={draft.trim() === ''} />
+            <Button label={t('common.cancel')} variant="ghost" onPress={() => setEditing(false)} />
+          </ButtonRow>
         </>
       ) : (
         <>
           <Card>
-            <Text style={[typography.quote, { color: palette.text }]}>{row.content}</Text>
+            <AppText variant="quote">{row.content}</AppText>
           </Card>
           {/* 🔴 카드인 것은 원문 하나다. 출처·태그는 메타데이터라 카드에서 뺀다(DESIGN_REVIEW §3) */}
-          {(data.book !== undefined || row.page !== null) && (
-            <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.md }]}>
-              {[data.book?.title, row.page].filter((v) => v != null && v !== '').join(' · ')}
-            </Text>
+          {source !== '' && (
+            <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.md }}>
+              {source}
+            </AppText>
           )}
           <Button
             label={t('common.edit')}
@@ -177,9 +165,9 @@ export default function KnowledgeDetail() {
       )}
 
       {/* 책 연결 — ⚠ 저장 후 유도는 한 번만이지만, 상세에서는 언제든 붙일 수 있어야 한다(§1.1) */}
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+      <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
         {t('knowledge.field.book')}
-      </Text>
+      </AppText>
       {/* 🔴 저장 화면과 **같은 부품**이다(§1.1.1). 두 화면이 다르게 생기면
           사용자는 저장 화면에서 배운 것을 여기서 다시 배워야 한다 */}
       <BookSelect
@@ -190,25 +178,23 @@ export default function KnowledgeDetail() {
       />
 
       {/* 태그 */}
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+      <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
         {t('knowledge.tags.title')}
-      </Text>
-      <View style={[styles.chips, { gap: spacing.sm, marginBottom: spacing.sm }]}>
-        {/* 🚫 "태그가 없습니다"를 쓰지 않는다 — 없는 것에 문장을 붙이면 할 일처럼 읽힌다 */}
-        {data.tags.length === 0
-          ? null
-          : data.tags.map((tag) => (
-              <Chip
-                key={tag.id}
-                label={tag.name}
-                trailing="×"
-                onPress={() => {
-                  detachTag(id, tag.id);
-                  reload();
-                }}
-              />
-            ))}
-      </View>
+      </AppText>
+      {/* 🚫 "태그가 없습니다"를 쓰지 않는다 — 없는 것에 문장을 붙이면 할 일처럼 읽힌다 */}
+      <ChipRow style={{ marginBottom: spacing.sm }}>
+        {data.tags.map((tag) => (
+          <Chip
+            key={tag.id}
+            label={tag.name}
+            trailing="×"
+            onPress={() => {
+              detachTag(id, tag.id);
+              reload();
+            }}
+          />
+        ))}
+      </ChipRow>
       <View style={[styles.row, { gap: spacing.sm, marginBottom: spacing.xl }]}>
         <View style={styles.grow}>
           <Field value={newTag} onChangeText={setNewTag} placeholder={t('knowledge.tags.placeholder')} />
@@ -220,10 +206,7 @@ export default function KnowledgeDetail() {
           onPress={() => {
             // 🔴 새 문장 화면과 같은 규칙으로 나눈다 — 화면마다 규칙이 다르면
             //    사용자는 저장 화면에서 배운 것을 여기서 다시 배워야 한다(§5)
-            const names = newTag
-              .split(',')
-              .map((v) => v.trim())
-              .filter((v) => v !== '');
+            const names = splitTagInput(newTag);
             const before = data.tags.length;
             for (const name of names) attachTag(id, name);
             setNewTag('');
@@ -234,31 +217,28 @@ export default function KnowledgeDetail() {
       </View>
 
       {tagNotice && (
-        <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.md }]}>
+        <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.md }}>
           {t('knowledge.tags.already')}
-        </Text>
+        </AppText>
       )}
 
       {/* 내 생각 — 1:N. 최신이 위 */}
-      <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+      <AppText variant="label" tone="muted" style={{ marginBottom: spacing.sm }}>
         {t('knowledge.thoughts.title')}
-      </Text>
+      </AppText>
       {data.thoughts.length === 0 ? (
-        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.md }]}>
+        <AppText tone="muted" style={{ marginBottom: spacing.md }}>
           {t('knowledge.thoughts.empty')}
-        </Text>
+        </AppText>
       ) : (
         data.thoughts.map((th, i) => (
           <Card key={th.id}>
             {/* 🔴 최신 하나만 펼치고 나머지는 접는다(§3) — 긴 생각이 쌓이면
                 삭제 버튼까지 스와이프 세 번이 걸렸다(2026-09-09 점검) */}
             <Pressable onPress={() => toggleThought(th.id)} accessibilityRole="button">
-              <Text
-                style={[typography.thought, { color: palette.text }]}
-                numberOfLines={i === 0 || expanded.has(th.id) ? undefined : 3}
-              >
+              <AppText variant="thought" numberOfLines={i === 0 || expanded.has(th.id) ? undefined : 3}>
                 {th.body}
-              </Text>
+              </AppText>
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -266,7 +246,9 @@ export default function KnowledgeDetail() {
               hitSlop={8}
               style={{ marginTop: spacing.sm }}
             >
-              <Text style={[typography.caption, { color: palette.textMuted }]}>{t('common.remove')}</Text>
+              <AppText variant="caption" tone="muted">
+                {t('common.remove')}
+              </AppText>
             </Pressable>
           </Card>
         ))
@@ -298,25 +280,21 @@ export default function KnowledgeDetail() {
              권유 문구를 붙이지 않는다(§4 "실천 생성을 유도하는 반복 배너" 금지). */}
       {data.suggest && (
         <Card>
-          <Text style={[typography.thought, { color: palette.text }]}>{t('practice.suggest.body')}</Text>
-          <View style={[styles.row, { gap: spacing.sm, marginTop: spacing.md }]}>
-            <View style={styles.grow}>
-              <Button
-                label={t('practice.suggest.accept')}
-                onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
-              />
-            </View>
-            <View style={styles.grow}>
-              <Button
-                label={t('practice.suggest.skip')}
-                variant="ghost"
-                onPress={() => {
-                  skipSuggestion(id);
-                  reload();
-                }}
-              />
-            </View>
-          </View>
+          <AppText variant="thought">{t('practice.suggest.body')}</AppText>
+          <ButtonRow gap="sm" style={{ marginTop: spacing.md }}>
+            <Button
+              label={t('practice.suggest.accept')}
+              onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
+            />
+            <Button
+              label={t('practice.suggest.skip')}
+              variant="ghost"
+              onPress={() => {
+                skipSuggestion(id);
+                reload();
+              }}
+            />
+          </ButtonRow>
         </Card>
       )}
 
@@ -326,13 +304,13 @@ export default function KnowledgeDetail() {
         hitSlop={8}
         style={{ marginBottom: spacing.xxl }}
       >
-        <Text style={[typography.caption, { color: palette.textMuted }]}>
+        <AppText variant="caption" tone="muted">
           {t('practice.createFromKnowledge')}
-        </Text>
+        </AppText>
       </Pressable>
 
       <Button label={t('common.delete')} variant="danger" onPress={confirmDelete} />
-      <View style={{ height: spacing.xl }} />
+      <Spacer size="xl" />
     </Screen>
   );
 }
@@ -340,5 +318,4 @@ export default function KnowledgeDetail() {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'flex-start' },
   grow: { flex: 1 },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' },
 });

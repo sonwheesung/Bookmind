@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { coverColorOf, coverLetter } from '@/features/books/cover';
-import { useTheme } from '@/theme';
+import { coverInk, useTheme } from '@/theme';
 
 type Props = {
   book: { title: string; cover_color: string | null };
@@ -15,7 +16,7 @@ type Props = {
  * 🔴 글자는 **시스템 폰트 그대로** — 어떤 언어의 책이 와도 두부(□)가 안 된다(결정 #13).
  */
 export function BookCover({ book, size = 'md' }: Props) {
-  const { palette, radius, typography } = useTheme();
+  const { palette, radius } = useTheme();
   const w = size === 'sm' ? 34 : 48;
   const h = size === 'sm' ? 48 : 68;
 
@@ -32,13 +33,10 @@ export function BookCover({ book, size = 'md' }: Props) {
         },
       ]}
     >
-      {/* 🚫 색에 의미를 주지 않는다 — 글자는 언제나 진한 텍스트색이다 */}
-      <Text
-        style={[size === 'sm' ? typography.body : typography.title, { color: '#1C1A17' }]}
-        numberOfLines={1}
-      >
+      {/* 🚫 색에 의미를 주지 않는다 — 글자는 언제나 진한 텍스트색이다(토큰 `coverInk`) */}
+      <AppText variant={size === 'sm' ? 'body' : 'title'} style={{ color: coverInk }} numberOfLines={1}>
         {coverLetter(book.title)}
-      </Text>
+      </AppText>
     </View>
   );
 }

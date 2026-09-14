@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { canAffixPageUnit, displayPage } from '../features/knowledge/compute.ts';
+import { canAffixPageUnit, displayPage, splitTagInput } from '../features/knowledge/compute.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
@@ -84,6 +84,25 @@ check(
   '④ 🔴 옛 코드를 찾는 정규식이 아무것도 안 잡는다',
 );
 
+// ── ⑤ 태그 입력 나누기 (`docs/UI_GUIDE.md` §3) ──
+{
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  check(
+    same(splitTagInput('철학, 습관'), ['철학', '습관']),
+    `⑤ 기본: ${JSON.stringify(splitTagInput('철학, 습관'))}`,
+  );
+  check(same(splitTagInput(''), []), '⑤ 빈 입력이 빈 목록이 아니다');
+  check(same(splitTagInput(' , ,, '), []), '⑤ 🔴 쉼표와 공백만 있는데 이름이 생긴다(빈 태그)');
+  check(same(splitTagInput('a,,b'), ['a', 'b']), '⑤ 연속 쉼표에서 빈 이름이 생긴다');
+  check(same(splitTagInput('  한 단어 태그  '), ['한 단어 태그']), '⑤ 이름 안의 공백을 건드린다');
+  check(same(splitTagInput('a, a'), ['a', 'a']), '⑤ 중복을 여기서 거른다(두 화면에 있던 동작이 아니다)');
+  check(same(splitTagInput('solo'), ['solo']), '⑤ 쉼표 없는 한 단어를 못 받는다');
+  // 🔴 두 화면이 **같은 함수**를 거치나
+  for (const f of ['app/knowledge/new.tsx', 'app/knowledge/[id].tsx']) {
+    check(read(f).includes('splitTagInput('), `⑤ 🔴 ${f} 가 splitTagInput 을 안 쓴다(규칙이 두 벌이 된다)`);
+  }
+}
+
 if (bad.length > 0) {
   console.error(`\ncheck:knowledge 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -92,6 +111,6 @@ if (bad.length > 0) {
 }
 console.log(
   `\ncheck:knowledge OK — 페이지 접사 ①숫자엔 씌운다 ②🔴 \`42p\`·\`3장\`·\`12-14\` 는 그대로 ` +
-    `\n  ③빈 값은 null(출처 줄에서 걸러진다) ④화면이 판정을 거친다` +
+    `\n  ③빈 값은 null(출처 줄에서 걸러진다) ④화면이 판정을 거친다 ⑤태그 나누기(빈 태그 0 · 두 화면 같은 함수)` +
     `\n  SELF-TEST 통과(판정이 갈라지는가 · 접사가 값을 바꾸는가)\n`,
 );

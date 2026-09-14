@@ -1,17 +1,21 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
-import { WeekRow } from '@/components/WeekRow';
+import { Divider } from '@/components/Divider';
 import { Header } from '@/components/Header';
+import { QuoteRow } from '@/components/QuoteRow';
 import { Screen } from '@/components/Screen';
+import { WeekRow } from '@/components/WeekRow';
 import { displayPage } from '@/features/knowledge/compute';
 import { listRecent } from '@/features/knowledge/repo';
 import { listToday, toggleCheck } from '@/features/practice/repo';
 import { dueCount } from '@/features/review/repo';
 import { loadStats } from '@/features/stats/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
 /**
@@ -29,7 +33,7 @@ import { useTheme } from '@/theme';
  */
 export default function Home() {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   // 🔴 `loadStats()` 가 책·문장 수를 이미 센다. 같은 것을 두 번 세지 않는다(`STATS_SYSTEM.md` §2)
   const { data, reload } = useDbQuery(() => ({
@@ -41,8 +45,20 @@ export default function Home() {
 
   const { books, knowledge, streak } = data.stats;
   const hasDue = data.due > 0;
-  const divider = { height: StyleSheet.hairlineWidth, backgroundColor: palette.border };
-  const meta = [typography.caption, { color: palette.textMuted }];
+
+  // 홈 아래 조용한 링크 줄의 조각. 🔴 이 화면에서만 반복되므로 파일 안에 둔다(`docs/UI_GUIDE.md` §4)
+  const metaLink = (label: string, onPress: () => void, accessibilityLabel?: string) => (
+    <Pressable accessibilityLabel={accessibilityLabel} onPress={onPress} hitSlop={10}>
+      <AppText variant="caption" tone="muted">
+        {label}
+      </AppText>
+    </Pressable>
+  );
+  const dot = () => (
+    <AppText variant="caption" tone="muted" style={{ marginHorizontal: spacing.sm }}>
+      ·
+    </AppText>
+  );
 
   return (
     <Screen scroll>
@@ -59,7 +75,9 @@ export default function Home() {
                 onPress={() => router.push('/search')}
                 hitSlop={12}
               >
-                <Text style={[typography.label, { color: palette.textMuted }]}>{t('search.title')}</Text>
+                <AppText variant="label" tone="muted">
+                  {t('search.title')}
+                </AppText>
               </Pressable>
             )}
             <Pressable
@@ -68,7 +86,9 @@ export default function Home() {
               onPress={() => router.push('/settings')}
               hitSlop={12}
             >
-              <Text style={[typography.label, { color: palette.textMuted }]}>{t('settings.title')}</Text>
+              <AppText variant="label" tone="muted">
+                {t('settings.title')}
+              </AppText>
             </Pressable>
           </View>
         }
@@ -78,9 +98,9 @@ export default function Home() {
           🚫 태그라인·저장 힌트를 여기 두지 않는다. 둘 다 처음 한 번 읽으면 끝인데
              매일 가장 좋은 자리를 먹고 있었다(저장 힌트는 저장 화면에 그대로 있다). */}
       <View style={{ marginBottom: spacing.section }}>
-        <Text style={[typography.section, { color: palette.text, marginBottom: spacing.sm }]}>
+        <AppText variant="section" style={{ marginBottom: spacing.sm }}>
           {t('home.today.title')}
-        </Text>
+        </AppText>
 
         {hasDue ? (
           <Button
@@ -90,9 +110,9 @@ export default function Home() {
           />
         ) : (
           /* 🚫 0 을 강조하지 않는다. 중립적인 문장 하나로 끝낸다(기둥 5) */
-          <Text style={[typography.thought, { color: palette.textMuted, marginBottom: spacing.lg }]}>
+          <AppText variant="thought" tone="muted" style={{ marginBottom: spacing.lg }}>
             {t('home.today.empty')}
-          </Text>
+          </AppText>
         )}
 
         <Button
@@ -102,7 +122,7 @@ export default function Home() {
         />
       </View>
 
-      <View style={[divider, { marginBottom: spacing.section }]} />
+      <Divider style={{ marginBottom: spacing.section }} />
 
       {/* ── 오늘의 실천 ────────────────────────────────────────────────
           🔴 **실천이 0개면 이 영역을 통째로 안 그린다**(`PRACTICE_SYSTEM.md` §3).
@@ -111,9 +131,9 @@ export default function Home() {
       {data.practices.length > 0 && (
         <View style={{ marginBottom: spacing.section }}>
           <Pressable accessibilityRole="button" onPress={() => router.push('/practice')} hitSlop={8}>
-            <Text style={[typography.section, { color: palette.text, marginBottom: spacing.md }]}>
+            <AppText variant="section" style={{ marginBottom: spacing.md }}>
               {t('practice.todayTitle')}
-            </Text>
+            </AppText>
           </Pressable>
 
           {data.practices.map((p, i) => (
@@ -123,9 +143,9 @@ export default function Home() {
                 onPress={() => router.push(`/practice/${p.id}`)}
                 style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
               >
-                <Text style={[typography.thought, { color: palette.text }]} numberOfLines={2}>
+                <AppText variant="thought" numberOfLines={2}>
                   {p.title}
-                </Text>
+                </AppText>
               </Pressable>
               <View style={{ marginTop: spacing.sm }}>
                 <WeekRow
@@ -138,57 +158,45 @@ export default function Home() {
                 />
               </View>
               {p.streak > 0 && (
-                <Text style={[...meta, { marginTop: spacing.sm }]}>
+                <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
                   {t('practice.streak', { count: p.streak })}
-                </Text>
+                </AppText>
               )}
             </View>
           ))}
         </View>
       )}
 
-      {data.practices.length > 0 && <View style={[divider, { marginBottom: spacing.section }]} />}
+      {data.practices.length > 0 && <Divider style={{ marginBottom: spacing.section }} />}
 
       {/* ── Recent ────────────────────────────────────────────────────
           🔴 카드가 아니다. 그래도 **항목 전체가 터치 영역**이다 —
              시각적으로 카드가 아닌 것과 기능적으로 목록인 것은 다른 축이다. */}
-      <Text style={[typography.section, { color: palette.text, marginBottom: spacing.xs }]}>
+      <AppText variant="section" style={{ marginBottom: spacing.xs }}>
         {t('home.recent.title')}
-      </Text>
+      </AppText>
 
       {data.recent.length === 0 ? (
-        <Text style={[typography.body, { color: palette.textMuted, marginTop: spacing.sm }]}>
+        <AppText tone="muted" style={{ marginTop: spacing.sm }}>
           {t('home.recent.empty')}
-        </Text>
+        </AppText>
       ) : (
         data.recent.map((k, i) => {
-          // 🚫 출처가 없으면 빈 줄을 만들지 않는다
-          const source = [
+          // 🚫 출처가 없으면 빈 줄을 만들지 않는다(`joinMeta` 가 '' 를 주고 `QuoteRow` 가 안 그린다)
+          const source = joinMeta([
             k.bookTitle,
             k.bookAuthor,
             // 🔴 숫자일 때만 `쪽`·`p.` 을 씌운다. `3장` 에 씌우면 `3장쪽` 이 된다(§3 · compute.ts)
             displayPage(k.page, (p) => t('knowledge.pageShort', { page: p })),
-          ]
-            .filter((v) => v !== null && v !== '')
-            .join(' · ');
+          ]);
           return (
-            <View key={k.id}>
-              {i > 0 && <View style={divider} />}
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => router.push(`/knowledge/${k.id}`)}
-                style={({ pressed }) => ({ paddingVertical: spacing.lg, opacity: pressed ? 0.6 : 1 })}
-              >
-                <Text style={[typography.quote, { color: palette.text }]} numberOfLines={3}>
-                  {k.content}
-                </Text>
-                {source !== '' && (
-                  <Text style={[...meta, { marginTop: spacing.xs }]} numberOfLines={1}>
-                    {source}
-                  </Text>
-                )}
-              </Pressable>
-            </View>
+            <QuoteRow
+              key={k.id}
+              divided={i > 0}
+              content={k.content}
+              source={source}
+              onPress={() => router.push(`/knowledge/${k.id}`)}
+            />
           );
         })
       )}
@@ -199,32 +207,22 @@ export default function Home() {
           🚫 신규 사용자에게 `책 0 · 문장 0` 을 보여주지 않는다 — 성취 대시보드가 된다. */}
       {(books > 0 || knowledge > 0) && (
         <View style={[styles.metaRow, { marginTop: spacing.xl }]}>
-          <Pressable onPress={() => router.push('/books')} hitSlop={10}>
-            <Text style={meta}>{t('home.meta.books', { count: books })}</Text>
-          </Pressable>
-          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
-          <Pressable onPress={() => router.push('/knowledge')} hitSlop={10}>
-            <Text style={meta}>{t('home.meta.knowledge', { count: knowledge })}</Text>
-          </Pressable>
-          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
+          {metaLink(t('home.meta.books', { count: books }), () => router.push('/books'))}
+          {dot()}
+          {metaLink(t('home.meta.knowledge', { count: knowledge }), () => router.push('/knowledge'))}
+          {dot()}
           {/* 🔴 연속일이 0 이면 `연속 0일` 이 아니라 `통계` 다(`STATS_SYSTEM.md` §4.1).
               0 을 적어 두면 다음에 "오늘 하면 1일!" 이 붙고, 그건 기둥 5 가 막는 그것이다. */}
-          <Pressable accessibilityLabel={t('stats.title')} onPress={() => router.push('/stats')} hitSlop={10}>
-            <Text style={meta}>
-              {streak > 0 ? t('home.meta.streak', { count: streak }) : t('stats.title')}
-            </Text>
-          </Pressable>
-          <Text style={[...meta, { marginHorizontal: spacing.sm }]}>·</Text>
+          {metaLink(
+            streak > 0 ? t('home.meta.streak', { count: streak }) : t('stats.title'),
+            () => router.push('/stats'),
+            t('stats.title'),
+          )}
+          {dot()}
           {/* 🔴 실천이 0개여도 이 줄은 남는다(`PRACTICE_SYSTEM.md` §7 "홈에서 직접 생성 경로").
               위쪽 `오늘의 실천` 블록은 0개면 사라지므로, 안 두면 만들 길이 지식 카드 하나뿐이 된다.
               🚫 조용한 글자 하나다. 만들라고 권하는 문구를 붙이지 않는다(§4). */}
-          <Pressable
-            accessibilityLabel={t('practice.title')}
-            onPress={() => router.push('/practice')}
-            hitSlop={10}
-          >
-            <Text style={meta}>{t('practice.title')}</Text>
-          </Pressable>
+          {metaLink(t('practice.title'), () => router.push('/practice'), t('practice.title'))}
         </View>
       )}
     </Screen>

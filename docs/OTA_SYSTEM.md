@@ -217,6 +217,13 @@ npx eas-cli update --channel production --platform android --message "<무엇을
 
 ---
 
+### 7.3 🔴 비공개 테스트 기간에는 내지 않는다 (결정 #23 · 2026-09-14)
+
+사용자 결정. 테스터 업체 doply 가 *2~3일 간격 업데이트*를 보증 조건으로 건다([`STORE_LISTING.md`](./STORE_LISTING.md) §8.6).
+OTA 는 Play 트랙에 새 버전을 만들지 않으므로 그 "업데이트"가 되지 못한다.
+→ 이 기간의 수정은 versionCode 를 올린 **AAB** 로 비공개 트랙에 올린다([`BUILD.md`](./BUILD.md) §6·§7).
+🟢 배선은 그대로 둔다. 비공개 테스트가 끝나면 이 절을 닫고 다시 쓴다.
+
 ## 8. 🔴 새 수탁자가 생긴다 — 처리방침을 같이 고친다
 
 OTA 를 켜면 기기가 앱 실행마다 **Expo, Inc.(미국) `u.expo.dev`** 와 통신한다.

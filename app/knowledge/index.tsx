@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
@@ -9,12 +9,13 @@ import { Screen } from '@/components/Screen';
 import { getBook } from '@/features/books/repo';
 import { listKnowledge } from '@/features/knowledge/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
 /** 지식 카드 목록. 출처가 없는 카드는 **출처 줄 자체가 없다**(`KNOWLEDGE_SYSTEM.md` §8). */
 export default function KnowledgeList() {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data } = useDbQuery(() =>
     listKnowledge().map((k) => ({
@@ -34,20 +35,24 @@ export default function KnowledgeList() {
       />
 
       {data.length === 0 ? (
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('knowledge.list.empty')}</Text>
+        <AppText tone="muted">{t('knowledge.list.empty')}</AppText>
       ) : (
-        data.map((k) => (
-          <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
-            <Text style={[typography.thought, { color: palette.text }]} numberOfLines={4}>
-              {k.content}
-            </Text>
-            {(k.bookTitle !== null || k.page !== null) && (
-              <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.sm }]}>
-                {[k.bookTitle, k.page].filter((v) => v !== null && v !== '').join(' · ')}
-              </Text>
-            )}
-          </Card>
-        ))
+        data.map((k) => {
+          // 🔴 페이지가 빈 문자열이어도 줄을 안 만든다(`joinMeta` 가 '' 를 준다)
+          const source = joinMeta([k.bookTitle, k.page]);
+          return (
+            <Card key={k.id} onPress={() => router.push(`/knowledge/${k.id}`)}>
+              <AppText variant="thought" numberOfLines={4}>
+                {k.content}
+              </AppText>
+              {source !== '' && (
+                <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
+                  {source}
+                </AppText>
+              )}
+            </Card>
+          );
+        })
       )}
     </Screen>
   );

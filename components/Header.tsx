@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { useTheme } from '@/theme';
 
 type Props = {
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function Header({ title, back = false, right }: Props) {
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   return (
     <View style={[styles.row, { marginBottom: spacing.lg, gap: spacing.sm }]}>
@@ -22,12 +23,14 @@ export function Header({ title, back = false, right }: Props) {
           onPress={() => router.back()}
           hitSlop={12}
         >
-          <Text style={[typography.title, { color: palette.textMuted }]}>{'‹'}</Text>
+          <AppText variant="title" tone="muted">
+            {'‹'}
+          </AppText>
         </Pressable>
       )}
-      <Text style={[typography.title, styles.title, { color: palette.text }]} numberOfLines={1}>
+      <AppText variant="title" style={styles.title} numberOfLines={1}>
         {title}
-      </Text>
+      </AppText>
       {right}
     </View>
   );

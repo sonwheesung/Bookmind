@@ -1,13 +1,16 @@
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { parseRepeat } from '@/features/practice/compute';
 import { listAll, type PracticeCard } from '@/features/practice/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
 /**
@@ -18,7 +21,7 @@ import { useTheme } from '@/theme';
  */
 export default function PracticeList() {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data } = useDbQuery(() => listAll());
 
@@ -27,19 +30,18 @@ export default function PracticeList() {
 
   const row = (p: PracticeCard) => (
     <Card key={p.id} onPress={() => router.push(`/practice/${p.id}`)}>
-      <Text style={[typography.thought, { color: palette.text }]} numberOfLines={3}>
+      <AppText variant="thought" numberOfLines={3}>
         {p.title}
-      </Text>
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.sm }]}>
-        {[
-          t(`practice.repeat.${p.repeatRule.startsWith('weekly:') ? 'weekly' : p.repeatRule}`),
+      </AppText>
+      <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
+        {joinMeta([
+          // 🔴 반복 주기 판정은 `parseRepeat` 한 곳이다. 화면에서 문자열로 다시 가르지 않는다
+          t(`practice.repeat.${parseRepeat(p.repeatRule).kind}`),
           p.state === 'running' ? null : t(`practice.state.${p.state}`),
           // 🚫 연속일이 0 이면 그 조각을 아예 안 붙인다(§8)
           p.streak > 0 ? t('practice.streak', { count: p.streak }) : null,
-        ]
-          .filter((v) => v !== null)
-          .join(' · ')}
-      </Text>
+        ])}
+      </AppText>
     </Card>
   );
 
@@ -55,16 +57,16 @@ export default function PracticeList() {
 
       {data.length === 0 ? (
         /* 🔴 실천이 0개인 것은 결핍이 아니다(기둥 4). 만들라고 밀지 않는다 */
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('practice.empty')}</Text>
+        <AppText tone="muted">{t('practice.empty')}</AppText>
       ) : (
         <>
           {running.map(row)}
 
           {closed.length > 0 && (
             <View style={{ marginTop: spacing.xl }}>
-              <Text style={[typography.section, { color: palette.text, marginBottom: spacing.sm }]}>
+              <AppText variant="section" style={{ marginBottom: spacing.sm }}>
                 {t('practice.closedTitle')}
-              </Text>
+              </AppText>
               {closed.map(row)}
             </View>
           )}

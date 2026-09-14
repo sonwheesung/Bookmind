@@ -164,11 +164,7 @@ export function scaleBoxes(
 }
 
 /** 사진을 폭에 맞춰 그릴 때의 표시 높이. 🔴 박스 배율과 **같은 식**을 써야 좌표가 맞는다 */
-export function displayHeight(
-  imageWidth: number,
-  imageHeight: number,
-  displayWidth: number,
-): number {
+export function displayHeight(imageWidth: number, imageHeight: number, displayWidth: number): number {
   if (imageWidth <= 0 || displayWidth <= 0) return 0;
   return imageHeight * (displayWidth / imageWidth);
 }
@@ -230,4 +226,107 @@ export function canSaveSelection(
 export function cleanupTarget(uri: string): string | null {
   if (!uri.startsWith('file://')) return null;
   return uri;
+}
+
+// ── 자동 문자 고르기 (결정 #24 · `docs/KNOWLEDGE_SYSTEM.md` §2.1.1) ─────────────
+
+/**
+ * 판정선. 🔴 **추정치다.** 실기기 사진으로 재기 전까지 이 숫자는 근거가 없다(결정 #24 대가 ②).
+ * 너무 낮으면 엉뚱한 라틴 글자 몇 개에 멈추고, 너무 높으면 짧은 사진마다 모델을 여러 번 돈다.
+ */
+export const AUTO_MIN_CHARS = 8;
+
+export interface ScriptCounts {
+  readonly latin: number;
+  readonly hangul: number;
+  readonly kana: number;
+  readonly han: number;
+  readonly devanagari: number;
+}
+
+/** 글자를 문자 체계별로 센다. 공백·숫자·문장부호는 어디에도 안 센다 */
+export function countScripts(text: string): ScriptCounts {
+  let latin = 0;
+  let hangul = 0;
+  let kana = 0;
+  let han = 0;
+  let devanagari = 0;
+  for (const ch of text) {
+    const c = ch.codePointAt(0) ?? 0;
+    if (
+      (c >= 0x41 && c <= 0x5a) ||
+      (c >= 0x61 && c <= 0x7a) ||
+      (c >= 0xc0 && c <= 0x24f && c !== 0xd7 && c !== 0xf7)
+    ) {
+      latin += 1;
+    } else if ((c >= 0xac00 && c <= 0xd7a3) || (c >= 0x1100 && c <= 0x11ff) || (c >= 0x3130 && c <= 0x318f)) {
+      hangul += 1;
+    } else if (c >= 0x3040 && c <= 0x30ff) {
+      kana += 1;
+    } else if ((c >= 0x4e00 && c <= 0x9fff) || (c >= 0x3400 && c <= 0x4dbf)) {
+      han += 1;
+    } else if (c >= 0x0900 && c <= 0x097f) {
+      devanagari += 1;
+    }
+  }
+  return { latin, hangul, kana, han, devanagari };
+}
+
+/**
+ * 그 모델이 **자기 몫으로** 읽은 글자 수.
+ *
+ * 🔴 일본어는 가나가 하나도 없으면 0 이다. 한자만 있는 페이지는 중국어로 본다
+ *    (일본어 모델이 중국어 페이지의 한자를 읽어도 일본어로 고르지 않게).
+ */
+const NATIVE: Record<Script, (c: ScriptCounts) => number> = {
+  latin: (c) => c.latin,
+  korean: (c) => c.hangul,
+  japanese: (c) => (c.kana > 0 ? c.kana + c.han : 0),
+  chinese: (c) => c.han,
+  devanagari: (c) => c.devanagari,
+};
+
+export function nativeCount(script: Script, counts: ScriptCounts): number {
+  return NATIVE[script](counts);
+}
+
+/** 이어 읽는 순서. 🔴 라틴은 없다. 라틴 모델은 다른 문자를 못 읽어서 신호가 안 나온다 */
+const AUTO_ORDER: readonly Script[] = ['korean', 'japanese', 'chinese', 'devanagari'];
+
+/**
+ * 첫 판독 뒤에 **더 읽을 모델** 순서. 비면 첫 결과로 끝낸다.
+ *
+ * ① 첫 모델 고유 글자가 판정선 이상이면 끝
+ * ② 첫 모델이 라틴이 아닌데 라틴 글자가 판정선 이상이면 끝(비라틴 모델은 라틴도 읽는다)
+ * ③ 그 밖에는 나머지 비라틴 모델을 순서대로
+ * ⚠ 라틴 모델이 한글 페이지에서 엉뚱한 라틴 글자를 판정선 이상 내면 ①에서 끝난다. 그날의 탈출구가 화면 링크다.
+ */
+export function planAuto(first: Script, counts: ScriptCounts): readonly Script[] {
+  if (nativeCount(first, counts) >= AUTO_MIN_CHARS) return [];
+  if (first !== 'latin' && counts.latin >= AUTO_MIN_CHARS) return [];
+  return AUTO_ORDER.filter((s) => s !== first);
+}
+
+/** 이어 읽기를 멈춰도 되나. 방금 읽은 모델의 고유 글자가 판정선에 닿았다 */
+export function autoSettled(script: Script, counts: ScriptCounts): boolean {
+  return nativeCount(script, counts) >= AUTO_MIN_CHARS;
+}
+
+/**
+ * 읽은 결과 중 무엇을 쓰나(인덱스). **고유 글자가 가장 많은 것**이고 같으면 먼저 읽은 것이다.
+ * 🔴 아무도 판정선에 못 미치면 **첫 결과**다. 앱 언어 기본값이 가장 덜 놀랍다.
+ */
+export function pickAuto(
+  tries: readonly { readonly script: Script; readonly counts: ScriptCounts }[],
+): number {
+  let best = 0;
+  let bestScore = -1;
+  tries.forEach((t, i) => {
+    const score = nativeCount(t.script, t.counts);
+    if (score > bestScore) {
+      best = i;
+      bestScore = score;
+    }
+  });
+  return bestScore >= AUTO_MIN_CHARS ? best : 0;
 }

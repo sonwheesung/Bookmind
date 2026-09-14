@@ -1,15 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import type { WeekCell } from '@/features/practice/repo';
+import { WEEKDAY_KEYS } from '@/lib/day';
 import { useTheme } from '@/theme';
 
 type Props = {
   cells: readonly WeekCell[];
   onToggle?: (day: string) => void;
 };
-
-const KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
 
 /**
  * 이번 주 일곱 칸 — `docs/PRACTICE_SYSTEM.md` §3 · §8.
@@ -20,12 +20,13 @@ const KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const;
  */
 export function WeekRow({ cells, onToggle }: Props) {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { palette, spacing } = useTheme();
 
   return (
     <View style={styles.row}>
       {cells.map((c, i) => {
-        const key = KEYS[i] ?? 'mon';
+        // 🔴 칸은 월요일부터다(`weekCells`). 인덱스가 곧 `isoWeekday - 1` 이다
+        const key = WEEKDAY_KEYS[i] ?? 'mon';
         const mark = c.done ? '●' : '○';
         const color = c.done ? palette.text : c.scheduled ? palette.textMuted : palette.border;
         return (
@@ -39,10 +40,12 @@ export function WeekRow({ cells, onToggle }: Props) {
             hitSlop={6}
             style={({ pressed }) => [styles.cell, { opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text style={[typography.caption, { color: palette.textMuted }]}>
+            <AppText variant="caption" tone="muted">
               {t(`practice.weekday.${key}`)}
-            </Text>
-            <Text style={[typography.section, { color, marginTop: spacing.xs }]}>{mark}</Text>
+            </AppText>
+            <AppText variant="section" style={{ color, marginTop: spacing.xs }}>
+              {mark}
+            </AppText>
           </Pressable>
         );
       })}

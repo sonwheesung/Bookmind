@@ -1,12 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text, View } from 'react-native';
+import { View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { WeekRow } from '@/components/WeekRow';
 import { getKnowledge } from '@/features/knowledge/repo';
+import { parseRepeat } from '@/features/practice/compute';
 import {
   getPractice,
   removePractice,
@@ -15,6 +17,8 @@ import {
   toggleCheck,
 } from '@/features/practice/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { confirmDestructive } from '@/lib/confirm';
+import { joinMeta } from '@/lib/format';
 import { useTheme } from '@/theme';
 
 /**
@@ -27,7 +31,7 @@ export default function PracticeDetail() {
   const params = useLocalSearchParams<{ id: string }>();
   const id = params.id;
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data, reload } = useDbQuery(() => {
     const p = getPractice(id);
@@ -42,7 +46,7 @@ export default function PracticeDetail() {
     return (
       <Screen>
         <Header title={t('practice.title')} back />
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('practice.empty')}</Text>
+        <AppText tone="muted">{t('practice.empty')}</AppText>
       </Screen>
     );
   }
@@ -52,57 +56,54 @@ export default function PracticeDetail() {
     reload();
   };
 
-  const confirmDelete = () => {
-    Alert.alert(t('practice.deleteConfirmTitle'), t('practice.deleteConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          removePractice(id);
-          router.back();
-        },
+  const confirmDelete = () =>
+    confirmDestructive({
+      title: t('practice.deleteConfirmTitle'),
+      body: t('practice.deleteConfirmBody'),
+      action: t('common.delete'),
+      onConfirm: () => {
+        removePractice(id);
+        router.back();
       },
-    ]);
-  };
+    });
 
   return (
     <Screen scroll>
       <Header title={t('practice.title')} back />
 
-      <Text style={[typography.quote, { color: palette.text, marginBottom: spacing.lg }]}>{p.title}</Text>
+      <AppText variant="quote" style={{ marginBottom: spacing.lg }}>
+        {p.title}
+      </AppText>
 
-      <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.xl }]}>
-        {[
-          t(`practice.repeat.${p.repeatRule.startsWith('weekly:') ? 'weekly' : p.repeatRule}`),
+      <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.xl }}>
+        {joinMeta([
+          // 🔴 반복 주기 판정은 `parseRepeat` 한 곳이다. 화면에서 문자열로 다시 가르지 않는다
+          t(`practice.repeat.${parseRepeat(p.repeatRule).kind}`),
           p.state === 'running' ? null : t(`practice.state.${p.state}`),
-        ]
-          .filter((v) => v !== null)
-          .join(' · ')}
-      </Text>
+        ])}
+      </AppText>
 
       <WeekRow cells={p.cells} onToggle={onToggle} />
 
       {/* 🚫 `0일 연속` 을 쓰지 않는다. 그 줄을 안 그린다(§8) */}
       {p.streak > 0 && (
-        <Text style={[typography.body, { color: palette.text, marginTop: spacing.lg }]}>
-          {t('practice.streak', { count: p.streak })}
-        </Text>
+        <AppText style={{ marginTop: spacing.lg }}>{t('practice.streak', { count: p.streak })}</AppText>
       )}
 
       {/* 🔴 연결이 없으면 아무것도 안 그린다. 없는 것을 결핍으로 보여주지 않는다(§5) */}
       {data.source !== undefined && (
         <View style={{ marginTop: spacing.section }}>
-          <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+          <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
             {t('practice.fromKnowledge')}
-          </Text>
-          <Text
-            style={[typography.thought, { color: palette.textMuted }]}
+          </AppText>
+          <AppText
+            variant="thought"
+            tone="muted"
             numberOfLines={3}
             onPress={() => router.push(`/knowledge/${data.source?.id ?? ''}`)}
           >
             {data.source.content}
-          </Text>
+          </AppText>
         </View>
       )}
 

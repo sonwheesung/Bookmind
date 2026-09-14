@@ -1,5 +1,6 @@
-import { StyleSheet, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
+import { StyleSheet, TextInput, View, type KeyboardTypeOptions } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { useTheme } from '@/theme';
 
 type Props = {
@@ -44,9 +45,9 @@ export function Field({
   return (
     <View style={{ marginBottom: spacing.lg }}>
       {label !== undefined && (
-        <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+        <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
           {label}
-        </Text>
+        </AppText>
       )}
       <TextInput
         value={value}

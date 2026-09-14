@@ -26,6 +26,16 @@ export function resolveDeviceLang(): Lang {
   return FALLBACK;
 }
 
+/**
+ * 날짜·숫자 표시용 **기기 로케일**(`en-US` · `ko-KR`).
+ *
+ * 🔴 UI 언어가 아니다(`CLAUDE.md` §9 · 2026-09-14 사용자 확인). UI 를 영어로 골라도 기기가 한국어면
+ *    날짜는 한국식이다. 그 전에는 화면들이 `i18n.language` 를 넘겨 문서와 어긋나 있었다.
+ */
+export function deviceLocale(): string {
+  return Localization.getLocales()[0]?.languageTag ?? FALLBACK;
+}
+
 void i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },

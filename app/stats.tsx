@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
+import { Divider } from '@/components/Divider';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { loadStats, loadTagDistribution } from '@/features/stats/repo';
@@ -17,7 +19,7 @@ import { useTheme } from '@/theme';
  */
 export default function StatsScreen() {
   const { t } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { spacing } = useTheme();
 
   const { data } = useDbQuery(() => ({
     totals: loadStats(),
@@ -26,9 +28,6 @@ export default function StatsScreen() {
 
   const { totals, tags } = data;
   const empty = totals.knowledge === 0 && totals.books === 0;
-
-  const label = [typography.label, { color: palette.textMuted }];
-  const value = [typography.body, { color: palette.text }];
 
   const rows: { key: string; text: string }[] = [
     {
@@ -65,32 +64,26 @@ export default function StatsScreen() {
 
       {empty ? (
         /* 🚫 `문장 0 · 책 0` 을 크게 보여주지 않는다. 성취 대시보드가 된다(§4) */
-        <Text style={[typography.body, { color: palette.textMuted }]}>{t('stats.empty')}</Text>
+        <AppText tone="muted">{t('stats.empty')}</AppText>
       ) : (
         <>
           {rows.map((r) => (
             <View key={r.key} style={[styles.row, { marginBottom: spacing.lg }]}>
-              <Text style={[...label, styles.rowLabel]}>{t(`stats.label.${r.key}`)}</Text>
-              <Text style={[...value, styles.rowValue]}>{r.text}</Text>
+              <AppText variant="label" tone="muted" style={styles.rowLabel}>
+                {t(`stats.label.${r.key}`)}
+              </AppText>
+              <AppText style={styles.rowValue}>{r.text}</AppText>
             </View>
           ))}
 
           {/* 태그가 하나도 없으면 이 절을 **아예 안 그린다**. 빈 상자를 만들지 않는다(§6) */}
           {tags.length > 0 && (
             <>
-              <View
-                style={{
-                  height: StyleSheet.hairlineWidth,
-                  backgroundColor: palette.border,
-                  marginVertical: spacing.lg,
-                }}
-              />
-              <Text style={[typography.section, { color: palette.text, marginBottom: spacing.sm }]}>
+              <Divider style={{ marginVertical: spacing.lg }} />
+              <AppText variant="section" style={{ marginBottom: spacing.sm }}>
                 {t('stats.tags')}
-              </Text>
-              <Text style={[typography.body, { color: palette.text }]}>
-                {tags.map((g) => `${g.name} ${g.n}`).join(' · ')}
-              </Text>
+              </AppText>
+              <AppText>{tags.map((g) => `${g.name} ${g.n}`).join(' · ')}</AppText>
             </>
           )}
         </>

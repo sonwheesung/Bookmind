@@ -1,16 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
 import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { Spacer } from '@/components/Spacer';
 import { rate, todayQueue } from '@/features/review/repo';
 import { RATINGS, type ReviewRating } from '@/features/review/schedule';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { formatDate } from '@/lib/format';
+import { deviceLocale } from '@/lib/i18n';
 import { useTheme } from '@/theme';
 
 /**
@@ -22,8 +26,8 @@ import { useTheme } from '@/theme';
  * 🚫 남은 개수를 "밀렸습니다"로 크게 말하지 않는다(§2.2).
  */
 export default function Review() {
-  const { t, i18n } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { t } = useTranslation();
+  const { spacing } = useTheme();
 
   // 세션 동안 큐를 고정한다 — 등급을 줄 때마다 다시 읽으면 순서가 흔들린다
   const { data: queue } = useDbQuery(() => todayQueue());
@@ -37,9 +41,9 @@ export default function Review() {
     return (
       <Screen>
         <Header title={t('review.title')} back />
-        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.xl }]}>
+        <AppText tone="muted" style={{ marginBottom: spacing.xl }}>
           {queue.length === 0 ? t('review.empty') : t('review.done')}
-        </Text>
+        </AppText>
         {/* 🚫 빈 화면으로 끝내지 않는다(§5) — 홈으로 이어 준다 */}
         <Button label={t('review.backHome')} variant="ghost" onPress={() => router.back()} />
       </Screen>
@@ -53,36 +57,37 @@ export default function Review() {
     setIndex((i) => i + 1);
   };
 
-  const savedOn = new Date(card.savedAt).toLocaleDateString(i18n.language);
+  // 🔴 날짜는 기기 로케일이다. UI 언어가 아니다(`CLAUDE.md` §9)
+  const savedOn = formatDate(card.savedAt, deviceLocale());
 
   return (
     <Screen scroll>
       <Header title={t('review.title')} back />
 
       {/* 단서 — 있는 것부터(§3.1). 저장 시점은 언제나 있다 */}
-      <Text style={[typography.caption, { color: palette.textMuted, marginBottom: spacing.md }]}>
+      <AppText variant="caption" tone="muted" style={{ marginBottom: spacing.md }}>
         {t('review.savedOn', { date: savedOn })}
-      </Text>
+      </AppText>
 
       {/* 🔴 단서는 카드가 아니다 — 카드를 여럿 세우면 사용자가 "이 카드는 뭐지"를 먼저 해석한다
           (DESIGN_REVIEW §3). 이 화면에서 카드인 것은 원문 하나다 */}
       {card.cue.kind !== 'none' && (
         <View style={{ marginBottom: spacing.xl }}>
-          <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.xs }]}>
+          <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
             {t(`review.cue.${card.cue.kind}`)}
-          </Text>
-          <Text style={[typography.thought, { color: palette.text }]}>{card.cue.text}</Text>
+          </AppText>
+          <AppText variant="thought">{card.cue.text}</AppText>
         </View>
       )}
 
       {revealed ? (
         <Card>
-          <Text style={[typography.quote, { color: palette.text }]}>{card.knowledge.content}</Text>
+          <AppText variant="quote">{card.knowledge.content}</AppText>
         </Card>
       ) : (
-        <Text style={[typography.body, { color: palette.textMuted, marginBottom: spacing.md }]}>
+        <AppText tone="muted" style={{ marginBottom: spacing.md }}>
           {t('review.prompt')}
-        </Text>
+        </AppText>
       )}
 
       {/* 회상 답변 — 🔴 입력은 선택이다. 안 쓰고 넘어갈 수 있다(§8) */}
@@ -101,9 +106,9 @@ export default function Review() {
       )}
 
       {revealed && (
-        <Text style={[typography.label, { color: palette.textMuted, marginBottom: spacing.sm }]}>
+        <AppText variant="label" tone="muted" style={{ marginBottom: spacing.sm }}>
           {t('review.howRecalled')}
-        </Text>
+        </AppText>
       )}
 
       {revealed ? (
@@ -122,10 +127,10 @@ export default function Review() {
         <Button label={t('review.reveal')} onPress={() => setRevealed(true)} />
       )}
 
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xl }]}>
+      <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
         {t('review.count', { count: queue.length - index })}
-      </Text>
-      <View style={{ height: spacing.xl }} />
+      </AppText>
+      <Spacer size="xl" />
       {index > 0 && queue.length - index === 0 && (
         <Button label={t('common.done')} variant="ghost" onPress={() => router.back()} />
       )}

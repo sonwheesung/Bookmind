@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
-import { BookCover } from '@/components/BookCover';
+import { AppText } from '@/components/AppText';
+import { BookLine } from '@/components/BookLine';
+import { Divider } from '@/components/Divider';
 import type { BookRow } from '@/features/types';
 import { useTheme } from '@/theme';
 
@@ -25,7 +27,7 @@ type Props = {
  */
 export function BookSelect({ books, value, onChange, onCreate }: Props) {
   const { t } = useTranslation();
-  const { palette, radius, spacing, typography } = useTheme();
+  const { palette, radius, spacing } = useTheme();
   const [open, setOpen] = useState(false);
 
   const selected = books.find((b) => b.id === value);
@@ -47,7 +49,7 @@ export function BookSelect({ books, value, onChange, onCreate }: Props) {
       })}
     >
       <View style={styles.grow}>{content}</View>
-      {checked && <Text style={[typography.body, { color: palette.accent }]}>✓</Text>}
+      {checked && <AppText tone="accent">✓</AppText>}
     </Pressable>
   );
 
@@ -69,10 +71,12 @@ export function BookSelect({ books, value, onChange, onCreate }: Props) {
           },
         ]}
       >
-        <Text style={[typography.body, styles.grow, { color: palette.text }]} numberOfLines={1}>
+        <AppText style={styles.grow} numberOfLines={1}>
           {label}
-        </Text>
-        <Text style={[typography.caption, { color: palette.textMuted }]}>▾</Text>
+        </AppText>
+        <AppText variant="caption" tone="muted">
+          ▾
+        </AppText>
       </Pressable>
 
       <Modal visible={open} animationType="slide" transparent onRequestClose={() => setOpen(false)}>
@@ -94,19 +98,14 @@ export function BookSelect({ books, value, onChange, onCreate }: Props) {
             },
           ]}
         >
-          <Text
-            style={[
-              typography.section,
-              { color: palette.text, padding: spacing.lg, paddingBottom: spacing.sm },
-            ]}
-          >
+          <AppText variant="section" style={{ padding: spacing.lg, paddingBottom: spacing.sm }}>
             {t('knowledge.field.book')}
-          </Text>
+          </AppText>
 
           <ScrollView>
             {row(
               'none',
-              <Text style={[typography.body, { color: palette.text }]}>{t('knowledge.book.none')}</Text>,
+              <AppText>{t('knowledge.book.none')}</AppText>,
               () => {
                 onChange(null);
                 setOpen(false);
@@ -117,19 +116,7 @@ export function BookSelect({ books, value, onChange, onCreate }: Props) {
             {books.map((b) =>
               row(
                 b.id,
-                <View style={styles.item}>
-                  <BookCover book={b} size="sm" />
-                  <View style={styles.grow}>
-                    <Text style={[typography.body, { color: palette.text }]} numberOfLines={2}>
-                      {b.title}
-                    </Text>
-                    {b.author != null && b.author !== '' && (
-                      <Text style={[typography.caption, { color: palette.textMuted }]} numberOfLines={1}>
-                        {b.author}
-                      </Text>
-                    )}
-                  </View>
-                </View>,
+                <BookLine book={b} caption={b.author} />,
                 () => {
                   onChange(b.id);
                   setOpen(false);
@@ -140,15 +127,11 @@ export function BookSelect({ books, value, onChange, onCreate }: Props) {
           </ScrollView>
 
           {/* 🔴 이 줄이 이 컴포넌트의 존재 이유다. 여기가 없으면 책을 만들 길이 없다 */}
-          <View style={{ height: StyleSheet.hairlineWidth, backgroundColor: palette.border }} />
-          {row(
-            'create',
-            <Text style={[typography.body, { color: palette.accent }]}>{t('knowledge.book.create')}</Text>,
-            () => {
-              setOpen(false);
-              onCreate();
-            },
-          )}
+          <Divider />
+          {row('create', <AppText tone="accent">{t('knowledge.book.create')}</AppText>, () => {
+            setOpen(false);
+            onCreate();
+          })}
         </View>
       </Modal>
     </>
@@ -160,5 +143,4 @@ const styles = StyleSheet.create({
   grow: { flex: 1 },
   backdrop: { ...StyleSheet.absoluteFillObject },
   sheet: { position: 'absolute', left: 0, right: 0, bottom: 0, maxHeight: '70%', borderWidth: 1 },
-  item: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
 });

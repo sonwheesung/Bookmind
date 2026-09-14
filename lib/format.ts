@@ -14,7 +14,7 @@ export function joinMeta(parts: readonly (string | null | undefined)[]): string 
   return parts.filter((v): v is string => v != null && v !== '').join(' · ');
 }
 
-/** 날짜 표시. 로케일은 부르는 쪽이 정한다(지금 화면들은 UI 언어를 넘긴다) */
+/** 날짜 표시. 🔴 로케일은 **기기 로케일**(`deviceLocale()`)을 넘긴다. UI 언어가 아니다(`CLAUDE.md` §9) */
 export function formatDate(iso: string, lang: string): string {
   return new Date(iso).toLocaleDateString(lang);
 }

@@ -29,6 +29,12 @@ import {
   readingOrder,
   scaleBoxes,
   scriptForLanguage,
+  AUTO_MIN_CHARS,
+  autoSettled,
+  countScripts,
+  nativeCount,
+  pickAuto,
+  planAuto,
 } from '../features/ocr/compute.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -69,6 +75,12 @@ function selfTest() {
   // ④ 합치기가 **무언가를 만들어 내는가**(빈 문자열만 돌려주는 함수가 아닌가)
   if (joinBlocks([block('가')], 'korean') !== '가') fail('한 줄도 못 잇는다');
 
+  // ⑪ 🔴 양성 대조 — 글자 세기가 문자 체계를 **가르는가**(전부 한 칸에 세는 함수를 배제한다)
+  const probe = countScripts('ab가');
+  if (probe.latin !== 2 || probe.hangul !== 1) fail('글자 세기가 라틴과 한글을 못 가른다');
+  if (nativeCount('korean', probe) === nativeCount('latin', probe)) fail('모델 몫 세기가 갈라지지 않는다');
+  if (AUTO_MIN_CHARS < 2) fail('판정선이 1 이하라 경계 검사가 뜻이 없다');
+
   // ⑤ 🔴 양성 대조 — 줄 모으기가 **실제로 줄을 만들어 내는가**.
   //    늘 빈 배열을 돌려주는 함수는 축 ⑥⑦⑧ 의 절반을 통과한다
   const one = collectLines([framed(at('가', 0, 0, 10, 10))]);
@@ -84,7 +96,11 @@ function selfTest() {
   if (texts(readingOrder(shuffled)) !== '위|아래') fail('정렬이 순서를 바꾸지 못한다');
 
   // ⑦ 🔴 양성 대조 — 배율이 **값을 실제로 바꾸는가**. 원본을 그대로 돌려주는 함수를 배제한다
-  const box = scaleBoxes([{ id: 'a', text: 'x', frame: { left: 10, top: 20, width: 30, height: 40 } }], 100, 50);
+  const box = scaleBoxes(
+    [{ id: 'a', text: 'x', frame: { left: 10, top: 20, width: 30, height: 40 } }],
+    100,
+    50,
+  );
   if (box.length !== 1) fail('박스를 하나도 안 만든다');
   if (box[0].left === 10) fail('배율이 좌표를 안 바꾼다(늘 원본을 돌려준다)');
 
@@ -196,10 +212,7 @@ const page = collectLines([
 ]);
 check(page.lines.length === 4, `⑥ 줄을 다 못 모았다: ${page.lines.length}`);
 const ordered = texts(readingOrder(page.lines));
-check(
-  ordered === '첫째 줄|둘째 줄 왼쪽|둘째 줄 오른쪽|셋째 줄',
-  `⑥ 🔴 읽기 순서가 틀렸다: ${ordered}`,
-);
+check(ordered === '첫째 줄|둘째 줄 왼쪽|둘째 줄 오른쪽|셋째 줄', `⑥ 🔴 읽기 순서가 틀렸다: ${ordered}`);
 
 // 🔴 같은 줄 판정이 **해상도에 딸리지 않는다.** 책담은 고정 10px 을 썼고, 그 값은 사진 크기에 딸린다.
 //    같은 배치를 픽셀만 여덟 배로 키워 같은 순서가 나오는지 잰다.
@@ -294,6 +307,92 @@ check(/setText\(\s*out\s*\)/.test('setText(out)'), '⑨ 🔴 옛 코드를 찾�
 check(scan.includes('needsFallback('), '⑩ 🔴 화면이 `needsFallback` 을 안 쓴다');
 check(scan.includes('fallbackText'), '⑩ 🔴 화면이 폴백 텍스트를 안 쓴다(그 줄을 가져올 길이 없다)');
 
+// ── 🔴 ⑪ 자동 문자 고르기 (결정 #24 · §2.1.1) ──
+{
+  const N = AUTO_MIN_CHARS;
+  const hangul = (n) => '가'.repeat(n);
+  const latinN = (n) => 'a'.repeat(n);
+  const zero = { latin: 0, hangul: 0, kana: 0, han: 0, devanagari: 0 };
+  const c = countScripts('Hello 세계 こんにちは 中文 नमस्ते 123 !');
+  check(
+    c.latin === 5 && c.hangul === 2 && c.kana === 5 && c.han === 2 && c.devanagari === 6,
+    `⑪ 글자 세기: ${JSON.stringify(c)}`,
+  );
+  check(JSON.stringify(countScripts('')) === JSON.stringify(zero), '⑪ 빈 글에서 무언가를 센다');
+  check(JSON.stringify(countScripts('123 !?. ')) === JSON.stringify(zero), '⑪ 숫자·문장부호를 글자로 센다');
+
+  // 판정선 경계 — 하나 모자라면 이어 읽고, 딱 닿으면 멈춘다
+  check(planAuto('korean', countScripts(hangul(N))).length === 0, `⑪ 한글 ${N}자에서 안 멈춘다`);
+  check(
+    planAuto('korean', countScripts(hangul(N - 1))).length === 3,
+    `⑪ 한글 ${N - 1}자에서 멈춘다(판정선 경계)`,
+  );
+  check(planAuto('latin', countScripts(latinN(N))).length === 0, `⑪ 라틴 ${N}자에서 안 멈춘다`);
+  check(
+    planAuto('latin', countScripts(latinN(N - 1))).join() === 'korean,japanese,chinese,devanagari',
+    `⑪ 라틴이 모자랄 때 이어 읽는 순서: ${planAuto('latin', countScripts(latinN(N - 1))).join()}`,
+  );
+  // 🔴 한국어 모델로 영어 책 — 라틴이 충분하면 더 안 읽는다(비라틴 모델은 라틴도 읽는다)
+  check(
+    planAuto('korean', countScripts(latinN(N))).length === 0,
+    '⑪ 🔴 한국어 모델이 읽은 영어 페이지에서 또 읽는다',
+  );
+  check(!planAuto('japanese', zero).includes('japanese'), '⑪ 방금 읽은 모델을 또 읽는다');
+  check(
+    !planAuto('latin', zero).includes('latin'),
+    '⑪ 이어 읽기에 라틴이 들어 있다(신호가 안 나오는 모델이다)',
+  );
+  check(
+    autoSettled('korean', countScripts(hangul(N))) && !autoSettled('korean', countScripts(hangul(N - 1))),
+    '⑪ 멈춤 판정의 경계가 틀렸다',
+  );
+
+  // 고르기
+  const t = (script, text) => ({ script, counts: countScripts(text) });
+  check(
+    pickAuto([t('latin', 'oL'), t('korean', hangul(20))]) === 1,
+    '⑪ 🔴 한글 페이지에서 라틴 찌꺼기를 고른다',
+  );
+  check(
+    pickAuto([t('latin', 'oL'), t('korean', ''), t('japanese', '')]) === 0,
+    '⑪ 아무도 판정선을 못 넘었는데 첫 결과가 아니다',
+  );
+  check(
+    pickAuto([t('korean', ''), t('japanese', '日本語' + 'の'.repeat(N))]) === 1,
+    '⑪ 일본어 페이지를 못 고른다',
+  );
+  check(
+    pickAuto([t('korean', ''), t('japanese', '中'.repeat(N * 2)), t('chinese', '中'.repeat(N * 2))]) === 2,
+    '⑪ 🔴 가나 없는 한자를 일본어로 고른다',
+  );
+  check(
+    pickAuto([t('korean', hangul(N)), t('japanese', 'の'.repeat(N))]) === 0,
+    '⑪ 같은 점수에서 먼저 읽은 것을 안 고른다',
+  );
+  check(pickAuto([t('korean', hangul(N - 1))]) === 0, '⑪ 결과가 하나뿐인데 0 이 아니다');
+  // 🔴 뒤의 결과가 점수는 더 높은데 판정선에 못 미친다 → 그래도 첫 결과다.
+  //    처음엔 첫 결과가 이미 최고점인 입력만 넣어서 "판정선 미달이면 첫 결과" 를 지워도 초록이었다(2026-09-14 변이)
+  check(
+    pickAuto([t('latin', ''), t('korean', hangul(N - 1))]) === 0,
+    '⑪ 🔴 판정선에 못 미친 뒤 결과를 고른다',
+  );
+}
+
+// ── 🔴 ⑫ 자동 배선 — 순수 함수를 만들어 두고 안 쓰면 아무것도 안 지킨 것이다 ──
+{
+  const ocrRepo = readFileSync(join(ROOT, 'features', 'ocr', 'repo.ts'), 'utf8');
+  check(
+    ocrRepo.includes('planAuto(') && ocrRepo.includes('pickAuto('),
+    '⑫ 🔴 repo 가 자동 판정을 거치지 않는다',
+  );
+  check(ocrRepo.includes('autoSettled('), '⑫ 🔴 repo 가 멈춤 판정 없이 모델을 전부 돈다');
+  check(scan.includes('recognizeAuto('), '⑫ 🔴 화면이 자동 읽기를 안 쓴다');
+  check(
+    scan.includes("t('ocr.otherScript')"),
+    '⑫ 🔴 자동이 헛짚은 날의 탈출구(다른 문자로 다시 읽기)가 화면에 없다',
+  );
+}
+
 if (bad.length > 0) {
   console.error(`\ncheck:ocr 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -305,5 +404,6 @@ console.log(
     `\n  🔴 앨범 원본 보호 · 네트워크 0건(소스 ${ocrFiles.length}개)` +
     `\n  🔴 읽기 순서(입력을 뒤섞어 잼 · 해상도 8배에도 같은 순서) · 좌표 배율(폭 0 이면 안 그린다) ·` +
     `\n  🔴 좌표 없는 줄 폴백(그 문장을 잃지 않는다) · 화면 배선(scaleBoxes·displayHeight·joinSelected·폴백)` +
+    `\n  🔴 자동 문자 고르기(판정선 경계 · 가나 없는 한자는 중국어 · 못 넘으면 첫 결과) · 자동 배선(recognizeAuto·다시 읽기 링크)` +
     `\n  ⚠ 인식 정확도는 못 잰다. 그건 빌드에서만 본다\n`,
 );

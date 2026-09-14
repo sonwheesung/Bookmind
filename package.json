@@ -26,12 +26,13 @@
     "check:ocr": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-ocr.mjs",
     "check:books": "node --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-books.mjs",
     "check:play-access": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-play-access.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota && npm run check:search && npm run check:stats && npm run check:practice && npm run check:ocr && npm run check:books && npm run check:knowledge && npm run check:privacy",
+    "verify": "npm run typecheck && npm run lint && npm run check:i18n && npm run check:chars && npm run check:docs && npm run check:db && npm run check:review && npm run check:backup && npm run check:ota && npm run check:search && npm run check:stats && npm run check:practice && npm run check:ocr && npm run check:books && npm run check:knowledge && npm run check:privacy && npm run check:ui",
     "build:aab": "bash scripts/build-aab.sh",
     "icons": "node scripts/make-icons.mjs",
     "check:knowledge": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-knowledge.mjs",
     "check:aab": "node scripts/check-aab-permissions.mjs",
-    "check:privacy": "node scripts/check-privacy.mjs"
+    "check:privacy": "node scripts/check-privacy.mjs",
+    "check:ui": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/check-ui.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

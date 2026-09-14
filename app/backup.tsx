@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text } from 'react-native';
+import { Alert } from 'react-native';
 
+import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { applyBackup, exportBackup, pickBackup } from '@/features/backup/repo';
 import { useBackupStore } from '@/features/backup/store';
 import type { BackupFile } from '@/features/backup/format';
+import { confirmDestructive } from '@/lib/confirm';
+import { formatDate } from '@/lib/format';
+import { deviceLocale } from '@/lib/i18n';
 import { useTheme } from '@/theme';
 
 /**
@@ -20,14 +24,14 @@ import { useTheme } from '@/theme';
  * 🚫 *"백업하면 안전합니다"* 라고 쓰지 않는다 — 파일 분실·유출은 사용자 영역이다.
  */
 export default function Backup() {
-  const { t, i18n } = useTranslation();
-  const { palette, spacing, typography } = useTheme();
+  const { t } = useTranslation();
+  const { spacing } = useTheme();
   const lastExportedAt = useBackupStore((s) => s.lastExportedAt);
   const markExported = useBackupStore((s) => s.markExported);
   const [busy, setBusy] = useState(false);
 
-  const lastText =
-    lastExportedAt === null ? t('backup.never') : new Date(lastExportedAt).toLocaleDateString(i18n.language);
+  // 🔴 날짜는 기기 로케일이다. UI 언어가 아니다(`CLAUDE.md` §9)
+  const lastText = lastExportedAt === null ? t('backup.never') : formatDate(lastExportedAt, deviceLocale());
 
   async function onExport() {
     if (busy) return;
@@ -50,10 +54,12 @@ export default function Backup() {
 
   /** 🔴 바꾸기는 되돌릴 수 없다 — 2단계 확인(§4.1) */
   function confirmReplace(file: BackupFile) {
-    Alert.alert(t('backup.import.replaceConfirmTitle'), t('backup.import.replaceConfirmBody'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('backup.import.replace'), style: 'destructive', onPress: () => run(file, 'replace') },
-    ]);
+    confirmDestructive({
+      title: t('backup.import.replaceConfirmTitle'),
+      body: t('backup.import.replaceConfirmBody'),
+      action: t('backup.import.replace'),
+      onConfirm: () => run(file, 'replace'),
+    });
   }
 
   function run(file: BackupFile, mode: 'merge' | 'replace') {
@@ -79,6 +85,7 @@ export default function Backup() {
         return;
       }
       const c = picked.file.counts;
+      // ⚠ 이 창은 확인창이 아니라 **고르는 창**이다(합치기 · 바꾸기). 되돌릴 수 없는 쪽은 한 번 더 묻는다
       Alert.alert(
         t('backup.import.preview'),
         t('backup.import.previewBody', {
@@ -104,14 +111,12 @@ export default function Backup() {
     <Screen scroll>
       <Header title={t('backup.title')} back />
 
-      <Text style={[typography.body, { color: palette.text, marginBottom: spacing.xl }]}>
-        {t('backup.intro')}
-      </Text>
+      <AppText style={{ marginBottom: spacing.xl }}>{t('backup.intro')}</AppText>
 
       <Button label={t('backup.exportAction')} onPress={() => void onExport()} disabled={busy} />
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xs }]}>
+      <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xs }}>
         {t('backup.lastExport', { value: lastText })}
-      </Text>
+      </AppText>
 
       <Button
         label={t('backup.importAction')}
@@ -121,9 +126,9 @@ export default function Backup() {
         style={{ marginTop: spacing.xl }}
       />
 
-      <Text style={[typography.caption, { color: palette.textMuted, marginTop: spacing.xl }]}>
+      <AppText variant="caption" tone="muted" style={{ marginTop: spacing.xl }}>
         {t('backup.caution')}
-      </Text>
+      </AppText>
     </Screen>
   );
 }

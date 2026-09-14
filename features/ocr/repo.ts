@@ -11,9 +11,13 @@ import { File } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
 
 import {
+  autoSettled,
   cleanupTarget,
   collectLines,
+  countScripts,
   joinBlocks,
+  pickAuto,
+  planAuto,
   type OcrBlock,
   type Script,
   type SelectableLine,
@@ -92,6 +96,34 @@ export async function recognize(uri: string, script: Script): Promise<Recognized
   } catch {
     return null;
   }
+}
+
+/**
+ * 문자를 **자동으로 골라** 읽는다(결정 #24 · `docs/KNOWLEDGE_SYSTEM.md` §2.1.1).
+ *
+ * 🔴 ML Kit 에는 자동 감지가 없다. 그래서 **여러 모델로 읽고 고른다.** 무엇을 더 읽고
+ *    무엇을 쓰는지는 `compute.ts` 의 `planAuto`·`autoSettled`·`pickAuto` 가 정하고 여기서는 부르기만 한다.
+ */
+export async function recognizeAuto(
+  uri: string,
+  first: Script,
+): Promise<(Recognized & { readonly script: Script }) | null> {
+  const firstOut = await recognize(uri, first);
+  if (firstOut === null) return null;
+
+  const firstCounts = countScripts(firstOut.fallbackText);
+  const tries = [{ script: first, out: firstOut, counts: firstCounts }];
+  for (const script of planAuto(first, firstCounts)) {
+    const out = await recognize(uri, script);
+    if (out === null) continue;
+    const counts = countScripts(out.fallbackText);
+    tries.push({ script, out, counts });
+    if (autoSettled(script, counts)) break;
+  }
+
+  const chosen = tries[pickAuto(tries)];
+  if (chosen === undefined) return { ...firstOut, script: first };
+  return { ...chosen.out, script: chosen.script };
 }
 
 /**
