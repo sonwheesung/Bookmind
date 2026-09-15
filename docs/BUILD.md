@@ -677,6 +677,10 @@ First internal build. Save a passage, recall it later, and get a daily reminder.
 판정 기준은 *"낯선 사람이 돈을 낼 수 있는가"* 이고 지금은 아니다.
 ⚠ 조각이 `0.2.6` 으로 프로덕션에 나가 세 번의 릴리스를 지나쳤다. **프로덕션 승격 때 올린다.**
 
+🔄 **이름 규칙 (2026-09-15 · 결정 #27)**: 비공개 테스트 동안 **`0.1.<versionCode>`** 이다(vc8 = `0.1.8`). vc2~vc7 은 `0.2.0`~`0.7.0` 으로 나갔다.
+Play 는 versionCode 만 비교하므로 이름 숫자가 한 번 작아져도 된다. 정식 출시본이 `1.0.0` 이고 versionCode 는 이어서 올린다.
+🔴 `runtimeVersion`(`native-N`)은 이 이름과 **따로 논다**(`OTA_SYSTEM.md` §3.1). 빌드 기록의 runtimeVersion 행에는 **지난 빌드 뒤 네이티브 모듈이 바뀌었나**를 함께 적는다. 가드 `check:ota` ⑧ 이 이름을 잰다.
+
 ---
 
 *최종 갱신: 2026-09-10. 업로드 키스토어(§5)·AAB(§6)·내부 테스트 업로드(§7) 신설.

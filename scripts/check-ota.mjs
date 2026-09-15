@@ -74,6 +74,20 @@ export function judgeConfig(app, deps) {
         'runtimeVersion 은 네이티브 세대 번호이고 앱 버전과 무관하다. ' +
         '맞추는 순간 기존 빌드가 전부 OTA 고아가 된다(OTA_SYSTEM §3)',
     );
+  } else if (/^\d+\.\d+\.\d+$/.test(rv)) {
+    bad.push(
+      `⑤ runtimeVersion("${rv}") 이 앱 버전 모양이다. 언젠가 앱 버전과 같아진다(정식 출시 1.0.0 이 그 자리였다). ` +
+        'native-N 으로 쓴다(결정 #27 · OTA_SYSTEM §3.1)',
+    );
+  }
+
+  // ⑧ 버전 이름. 비공개 테스트 동안은 0.1.<versionCode> 다(결정 #27). 정식(1.0.0 이상)은 건너뛴다
+  const code = app.android?.versionCode;
+  if (typeof app.version === 'string' && app.version.startsWith('0.') && app.version !== `0.1.${code}`) {
+    bad.push(
+      `⑧ 테스트 기간 버전 이름 "${app.version}" 이 0.1.${code}(versionCode) 가 아니다. ` +
+        'versionCode 를 올릴 때 이름도 같이 올린다(결정 #27 · BUILD §7.1)',
+    );
   }
   return bad;
 }
@@ -100,7 +114,8 @@ export function judgeNative(manifest, strings, expect) {
   if (!manifest.includes('expo-channel-name')) {
     bad.push('🔴 ⑦ AndroidManifest 에 채널 헤더가 없다 — 발행해도 아무도 못 받는다(§4)');
   }
-  if (strings !== null && !strings.includes(expect.runtimeVersion)) {
+  // 🔴 꺾쇠까지 붙여 대조한다. 그냥 includes 면 `native-1` 이 `native-10` 안에 들어맞는다(2026-09-15)
+  if (strings !== null && !strings.includes(`>${expect.runtimeVersion}<`)) {
     bad.push(
       `⑦ strings.xml 의 expo_runtime_version 이 app.json(${expect.runtimeVersion}) 과 다르다 — ` +
         '어긋나면 오류 없이 업데이트만 안 간다',
@@ -117,8 +132,9 @@ function selfTest() {
     process.exit(2);
   };
   const good = {
-    version: '0.1.0',
-    runtimeVersion: '1.0.0',
+    version: '0.1.1',
+    runtimeVersion: 'native-1',
+    android: { versionCode: 1 },
     updates: {
       url: 'https://u.expo.dev/AAA',
       checkAutomatically: 'ON_LOAD',
@@ -139,10 +155,18 @@ function selfTest() {
     ['ON_LOAD 아님', { ...good, updates: { ...good.updates, checkAutomatically: 'ON_ERROR_RECOVERY' } }, deps],
     ['projectId 불일치', { ...good, extra: { eas: { projectId: 'BBB' } } }, deps],
     ['fingerprint 정책', { ...good, runtimeVersion: { policy: 'fingerprint' } }, deps],
-    ['runtimeVersion == version', { ...good, runtimeVersion: '0.1.0' }, deps],
+    ['runtimeVersion == version', { ...good, runtimeVersion: '0.1.1' }, deps],
+    ['runtimeVersion 이 앱 버전 모양', { ...good, runtimeVersion: '2.0.0' }, deps],
+    ['테스트 이름 n ≠ versionCode', { ...good, version: '0.1.5' }, deps],
+    ['테스트 이름 옛 모양', { ...good, version: '0.7.0', android: { versionCode: 7 } }, deps],
+    ['versionCode 없음', { ...good, android: {} }, deps],
   ];
   for (const [what, app, d] of mut) {
     if (judgeConfig(app, d).length === 0) fail(`변이를 못 잡는다 — ${what}`);
+  }
+  // 🔴 양성 대조: 정식 출시 이름(1.0.0 이상)은 테스트 이름 규칙에 걸리지 않는다
+  if (judgeConfig({ ...good, version: '1.0.0', android: { versionCode: 9 } }, deps).length !== 0) {
+    fail('정식 출시 이름을 테스트 규칙으로 막는다');
   }
 
   // ③ 🔴 양성 대조 — 소스 스캔 정규식이 **실제로 무언가를 수집하는가**
@@ -157,12 +181,16 @@ function selfTest() {
   }
 
   // ④ 네이티브 판정
-  const exp = { url: 'https://u.expo.dev/AAA', runtimeVersion: '1.0.0' };
-  if (judgeNative('EXPO_UPDATE_URL https://u.expo.dev/AAA expo-channel-name', '1.0.0', exp).length !== 0) {
+  const exp = { url: 'https://u.expo.dev/AAA', runtimeVersion: 'native-1' };
+  const rvXml = (v) => `<string name="expo_runtime_version">${v}</string>`;
+  if (judgeNative('EXPO_UPDATE_URL https://u.expo.dev/AAA expo-channel-name', rvXml('native-1'), exp).length !== 0) {
     fail('정상 매니페스트를 통과시키지 못한다');
   }
-  if (judgeNative('EXPO_UPDATE_URL https://u.expo.dev/AAA', '1.0.0', exp).length === 0) {
+  if (judgeNative('EXPO_UPDATE_URL https://u.expo.dev/AAA', rvXml('native-1'), exp).length === 0) {
     fail('채널 헤더 누락을 못 잡는다');
+  }
+  if (judgeNative('EXPO_UPDATE_URL https://u.expo.dev/AAA expo-channel-name', rvXml('native-10'), exp).length === 0) {
+    fail('🔴 native-10 을 native-1 로 읽는다(부분 문자열 대조)');
   }
 }
 
