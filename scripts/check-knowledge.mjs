@@ -16,10 +16,12 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  BOOK_ORDERS,
   canAffixPageUnit,
   displayPage,
   groupByBook,
   KNOWLEDGE_SORTS,
+  parseBookOrder,
   parseKnowledgeSort,
   splitTagInput,
 } from '../features/knowledge/compute.ts';
@@ -172,6 +174,78 @@ check(
   );
 }
 
+// ── ⑦ 책별 보기의 책 순서 (`docs/KNOWLEDGE_SYSTEM.md` §3.2.1 · 2026-09-15 관리자 수정사항 #1) ──
+{
+  const k = (id, bookId, bookTitle, at) => ({ id, book_id: bookId, bookTitle, created_at: at });
+  const order = (gs) => gs.map((g) => g.bookId ?? 'none').join(',');
+  // 🔴 세 순서가 **서로 다른 답**을 내게 짰다. 셋 중 둘이 같으면 한쪽 분기를 지워도 초록이다
+  //    recent: C(09-08) · A(09-06) · B(09-05)   title: B(논어) · A(명상록) · C(월든)   count: A(3) · B(2) · C(1)
+  const rows = [
+    k('a1', 'A', '명상록', '2026-09-01T00:00:00Z'),
+    k('b1', 'B', '논어', '2026-09-02T00:00:00Z'),
+    k('a2', 'A', '명상록', '2026-09-03T00:00:00Z'),
+    k('b2', 'B', '논어', '2026-09-05T00:00:00Z'),
+    k('a3', 'A', '명상록', '2026-09-06T00:00:00Z'),
+    // 🔴 책 없는 문장이 **가장 최근**이다. 어느 순서에서도 맨 아래인지 재려면 그래야 한다
+    k('n1', null, null, '2026-09-09T00:00:00Z'),
+    k('c1', 'C', '월든', '2026-09-08T00:00:00Z'),
+  ];
+  const snapshot = JSON.stringify(rows);
+  check(order(groupByBook(rows)) === 'C,A,B,none', `⑦ 🔴 순서를 안 넘기면 최근 저장순이 아니다: ${order(groupByBook(rows))}`);
+  check(order(groupByBook(rows, 'recent')) === 'C,A,B,none', `⑦ recent 순서가 틀렸다: ${order(groupByBook(rows, 'recent'))}`);
+  check(order(groupByBook(rows, 'title')) === 'B,A,C,none', `⑦ 🔴 제목순이 가나다가 아니다: ${order(groupByBook(rows, 'title'))}`);
+  check(order(groupByBook(rows, 'count')) === 'A,B,C,none', `⑦ 🔴 문장 많은 순이 아니다: ${order(groupByBook(rows, 'count'))}`);
+  const inner = groupByBook(rows, 'title').find((g) => g.bookId === 'A');
+  check(
+    inner?.items.map((x) => x.id).join(',') === 'a3,a2,a1',
+    `⑦ 🔴 책 순서를 바꾸자 구획 안이 최신순이 아니게 됐다: ${inner?.items.map((x) => x.id).join(',')}`,
+  );
+  check(JSON.stringify(rows) === snapshot, '⑦ 🔴 순서를 바꾸다 입력 배열을 바꿨다');
+
+  // 🔴 같은 제목 · 같은 개수는 recent 순서를 지키나(안정 정렬). 입력을 **오래된 순**으로 줘야 잰다
+  const tie = [
+    k('p1', 'P', '같은 책', '2026-09-01T00:00:00Z'),
+    k('q1', 'Q', '같은 책', '2026-09-02T00:00:00Z'),
+  ];
+  check(order(groupByBook(tie, 'title')) === 'Q,P', `⑦ 🔴 제목이 같을 때 최근 저장순을 안 따른다: ${order(groupByBook(tie, 'title'))}`);
+  check(order(groupByBook(tie, 'count')) === 'Q,P', `⑦ 🔴 개수가 같을 때 최근 저장순을 안 따른다: ${order(groupByBook(tie, 'count'))}`);
+  // 숫자가 든 제목은 숫자 크기로(1권 · 2권 · 10권)
+  const vol = [
+    k('v10', 'V10', '10권', '2026-09-03T00:00:00Z'),
+    k('v2', 'V2', '2권', '2026-09-02T00:00:00Z'),
+    k('v1', 'V1', '1권', '2026-09-01T00:00:00Z'),
+  ];
+  check(order(groupByBook(vol, 'title')) === 'V1,V2,V10', `⑦ 제목 속 숫자를 글자로 센다: ${order(groupByBook(vol, 'title'))}`);
+  // 대소문자는 가르지 않는다 — 대소문자만 다른 제목은 **같은 제목**이라 최근 저장순을 따른다.
+  // 🔴 `beta` · `Alpha` 처럼 글자가 다르면 대소문자를 가르든 말든 답이 같아 아무것도 안 잰다(2026-09-15 변이가 침묵했다).
+  //    대소문자를 가르면 ICU 는 소문자를 앞에 세우므로, 최근 것을 **대문자**로 둬야 두 답이 갈린다
+  const cs = [
+    k('lo', 'LO', 'alpha', '2026-09-01T00:00:00Z'),
+    k('up', 'UP', 'Alpha', '2026-09-02T00:00:00Z'),
+  ];
+  check(order(groupByBook(cs, 'title')) === 'UP,LO', `⑦ 제목순이 대소문자를 가른다: ${order(groupByBook(cs, 'title'))}`);
+  check(groupByBook([], 'count').length === 0, '⑦ 문장이 0 인데 구획이 생긴다');
+  const onlyLoose = groupByBook([k('n', null, null, '2026-09-01T00:00:00Z')], 'title');
+  check(onlyLoose.length === 1 && onlyLoose[0]?.bookId === null, '⑦ 책 없는 문장만 있을 때 제목순이 깨진다');
+
+  // 기기에 저장된 책 순서
+  for (const v of BOOK_ORDERS) check(parseBookOrder(v) === v, `⑦ 저장된 ${v} 를 못 읽는다`);
+  for (const v of [undefined, null, '', 'TITLE', 'book', 'recent ', 0, {}, ['count']]) {
+    check(parseBookOrder(v) === 'recent', `⑦ 🔴 깨진 값 ${JSON.stringify(v)} 를 recent 로 안 돌린다`);
+  }
+  check(BOOK_ORDERS.length === 3, `⑦ 책 순서가 ${BOOK_ORDERS.length}가지다`);
+
+  // 🔴 화면이 고른 순서를 넘기나. `groupByBook(data)` 만 남으면 고르기가 아무것도 안 바꾼다
+  const tab = read('app/(tabs)/knowledge.tsx');
+  check(/groupByBook\(\s*data\s*,\s*bookOrder\s*\)/.test(tab), '⑦ 🔴 문장 탭이 고른 책 순서를 groupByBook 에 안 넘긴다');
+  check(!/groupByBook\(\s*data\s*,\s*bookOrder\s*\)/.test('groupByBook(data)'), '⑦ SELF-TEST: 순서를 안 넘긴 호출을 통과시킨다');
+  check(tab.includes('setBookOrder('), '⑦ 🔴 문장 탭에 책 순서를 고르는 자리가 없다');
+  check(
+    read('features/settings/knowledge-sort.ts').includes('parseBookOrder('),
+    '⑦ 🔴 저장소가 책 순서를 복원할 때 값을 안 거른다',
+  );
+}
+
 if (bad.length > 0) {
   console.error(`\ncheck:knowledge 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -182,5 +256,6 @@ console.log(
   `\ncheck:knowledge OK — 페이지 접사 ①숫자엔 씌운다 ②🔴 \`42p\`·\`3장\`·\`12-14\` 는 그대로 ` +
     `\n  ③빈 값은 null(출처 줄에서 걸러진다) ④화면이 판정을 거친다 ⑤태그 나누기(빈 태그 0 · 두 화면 같은 함수)` +
     `\n  ⑥책별 묶음(🔴 책 없음 맨 아래 · 구획 안 최신순 · 제목 없는 책 · 입력 불변) · 정렬 값 복원(깨진 값 → recent)` +
+    `\n  ⑦책 순서 셋(🔴 셋이 다른 답 · 책 없음 맨 아래 · 같으면 최근 저장순 · 구획 안 최신순 유지 · 1·2·10권) · 화면이 순서를 넘기나` +
     `\n  SELF-TEST 통과(판정이 갈라지는가 · 접사가 값을 바꾸는가)\n`,
 );

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { ChartColumn, Plus, Search } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
@@ -11,7 +11,7 @@ import { Header } from '@/components/Header';
 import { IconButton } from '@/components/IconButton';
 import { Screen } from '@/components/Screen';
 import { getBook } from '@/features/books/repo';
-import { groupByBook } from '@/features/knowledge/compute';
+import { BOOK_ORDERS, groupByBook } from '@/features/knowledge/compute';
 import { listKnowledge } from '@/features/knowledge/repo';
 import { useKnowledgeSortStore } from '@/features/settings/knowledge-sort';
 import { useDbQuery } from '@/hooks/useDbQuery';
@@ -29,6 +29,8 @@ export default function KnowledgeList() {
   const { spacing } = useTheme();
   const sort = useKnowledgeSortStore((s) => s.sort);
   const setSort = useKnowledgeSortStore((s) => s.setSort);
+  const bookOrder = useKnowledgeSortStore((s) => s.bookOrder);
+  const setBookOrder = useKnowledgeSortStore((s) => s.setBookOrder);
 
   const { data } = useDbQuery(() =>
     listKnowledge().map((k) => ({
@@ -87,9 +89,30 @@ export default function KnowledgeList() {
             <Chip label={t('knowledge.list.sort.book')} active={sort === 'book'} onPress={() => setSort('book')} />
           </ChipRow>
 
+          {/* 🔄 2026-09-15 관리자 수정사항 #1 — 책별일 때만 **책 정렬** 을 고른다(§3.2.1).
+              🔴 조용한 칩이다. 위 줄의 선택이 이미 accent 라 둘이 되지 않게 한다 */}
+          {sort === 'book' && (
+            <View style={[styles.orderRow, { gap: spacing.sm, marginTop: -spacing.sm, marginBottom: spacing.lg }]}>
+              <AppText variant="label" tone="muted">
+                {t('knowledge.list.bookOrder.label')}
+              </AppText>
+              <ChipRow style={styles.orderChips}>
+                {BOOK_ORDERS.map((o) => (
+                  <Chip
+                    key={o}
+                    quiet
+                    label={t(`knowledge.list.bookOrder.${o}`)}
+                    active={bookOrder === o}
+                    onPress={() => setBookOrder(o)}
+                  />
+                ))}
+              </ChipRow>
+            </View>
+          )}
+
           {sort === 'book'
-            ? // 🔴 묶는 규칙은 `groupByBook` 한 곳이다. `책 없음` 은 맨 아래, 구획 안은 등록순이다
-              groupByBook(data).map((g, i) => (
+            ? // 🔴 묶는 규칙은 `groupByBook` 한 곳이다. `책 없음` 은 맨 아래, 구획 안은 최신순이다
+              groupByBook(data, bookOrder).map((g, i) => (
                 <View key={g.bookId ?? 'none'} style={{ marginTop: i > 0 ? spacing.lg : 0 }}>
                   <AppText variant="label" style={{ marginBottom: spacing.sm }}>
                     {joinMeta([g.title ?? t('knowledge.book.none'), String(g.items.length)])}
@@ -103,3 +126,9 @@ export default function KnowledgeList() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  /** 라벨과 칩을 한 줄에. 칩이 넘치면 칩만 줄바꿈된다 */
+  orderRow: { flexDirection: 'row', alignItems: 'center' },
+  orderChips: { flex: 1 },
+});

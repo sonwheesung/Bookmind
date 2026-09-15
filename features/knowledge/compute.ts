@@ -79,14 +79,29 @@ export interface BookGroup<T> {
   readonly items: readonly T[];
 }
 
+// ── 책별 보기의 책 순서 (§3.2.1 · 2026-09-15) ─────────────────────────
+
+export const BOOK_ORDERS = ['recent', 'title', 'count'] as const;
+export type BookOrder = (typeof BOOK_ORDERS)[number];
+
+/** 기기에 저장된 책 순서를 읽는다. 🔴 깨졌거나 모르는 값이면 `recent`(지금까지의 순서) */
+export function parseBookOrder(v: unknown): BookOrder {
+  return (BOOK_ORDERS as readonly unknown[]).includes(v) ? (v as BookOrder) : 'recent';
+}
+
 /**
  * 책별 보기(§3.2).
  *
- * 🔴 구획 안은 **최신순**, 구획 순서는 그 책에 마지막으로 저장한 시각(§4.0 과 같은 규칙).
- * 🔴 `책 없음` 은 **맨 아래**다. 제목을 못 찾는 책의 문장도 그리로 간다(이름 없는 구획을 만들지 않는다).
+ * 🔴 구획 안은 **최신순**이다. 책 순서를 바꿔도 구획 안은 그대로다.
+ * 🔴 구획 순서는 `order` 로 고른다(§3.2.1). 기본 `recent` 는 그 책에 마지막으로 저장한 시각(§4.0 과 같은 규칙).
+ *    `title` 은 제목 가나다 · `count` 는 문장 많은 순이고, 둘 다 **같으면 `recent` 순서**를 따른다.
+ * 🔴 `책 없음` 은 순서와 상관없이 **맨 아래**다. 제목을 못 찾는 책의 문장도 그리로 간다(이름 없는 구획을 만들지 않는다).
  * 🔴 입력을 바꾸지 않는다.
  */
-export function groupByBook<T extends GroupableKnowledge>(rows: readonly T[]): BookGroup<T>[] {
+export function groupByBook<T extends GroupableKnowledge>(
+  rows: readonly T[],
+  order: BookOrder = 'recent',
+): BookGroup<T>[] {
   const sorted = [...rows].sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0));
 
   const books = new Map<string, { title: string; items: T[] }>();
@@ -102,7 +117,14 @@ export function groupByBook<T extends GroupableKnowledge>(rows: readonly T[]): B
     else group.items.push(k);
   }
 
+  // 🔴 Map 은 넣은 순서를 지킨다. 문장을 최신순으로 넣었으니 여기까지가 `recent` 순서다
   const out: BookGroup<T>[] = [...books].map(([bookId, g]) => ({ bookId, title: g.title, items: g.items }));
+  // 🔴 `sort` 는 안정 정렬이다. 같은 제목 · 같은 개수는 위의 `recent` 순서를 그대로 둔다
+  if (order === 'title') {
+    out.sort((a, b) => (a.title ?? '').localeCompare(b.title ?? '', undefined, { sensitivity: 'base', numeric: true }));
+  } else if (order === 'count') {
+    out.sort((a, b) => b.items.length - a.items.length);
+  }
   if (loose.length > 0) out.push({ bookId: null, title: null, items: loose });
   return out;
 }

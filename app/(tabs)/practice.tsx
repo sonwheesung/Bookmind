@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
@@ -74,34 +74,53 @@ export default function PracticeTab() {
                 {t('practice.todayTitle')}
               </AppText>
 
-              {data.today.map((p, i) => (
-                <View key={p.id} style={{ marginTop: i > 0 ? spacing.xl : 0 }}>
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => router.push(`/practice/${p.id}`)}
-                    style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
-                  >
-                    <AppText variant="thought" numberOfLines={2}>
-                      {p.title}
-                    </AppText>
-                  </Pressable>
-                  <View style={{ marginTop: spacing.sm }}>
-                    <WeekRow
-                      cells={p.cells}
-                      onToggle={(day) => {
-                        // 🔴 `day` 는 누른 칸의 날짜다. "오늘"로 넘기면 아무 날이나 오늘이 된다
-                        toggleCheck(p.id, day);
-                        reload();
-                      }}
-                    />
-                  </View>
-                  {p.streak > 0 && (
-                    <AppText variant="caption" tone="muted" style={{ marginTop: spacing.sm }}>
-                      {t('practice.streak', { count: p.streak })}
-                    </AppText>
-                  )}
-                </View>
-              ))}
+              {/* 🔄 2026-09-15 관리자 수정사항 #2 · #3 — 실천마다 **카드 하나**로 감싸고, 상세(기록 달력)로 가는
+                  **글자 링크**를 아래 오른쪽에 둔다. 제목만 눌리던 때는 눌린다는 표시가 없어 달력을 못 찾았다.
+                  🔴 카드 전체를 누르게 하지 않는다. 요일 칸을 누르다 상세로 넘어가면 체크가 안 된다 */}
+              {data.today.map((p) => {
+                const open = () => router.push(`/practice/${p.id}`);
+                return (
+                  <Card key={p.id}>
+                    <Pressable
+                      accessibilityRole="button"
+                      onPress={open}
+                      hitSlop={spacing.sm}
+                      style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                    >
+                      <AppText variant="thought" numberOfLines={2}>
+                        {p.title}
+                      </AppText>
+                    </Pressable>
+                    <View style={{ marginTop: spacing.md }}>
+                      <WeekRow
+                        cells={p.cells}
+                        onToggle={(day) => {
+                          // 🔴 `day` 는 누른 칸의 날짜다. "오늘"로 넘기면 아무 날이나 오늘이 된다
+                          toggleCheck(p.id, day);
+                          reload();
+                        }}
+                      />
+                    </View>
+                    <View style={[styles.footer, { marginTop: spacing.md }]}>
+                      {/* 🚫 연속일이 0 이면 왼쪽을 비운다(§8). 링크는 늘 오른쪽이다 */}
+                      <AppText variant="caption" tone="muted">
+                        {p.streak > 0 ? t('practice.streak', { count: p.streak }) : ''}
+                      </AppText>
+                      {/* 🔴 색은 accent 가 아니라 글자색이다. 오늘의 실천이 여럿이면 링크도 여럿이라 accent 가 화면에 여럿 생긴다 */}
+                      <Pressable
+                        accessibilityRole="link"
+                        onPress={open}
+                        hitSlop={spacing.sm}
+                        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+                      >
+                        <AppText variant="label">
+                          {t('practice.openHistory')}
+                        </AppText>
+                      </Pressable>
+                    </View>
+                  </Card>
+                );
+              })}
             </View>
           )}
 
@@ -120,3 +139,7 @@ export default function PracticeTab() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  footer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+});

@@ -47,6 +47,12 @@
       "sort": {
         "recent": "최근 저장",
         "book": "책별"
+      },
+      "bookOrder": {
+        "label": "책 정렬",
+        "recent": "최근 추가순",
+        "title": "제목순",
+        "count": "문장 많은 순"
       }
     },
     "detail": {
@@ -291,7 +297,8 @@
     "calendar": {
       "prev": "이전 달",
       "next": "다음 달"
-    }
+    },
+    "openHistory": "기록 보기 ›"
   },
   "reminder": {
     "title": "복습 알림",

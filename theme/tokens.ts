@@ -63,7 +63,7 @@ type Palette = {
   highlight: string;
   /** 사진 위에서 **아직 안 고른** 줄. 🔴 있다는 것만 알리고 읽기를 방해하지 않는다 */
   highlightIdle: string;
-  /** 하단 탭에서 선택된 탭의 알약 배경. 🔴 accent 가 아니다 — 탭 바는 모든 화면에 붙어 있어 accent 가 둘이 된다 */
+  /** 하단 탭에서 선택된 탭 칸의 배경(🔄 2026-09-15 알약 → 칸 전체). 🔴 accent 가 아니다 — 탭 바는 모든 화면에 붙어 있어 accent 가 둘이 된다 */
   tabIndicator: string;
 };
 

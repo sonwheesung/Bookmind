@@ -47,6 +47,12 @@
       "sort": {
         "recent": "Recent",
         "book": "By book"
+      },
+      "bookOrder": {
+        "label": "Sort books",
+        "recent": "Recently added",
+        "title": "Title",
+        "count": "Most passages"
       }
     },
     "detail": {
@@ -291,7 +297,8 @@
     "calendar": {
       "prev": "Previous month",
       "next": "Next month"
-    }
+    },
+    "openHistory": "View history ›"
   },
   "reminder": {
     "title": "Review reminder",
