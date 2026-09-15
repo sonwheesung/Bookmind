@@ -7,7 +7,8 @@ description: 프로젝트 별 수정사항 시트에서 이 프로젝트 탭을 
 
 정본 규칙은 `C:/project/common/FIX_REQUESTS.md` 다. 이 스킬은 **읽고 알려 주기만** 한다.
 
-1. 크롬 **새 탭**으로 시트를 연다: https://docs.google.com/spreadsheets/d/<시트 ID>/edit
+1. 크롬 **새 탭**으로 시트를 연다. 주소는 `C:/project/common/FIX_REQUESTS.md` §1 에 있다
+   - 🔴 공개 저장소라 주소를 여기 적지 않는다(`scripts/check-public.mjs` ④ · 로컬 사본 `.private/LINKS.md`)
 2. 그 탭에서 `FIX_REQUESTS.md` §7.4 의 읽기 코드를 실행한다. `TAB` 은 `bookmind` 이다
    - ⚠ 폴더 이름은 `Bookmind` 인데 시트 탭은 **소문자 `bookmind`** 로 이미 만들어져 있었다(2026-09-15 확인). 읽기 코드는 대소문자까지 정확히 비교하므로 `bookmind` 로 쓴다
 3. 결과가 `ok: false` 면 멈추고 알린다

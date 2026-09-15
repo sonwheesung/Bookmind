@@ -612,7 +612,7 @@ npx eas-cli submit          → ✖ The service account is missing the
 | 올라간 것 | `internal` 트랙 · versionCode 1 · sha1 `6725fa38…` |
 | **게시** | ✅ **2026-09-10 16:14** · `활성` · *내부 테스터에게 제공됨* · **검토되지 않음** |
 | 테스터 | 기존 목록 **`사장님 검증 전용`**(2명) 연결. 🔴 doply(41명)는 안 붙였다. 내부 테스트는 우리만 있으면 된다 |
-| 참여 링크 | `https://play.google.com/apps/internaltest/<내부 테스트 ID>` |
+| 참여 링크 | 로컬 `.private/LINKS.md`(커밋 금지 · 2026-09-15 공개 점검으로 뺐다) |
 | 크기 | AAB 53.4MB → **신규 설치 18.7MB**(기기별 분할). 다운로드 11초 |
 | 프로덕션 | **릴리스 0건**(확인함). 아무것도 새지 않았다 |
 

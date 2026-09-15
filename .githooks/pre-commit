@@ -1,0 +1,7 @@
+#!/bin/sh
+# 공개되면 안 되는 것이 이번 커밋에 들어가면 막는다(scripts/check-public.mjs · CLAUDE.md §13).
+# 켜는 법(새로 받은 저장소): npm run hooks:install
+node scripts/check-public.mjs --staged || {
+  echo "커밋을 막았다. 값은 .private/LINKS.md(커밋 금지)로 옮기고 문서에는 그 파일을 가리키기만 한다."
+  exit 1
+}

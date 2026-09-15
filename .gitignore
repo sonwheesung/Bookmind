@@ -66,3 +66,6 @@ expo-env.d.ts
 # @end expo-cli
 # ---- /check 스킬 (common/FIX_REQUESTS.md §7.1 · 읽은 결과와 지난 기록은 커밋하지 않는다) ----
 .claude/skills/check/*.json
+
+# ---- 비공개 링크 · 값 (CLAUDE.md §13 · 공개 저장소로 본다 · scripts/check-public.mjs 가 한 번 더 막는다) ----
+.private/

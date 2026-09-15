@@ -1,0 +1,6 @@
+#!/bin/sh
+# 공개되면 안 되는 것이 추적 파일에 남아 있으면 push 를 막는다(scripts/check-public.mjs · CLAUDE.md §13).
+node scripts/check-public.mjs || {
+  echo "push 를 막았다. 값은 .private/LINKS.md(커밋 금지)로 옮기고 문서에는 그 파일을 가리키기만 한다."
+  exit 1
+}

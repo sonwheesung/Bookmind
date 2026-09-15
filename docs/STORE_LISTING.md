@@ -90,7 +90,7 @@
 | 웹브라우저·검색 엔진 | 아니요 | |
 | 주로 뉴스 또는 교육용 제품 | **예** | 앱 카테고리를 `교육` 으로 둔 것과 맞춘다 |
 
-결과는 전 기관 **전체이용가**다. 연락 이메일은 형제 앱 IARC 통지와 같은 `<관리자 메일 · .private/LINKS.md>` 이다.
+결과는 전 기관 **전체이용가**다. 연락 이메일은 형제 앱 IARC 통지와 같은 관리자 메일이다(값은 로컬 `.private/LINKS.md` · 공개 저장소라 적지 않는다).
 ⚠ 요약 화면의 대한민국 행에 경고가 하나 붙는데, 내용이 *"만 19세 미만에게 부적합한 **게임**은 게임물관리위원회 등급이 없으면 삭제될 수 있다"* 라서 게임이 아닌 우리와 무관하다.
 
 ⚠ **전화번호는 비워 뒀다.** 필수가 아니고, `common/BUSINESS_INFO.md` §7 에
@@ -485,7 +485,7 @@ AI 고지에 쓸 문안은 이미 `docs/AI_SYSTEM.md` §2.1 에 확정돼 있다
 |---|---|
 | URL | `https://vivace-games.com/reread/privacy` → **200** (대조군 `snoreless/privacy` 도 200) |
 | 배포 방식 | 커밋 `c3a2885` push = Vercel 자동 배포. 푸시 후 **약 50초** 만에 404 → 200 |
-| 라이브 본문 실측 | 🟢 AdMob·RevenueCat·Supabase·Discord **0회** · `SON WHEESUNG` · `749-25-02260` · `RECORD_AUDIO` 고지 있음 |
+| 라이브 본문 실측 | 🟢 AdMob·RevenueCat·Supabase·Discord **0회** · `SON WHEESUNG` · 사업자등록번호 · `RECORD_AUDIO` 고지 있음 |
 
 ⚠ **Next.js 는 같은 내용을 렌더 HTML 과 직렬화 데이터에 두 벌 담는다.** 문자열을 세면 2배로 나온다.
 `<script>` 를 걷어내도 그렇다. 개수로 판정하지 말고 **있나 없나**로 본다(그쪽 세션도 같은 착시를 겪었다).
