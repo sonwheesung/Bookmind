@@ -2,7 +2,7 @@
   "expo": {
     "name": "Re:Read",
     "slug": "reread",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "runtimeVersion": "native-2",
     "updates": {
       "url": "https://u.expo.dev/8785afeb-e523-40c5-9b42-20593214aba6",
@@ -17,7 +17,7 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.vivacegames.reread",
-      "versionCode": 7,
+      "versionCode": 8,
       "edgeToEdgeEnabled": true,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
