@@ -128,7 +128,7 @@
       "tags": "Tags",
       "head": "It starts like this"
     },
-    "answer": "What came to mind (optional)",
+    "answer": "What came to mind",
     "backHome": "Back to home",
     "howRecalled": "How did it come back?"
   },
@@ -181,7 +181,7 @@
   },
   "stats": {
     "title": "Stats",
-    "empty": "Numbers appear here once you save your first passage.",
+    "empty": "Nothing recorded yet.",
     "tags": "By topic",
     "label": {
       "saved": "Saved",
@@ -249,12 +249,12 @@
     "title": "Practices",
     "todayTitle": "Today's practice",
     "closedTitle": "Finished",
-    "empty": "Nothing here yet.",
+    "empty": "No practices yet.",
     "create": "New practice",
     "createAction": "Create",
     "createFromKnowledge": "Turn this passage into a practice",
     "fromKnowledge": "From this passage",
-    "titleLabel": "What will you do?",
+    "titleLabel": "What to practice",
     "titlePlaceholder": "Put my phone on the desk before bed",
     "repeatLabel": "How often",
     "startsToday": "Starts today.",

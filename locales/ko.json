@@ -6,7 +6,7 @@
     "save": "저장",
     "edit": "수정",
     "add": "추가",
-    "remove": "떼기"
+    "remove": "제거"
   },
   "home": {
     "today": {
@@ -45,7 +45,7 @@
       "title": "문장",
       "empty": "아직 저장한 것이 없습니다.",
       "sort": {
-        "recent": "등록순",
+        "recent": "최근 저장",
         "book": "책별"
       }
     },
@@ -63,7 +63,7 @@
     "tags": {
       "title": "태그",
       "placeholder": "태그 추가",
-      "already": "이미 붙어 있는 태그입니다."
+      "already": "이미 추가한 태그입니다."
     },
     "delete": {
       "title": "이 문장을 지울까요?",
@@ -128,7 +128,7 @@
       "tags": "태그",
       "head": "이렇게 시작합니다"
     },
-    "answer": "떠오른 내용 (선택)",
+    "answer": "떠오른 내용",
     "backHome": "홈으로",
     "howRecalled": "어떻게 떠올랐나요?"
   },
@@ -171,7 +171,7 @@
   "search": {
     "title": "검색",
     "placeholder": "문장 · 내 생각 · 태그 · 책 제목",
-    "empty": "찾는 문장이 없습니다.",
+    "empty": "일치하는 내용이 없습니다.",
     "axis": {
       "content": "원문",
       "thought": "내 생각",
@@ -181,12 +181,12 @@
   },
   "stats": {
     "title": "통계",
-    "empty": "첫 문장을 저장하면 여기에 숫자가 생깁니다.",
+    "empty": "아직 기록이 없습니다.",
     "tags": "분야별",
     "label": {
       "saved": "저장",
       "review": "복습",
-      "streak": "연속 학습일"
+      "streak": "연속 활동일"
     },
     "savedValue": "문장 {{knowledge}} · 책 {{books}} · 생각 {{thoughts}}",
     "reviewValue": "{{count}}회 · 기억률 {{percent}}%",
@@ -249,16 +249,16 @@
     "title": "실천",
     "todayTitle": "오늘의 실천",
     "closedTitle": "지난 실천",
-    "empty": "아직 없습니다.",
+    "empty": "등록한 실천이 없습니다.",
     "create": "실천 만들기",
     "createAction": "만들기",
     "createFromKnowledge": "이 문장으로 실천 만들기",
     "fromKnowledge": "이 문장에서",
-    "titleLabel": "무엇을 하시겠어요?",
+    "titleLabel": "실천할 내용",
     "titlePlaceholder": "자기 전에 스마트폰을 책상에 놓는다",
     "repeatLabel": "반복",
     "startsToday": "오늘부터 시작합니다.",
-    "streak": "{{count}}일 연속",
+    "streak": "{{count}}일 연속 실천",
     "stop": "그만두기",
     "resume": "다시 시작하기",
     "deleteConfirmTitle": "이 실천을 지울까요?",
@@ -272,7 +272,7 @@
       "running": "진행 중",
       "upcoming": "시작 전",
       "ended": "종료됨",
-      "stopped": "그만두었음"
+      "stopped": "중단됨"
     },
     "weekday": {
       "mon": "월",
@@ -295,7 +295,7 @@
   },
   "reminder": {
     "title": "복습 알림",
-    "hint": "복습할 문장이 있는 날에만 알립니다. 하루 한 번입니다.",
+    "hint": "다시 만날 문장이 있는 날에만 알립니다. 하루 한 번입니다.",
     "on": "켜짐",
     "off": "꺼짐",
     "time": "알림 시각",
