@@ -9,12 +9,42 @@
  */
 import { DatabaseSync } from 'node:sqlite';
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { runMigrations } from '../db/migrate.ts';
 import { buildCount, buildInsert } from '../db/sql.ts';
 import { localDayKey, previousDayKey } from '../lib/day.ts';
 import { retentionRate, streakDays } from '../features/stats/compute.ts';
-import { activityTimesQuery, reviewTallyQuery, tagDistributionQuery } from '../features/stats/sql.ts';
+import {
+  activityLevel,
+  chartsReady,
+  clampPeriod,
+  countByDay,
+  forecast,
+  mergeCounts,
+  MIN_ACTIVE_DAYS,
+  monthGrid,
+  niceMax,
+  parseStatsPeriod,
+  periodBounds,
+  periodBuckets,
+  periodEnd,
+  periodStart,
+  shiftPeriod,
+  sumBuckets,
+  tallyIn,
+} from '../features/stats/charts.ts';
+import {
+  activityTimesQuery,
+  bookDistributionQuery,
+  dueTimesQuery,
+  reviewMarksQuery,
+  reviewTallyQuery,
+  saveTimesQuery,
+  tagDistributionQuery,
+} from '../features/stats/sql.ts';
 
 // ── 🔴 SELF-TEST ─────────────────────────────────────────────────────
 function selfTest() {
@@ -229,6 +259,215 @@ check(slices[0]?.name === '생산성' && slices[0]?.n === 2, '⑦ 분야 집계�
 const capped = tagDistributionQuery(0);
 check(db.prepare(capped.text).all(...capped.params).length === 0, '⑦ limit 이 안 먹는다');
 
+// ── ⑧~⑫ 차트 (§4.2) ──
+{
+  const throws = (fn) => {
+    try {
+      fn();
+      return false;
+    } catch {
+      return true;
+    }
+  };
+
+  // ── ⑧ 기간 ──
+  // 🔴 오늘은 **목요일 · 월 중간**(09-10)이다. 월요일 · 1일이면 기간 시작 계산을 지워도 초록이다
+  check(periodStart('week', TODAY) === '2026-09-07', `⑧ 주 시작이 ${periodStart('week', TODAY)} 다(월요일 09-07)`);
+  check(periodStart('month', TODAY) === '2026-09-01', `⑧ 달 시작: ${periodStart('month', TODAY)}`);
+  check(periodStart('year', TODAY) === '2026-01-01', `⑧ 해 시작: ${periodStart('year', TODAY)}`);
+  check(periodEnd('week', TODAY) === '2026-09-13', `⑧ 주 끝: ${periodEnd('week', TODAY)}`);
+  check(periodEnd('month', '2026-02-10') === '2026-02-28', '⑧ 평년 2월 끝이 28일이 아니다');
+  check(periodEnd('month', '2028-02-10') === '2028-02-29', '⑧ 🔴 윤년 2월 끝이 29일이 아니다');
+  check(periodEnd('month', TODAY) === '2026-09-30', '⑧ 9월 끝이 30일이 아니다');
+  check(periodEnd('year', TODAY) === '2026-12-31', '⑧ 해 끝이 12-31 이 아니다');
+  check(shiftPeriod('week', '2026-12-30', 1) === '2027-01-04', `⑧ 🔴 해를 넘기는 주: ${shiftPeriod('week', '2026-12-30', 1)}`);
+  check(shiftPeriod('week', TODAY, -1) === '2026-08-31', `⑧ 달을 넘기는 지난 주: ${shiftPeriod('week', TODAY, -1)}`);
+  check(shiftPeriod('month', '2026-01-20', -1) === '2025-12-01', '⑧ 🔴 해를 넘기는 지난 달');
+  check(shiftPeriod('year', TODAY, -1) === '2025-01-01', '⑧ 지난 해');
+  check(shiftPeriod('week', TODAY, 0) === '2026-09-07', '⑧ 0 이동이 기간 첫날로 안 맞춘다');
+  check(throws(() => shiftPeriod('week', TODAY, 0.5)), '⑧ 🔴 기간 수 0.5 를 조용히 받는다');
+  check(throws(() => shiftPeriod('month', TODAY, Number.NaN)), '⑧ 🔴 기간 수 NaN 을 조용히 받는다');
+
+  const pb = periodBounds('month', '2026-07-20', TODAY);
+  check(pb.first === '2026-07-01' && pb.last === '2026-09-01', `⑧ 넘기기 범위: ${JSON.stringify(pb)}`);
+  check(clampPeriod('month', null, pb) === '2026-09-01', '⑧ 고른 기간이 없는데 이번 달이 아니다');
+  check(clampPeriod('month', '2026-05-10', pb) === '2026-07-01', '⑧ 🔴 첫 활동보다 앞 기간으로 간다');
+  check(clampPeriod('month', '2026-12-01', pb) === '2026-09-01', '⑧ 🔴 이번 기간보다 뒤로 간다');
+  check(clampPeriod('month', '2026-08-15', pb) === '2026-08-01', '⑧ 범위 안 기간을 기간 첫날로 안 맞춘다');
+  const noAct = periodBounds('week', null, TODAY);
+  check(noAct.first === '2026-09-07' && noAct.last === '2026-09-07', '⑧ 활동이 없을 때 이번 주 하나가 아니다');
+  const future = periodBounds('week', '2026-10-01', TODAY);
+  check(future.first === future.last, '⑧ 🔴 첫 활동이 미래로 찍혀 범위가 뒤집혔다');
+  check(parseStatsPeriod('month') === 'month' && parseStatsPeriod('year') === 'year', '⑧ 저장된 기간을 못 읽는다');
+  for (const v of [undefined, null, '', 'day', 'WEEK', 0, {}, ['month']]) {
+    check(parseStatsPeriod(v) === 'week', `⑧ 🔴 깨진 기간 값 ${JSON.stringify(v)} 를 week 로 안 돌린다`);
+  }
+
+  // ── ⑨ 일별 집계(실물 SQLite) ──
+  const sq = saveTimesQuery();
+  const saveRows = db.prepare(sq.text).all(...sq.params);
+  check(saveRows.length === 2, `⑨ 🔴 저장 시각이 ${saveRows.length}건이다. 지운 문장의 저장이 들어왔나`);
+  const saveDays = countByDay(saveRows.map((r) => r.at));
+  check(
+    saveDays.get('2026-09-08') === 1 && saveDays.get('2026-09-09') === 1 && !saveDays.has('2026-09-06'),
+    `⑨ 저장 날짜별 수: ${JSON.stringify([...saveDays])}`,
+  );
+  const rq = reviewMarksQuery();
+  const markRows = db.prepare(rq.text).all(...rq.params);
+  check(markRows.length === 4, `⑨ 복습 표시가 ${markRows.length}건이다(지운 문장의 복습 포함 4)`);
+  const marks = markRows.map((r) => ({ day: localDayKey(r.at), again: r.rating === 'again' }));
+  const t89 = tallyIn(marks, '2026-09-08', '2026-09-09');
+  check(t89.total === 2 && t89.again === 1, `⑨ 기간 기억률 재료: ${JSON.stringify(t89)}`);
+  const t10 = tallyIn(marks, TODAY, TODAY);
+  check(t10.total === 1 && t10.again === 0, `⑨ 🔴 기간 양끝을 포함하지 않는다: ${JSON.stringify(t10)}`);
+  check(tallyIn(marks, '2026-08-01', '2026-08-31').total === 0, '⑨ 기간 밖 복습을 센다');
+
+  const wk = periodBuckets('week', TODAY, saveDays);
+  check(wk.length === 7 && wk[0]?.key === '2026-09-07', `⑨ 주 막대: ${wk.length}개 · ${wk[0]?.key}`);
+  check(wk[1]?.value === 1 && wk[2]?.value === 1 && sumBuckets(wk) === 2, '⑨ 주 막대 값이 날짜와 어긋났다');
+  const feb = periodBuckets('month', '2026-02-15', new Map());
+  check(feb.length === 28 && feb[0]?.key === '2026-02-01' && sumBuckets(feb) === 0, '⑨ 2월 막대가 28개가 아니다');
+  const yr = periodBuckets(
+    'year',
+    TODAY,
+    new Map([
+      ['2026-09-08', 2],
+      ['2026-09-30', 3],
+      ['2026-01-01', 1],
+      ['2025-09-08', 9],
+      ['2027-01-01', 4],
+    ]),
+  );
+  check(yr.length === 12 && yr[8]?.key === '2026-09', `⑨ 년 막대: ${yr.length}개 · ${yr[8]?.key}`);
+  check(yr[8]?.value === 5 && yr[0]?.value === 1, '⑨ 년 막대가 달별로 안 합쳐졌다');
+  check(sumBuckets(yr) === 6, `⑨ 🔴 년 막대가 다른 해를 섞는다(합 ${sumBuckets(yr)} ≠ 6)`);
+  const a = new Map([['2026-09-08', 1]]);
+  const merged = mergeCounts(a, new Map([['2026-09-08', 2], ['2026-09-09', 1]]));
+  check(merged.get('2026-09-08') === 3 && merged.get('2026-09-09') === 1, '⑨ 활동 합치기가 틀렸다');
+  check(a.get('2026-09-08') === 1, '⑨ 🔴 mergeCounts 가 입력을 바꿨다');
+
+  // ── 🔴 ⑩ 다가올 복습 ──
+  const sched = (kid, dueAt) =>
+    driver.run(
+      `INSERT INTO review_schedules (knowledge_id, due_at, state, stability, difficulty, reps, lapses,
+         last_reviewed_at, created_at, updated_at, deleted_at)
+       VALUES (?, ?, 'review', 1, 5, 1, 0, NULL, ?, ?, NULL)`,
+      [kid, dueAt, dueAt, dueAt],
+    );
+  sched(kA, localIso(2026, 9, 5, 9)); // 밀린 카드
+  sched(kB, localIso(2026, 9, 10, 23)); // 오늘 밤
+  sched(kDel, localIso(2026, 9, 10, 8)); // 🔴 지운 문장
+  const dq = dueTimesQuery();
+  const dueRows = db.prepare(dq.text).all(...dq.params);
+  check(dueRows.length === 2, `⑩ 🔴 만기가 ${dueRows.length}건이다. 지운 문장의 만기가 들어왔나`);
+  const fc = forecast(
+    dueRows.map((r) => localDayKey(r.at)),
+    TODAY,
+    7,
+    20,
+  );
+  check(fc.length === 7 && fc[0]?.key === TODAY, `⑩ 다가올 복습 창: ${fc.length}일 · ${fc[0]?.key}`);
+  check(fc[0]?.value === 2 && sumBuckets(fc) === 2, `⑩ 🔴 밀린 카드가 오늘로 안 모인다: ${fc.map((b) => b.value)}`);
+
+  const many = [...Array(25).fill('2026-09-01'), ...Array(3).fill(TODAY), ...Array(5).fill('2026-09-11')];
+  const f2 = forecast(many, TODAY, 3, 20).map((b) => b.value).join();
+  check(f2 === '20,13,0', `⑩ 🔴 상한을 넘는 수가 다음 날로 안 넘어간다: ${f2}(기대 20,13,0)`);
+  const f3 = forecast(Array(50).fill('2026-09-01'), TODAY, 3, 20).map((b) => b.value).join();
+  check(f3 === '20,20,10', `⑩ 넘김이 여러 날 이어지지 않는다: ${f3}`);
+  check(sumBuckets(forecast(['2026-09-17'], TODAY, 7, 20)) === 0, '⑩ 창 밖 만기를 센다');
+  check(forecast(['2026-09-16'], TODAY, 7, 20)[6]?.value === 1, '⑩ 🔴 창의 마지막 날 만기를 빠뜨린다');
+  check(forecast([], TODAY, 30, 20).length === 30, '⑩ 30일 창이 30칸이 아니다');
+  for (const [d, c] of [
+    [0, 20],
+    [1.5, 20],
+    [7, -1],
+    [7, 2.5],
+    [Number.NaN, 20],
+  ]) {
+    check(throws(() => forecast([], TODAY, d, c)), `⑩ 🔴 날 수 ${d} · 상한 ${c} 를 조용히 받는다`);
+  }
+
+  // ── ⑪ 축 · 칸 ──
+  for (const [n, want] of [
+    [0, 0],
+    [0.4, 1],
+    [1, 1],
+    [2, 2],
+    [3, 5],
+    [5, 5],
+    [6, 10],
+    [10, 10],
+    [11, 20],
+    [21, 50],
+    [99, 100],
+    [101, 200],
+  ]) {
+    check(niceMax(n) === want, `⑪ niceMax(${n}) = ${niceMax(n)} (기대 ${want})`);
+  }
+  for (const n of [-1, Number.NaN, Number.POSITIVE_INFINITY]) {
+    check(throws(() => niceMax(n)), `⑪ 🔴 축 값 ${n} 을 조용히 받는다`);
+  }
+  for (const [n, want] of [
+    [0, 0],
+    [1, 1],
+    [2, 1],
+    [3, 2],
+    [5, 2],
+    [6, 3],
+    [10, 3],
+    [11, 4],
+    [20, 4],
+  ]) {
+    check(activityLevel(n) === want, `⑪ activityLevel(${n}) = ${activityLevel(n)} (기대 ${want})`);
+  }
+  for (const n of [-1, 1.5, Number.NaN]) {
+    check(throws(() => activityLevel(n)), `⑪ 🔴 활동 수 ${n} 을 조용히 받는다`);
+  }
+  const nov = monthGrid('2026-11');
+  check(nov.length === 42 && nov[5] === null && nov[6] === '2026-11-01', '⑪ 🔴 일요일 시작 달의 1일이 일곱 번째 칸이 아니다');
+  const feb27 = monthGrid('2027-02');
+  check(feb27.length === 28 && feb27[0] === '2027-02-01', '⑪ 🔴 딱 맞는 달에 빈칸이 생긴다');
+  check(monthGrid('2026-09').length % 7 === 0, '⑪ 달력 칸 수가 7 의 배수가 아니다');
+
+  // ── ⑫ 뜨는 조건 · 책별 · 배선 ──
+  check(!chartsReady(6) && chartsReady(7), `⑫ 🔴 차트 문턱이 ${MIN_ACTIVE_DAYS}(활동 6일 숨김 · 7일 표시)이 아니다`);
+  check(!chartsReady(0) && !chartsReady(Number.NaN), '⑫ 활동 0 · NaN 에 차트를 그린다');
+
+  const bLive = addRow(driver, 'books', { title: '명상록', status: 'reading' }, localIso(2026, 9, 1));
+  const bDead = addRow(driver, 'books', { title: '지워진 책', status: 'reading' }, localIso(2026, 9, 1));
+  driver.run('UPDATE knowledge SET book_id = ? WHERE id IN (?, ?, ?)', [bLive, kA, kB, kDel]);
+  const kOnDead = newKnowledge(driver, '지워진 책의 문장', localIso(2026, 9, 9, 12));
+  driver.run('UPDATE knowledge SET book_id = ? WHERE id = ?', [bDead, kOnDead]);
+  softDelete(driver, 'books', 'id = ?', [bDead]);
+  const bq = bookDistributionQuery(5);
+  const bookRows = db.prepare(bq.text).all(...bq.params);
+  check(bookRows.length === 1, `⑫ 🔴 책별이 ${bookRows.length}권이다. 지운 책이 나왔나`);
+  check(bookRows[0]?.name === '명상록' && bookRows[0]?.n === 2, `⑫ 🔴 책별 수가 틀렸다(지운 문장 포함?): ${JSON.stringify(bookRows[0])}`);
+  const bq0 = bookDistributionQuery(0);
+  check(db.prepare(bq0.text).all(...bq0.params).length === 0, '⑫ 책별 limit 이 안 먹는다');
+
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const screen = readFileSync(join(root, 'app', 'stats.tsx'), 'utf8');
+  for (const needle of ['chartsReady(', 'periodBuckets(', 'clampPeriod(', 'tallyIn(']) {
+    check(screen.includes(needle), `⑫ 🔴 통계 화면이 ${needle} 를 안 거친다(규칙이 화면에 따로 생긴다)`);
+  }
+  // 🔴 `DAILY_LIMIT` 글자가 **있는지**가 아니라 `forecast(…, DAILY_LIMIT)` 로 **넘기는지** 잰다.
+  //    처음엔 includes 로 쟀는데 import 줄이 그 글자를 담고 있어서, 상한을 999 로 바꾼 변이에 침묵했다(2026-09-15)
+  check(
+    /forecast\([^;]*\bDAILY_LIMIT\s*\)/.test(screen),
+    '⑫ 🔴 다가올 복습이 오늘의 복습 상한(DAILY_LIMIT)으로 안 흐른다. 첫 막대가 홈의 복습 수와 달라진다',
+  );
+  // 양성 대조 — 그 정규식이 옛 모양(상한 없는 호출)을 **실제로 거르는가**
+  check(
+    !/forecast\([^;]*\bDAILY_LIMIT\s*\)/.test("import { DAILY_LIMIT } from 'x';\nforecast(a, b, 7, 999);"),
+    '⑫ 🔴 상한 배선 정규식이 import 줄에 속는다',
+  );
+  check(
+    readFileSync(join(root, 'features', 'settings', 'stats-period.ts'), 'utf8').includes('parseStatsPeriod('),
+    '⑫ 🔴 기간 저장소가 복원할 때 값을 안 거른다',
+  );
+}
+
 if (bad.length > 0) {
   console.error(`\ncheck:stats 실패 ${bad.length}건:\n`);
   for (const m of bad) console.error(`  ✗ ${m}`);
@@ -238,5 +477,6 @@ if (bad.length > 0) {
 console.log(
   `\ncheck:stats OK — tombstone · 기억률(🔴 분모 0 → null) · 지운 지식의 복습 ·` +
     `\n  🔴 연속일 경계(오늘이 비어도 유지) · 끊김 4종 · 로컬 자정 · 태그 분포` +
+    `\n  ⑧기간(월요일 · 월말 · 윤년 · 해 넘김 · 범위) ⑨일별 집계(🔴 년은 그 해만) 🔴⑩다가올 복습(밀린 것 오늘로 · 상한 넘김) ⑪축·칸 경계 ⑫뜨는 조건 7일 · 책별 · 배선` +
     `\n  SELF-TEST 통과(기억률·연속일 양성 대조 포함)\n`,
 );

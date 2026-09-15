@@ -16,7 +16,7 @@
 |---|---|
 | 설계(이 문서) | ✅ 2026-09-13 |
 | 토큰 `theme/tokens.ts` · `useTheme()` | ✅ 2026-09-08 (Phase 0) |
-| 공통 부품 **18개**(§2) | ✅ 2026-09-14. 기존 9 + 새 7 + 연령 게이트 층(`AgeGate`) 1 · 🔄 같은 날 `IconButton` · `MonthCalendar` 을 더하고 `BookCover` 를 지웠다. 화면 16개와 기존 부품 5개가 이전을 마쳤다(§7.5) |
+| 공통 부품 **21개**(§2) | ✅ 2026-09-14. 기존 9 + 새 7 + 연령 게이트 층(`AgeGate`) 1 · 🔄 같은 날 `IconButton` · `MonthCalendar` 을 더하고 `BookCover` 를 지웠다 · 🔄 2026-09-15 차트 부품 셋(`BarChart` · `ActivityGrid` · `RankBars`)을 더했다. 화면 16개와 기존 부품 5개가 이전을 마쳤다(§7.5) |
 | 공통 헬퍼(§3) | ✅ 2026-09-14 |
 | 가드 `npm run check:ui`(§6) | ✅ 2026-09-14. `verify` 17번째 |
 | 헤더 로고 | 🔄 2026-09-14 — 같은 날 **홈 헤더 자체를 뺐다**(결정 #26). `brand` 토큰도 없앴다 |
@@ -33,7 +33,7 @@
 
 ## 2. 공통 부품
 
-**18개** (세는 법: `ls components/*.tsx | wc -l` · `check:ui` ⑦이 이 표와 파일을 대조한다)
+**21개** (세는 법: `ls components/*.tsx | wc -l` · `check:ui` ⑦이 이 표와 파일을 대조한다)
 
 | 부품 | 쓰는 자리 | 규칙 |
 |---|---|---|
@@ -53,6 +53,9 @@
 | `BookSelect` | 책 연결 | 🔴 목록 안에 `+ 새 책 등록` 이 있다(`KNOWLEDGE_SYSTEM.md` §1.1.1) |
 | `WeekRow` | 실천 탭의 이번 주 일곱 칸 | 못 한 날은 빈 동그라미. 붉은색 없음 |
 | `MonthCalendar` | 실천 상세의 한 달 기록 | 판정은 `monthCells` 가 하고 여기서는 그리기만 · 채운 동그라미 = 한 날 · 누를 수 없는 날은 흐리게 · 붉은색 없음(`PRACTICE_SYSTEM.md` §3.1) |
+| `BarChart` | 통계의 세로 막대(저장 · 복습 · 다가올 복습) | 🔴 축 맨 위 값은 깔끔한 수(`niceMax`) · 글자색 한 가지 · 🚫 목표선 · 평균선 · 신호등 색 · 아래 글자는 `null` 로 건너뛴다(`STATS_SYSTEM.md` §4.2) |
+| `ActivityGrid` | 통계의 활동 달력 칸 | 진하기 5단계(`activityLevel`) · 🚫 빈 날은 빈 칸이지 실패 표시가 아니다 · 오늘 칸만 테두리 |
+| `RankBars` | 분야별 · 책별 상위 몇 개 | 1위 대비 가로 막대 · 🚫 파이 차트 · 순위 번호 · 메달 |
 | `AgeGate` | 부팅 연령 확인 모달(앱 전체를 덮는 층) | 🔴 중립 연도 목록 · 벽이 아니다 · 여러 화면이 쓰는 부품이 아니라 **한 곳만 그리는 층**이지만 화면이라 `components/` 에 둔다(`AUTH_SYSTEM.md` §1.6) |
 | `Spacer` | 화면 끝 여백 · 큰 구획 사이 빈 공간 | 높이는 `spacing` 이름으로만 |
 
@@ -86,6 +89,7 @@
 | `formatMonth(month, deviceLocale())` | `lib/format.ts` | 달 이름(`2026년 9월`). 로케일 규칙은 `formatDate` 와 같다 |
 | `groupByBook(rows)` | `features/knowledge/compute.ts` | 문장 책별 보기. 🔴 `책 없음` 은 맨 아래 · 구획 안은 최신순(`KNOWLEDGE_SYSTEM.md` §3.2) |
 | `monthCells` · `calendarBounds` · `addMonths` | `features/practice/compute.ts` · `lib/day.ts` | 실천 기록 달력. 🔴 누를 수 있는지는 주 칸과 같은 `canCheck` 다(`PRACTICE_SYSTEM.md` §3.1) |
+| `features/stats/charts.ts` · `formatDayShort` · `formatMonthShort` · `formatYear` | `features/stats/charts.ts` · `lib/format.ts` | 통계 차트의 기간 · 막대 · 칸 · 다가올 복습. 🔴 다가올 복습은 오늘의 복습과 같은 상한으로 흘린다(`STATS_SYSTEM.md` §4.2) |
 
 ## 4. 언제 공통으로 빼나
 

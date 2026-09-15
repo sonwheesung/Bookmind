@@ -190,7 +190,33 @@
     },
     "savedValue": "Passages {{knowledge}} · Books {{books}} · Thoughts {{thoughts}}",
     "reviewValue": "{{count}} times · Recalled {{percent}}%",
-    "streakValue": "{{count}} days"
+    "streakValue": "{{count}} days",
+    "period": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "saved": "Saved {{count}}",
+      "reviewed": "Reviews {{count}}",
+      "retention": "Recalled {{percent}}%",
+      "none": "Nothing recorded in this period."
+    },
+    "nav": {
+      "prev": "Previous period",
+      "next": "Next period"
+    },
+    "chart": {
+      "activity": "Activity",
+      "saved": "Passages saved",
+      "reviewed": "Reviews",
+      "activeDays": "{{count}} active days"
+    },
+    "forecast": {
+      "title": "Upcoming reviews",
+      "today": "Today",
+      "plusDays": "+{{count}}d"
+    },
+    "total": "All time",
+    "books": "By book"
   },
   "ocr": {
     "title": "From a photo",

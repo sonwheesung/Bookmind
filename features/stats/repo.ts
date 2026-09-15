@@ -6,8 +6,19 @@
  */
 import { count, getDb } from '@/db';
 
+import type { DayKey } from '@/lib/day';
+
+import { countByDay, mergeCounts, type ReviewMark } from './charts';
 import { localDayKey, retentionRate, streakDays, type Totals } from './compute';
-import { activityTimesQuery, reviewTallyQuery, tagDistributionQuery } from './sql';
+import {
+  activityTimesQuery,
+  bookDistributionQuery,
+  dueTimesQuery,
+  reviewMarksQuery,
+  reviewTallyQuery,
+  saveTimesQuery,
+  tagDistributionQuery,
+} from './sql';
 
 export type { Totals };
 
@@ -44,4 +55,54 @@ export function loadStats(now: Date = new Date()): Totals {
 export function loadTagDistribution(limit = 12): TagSlice[] {
   const sql = tagDistributionQuery(limit);
   return getDb().getAllSync<TagSlice>(sql.text, sql.params as never);
+}
+
+// ── 차트 (§4.2) ──────────────────────────────────────────────────────
+
+export interface ChartSource {
+  readonly saveDays: ReadonlyMap<DayKey, number>;
+  readonly reviewDays: ReadonlyMap<DayKey, number>;
+  /** 저장 + 복습. 🔴 연속일과 같은 활동 정의다(§3.3) */
+  readonly activityDays: ReadonlyMap<DayKey, number>;
+  readonly marks: readonly ReviewMark[];
+  readonly dueDays: readonly DayKey[];
+  /** 첫 활동 날. 없으면 `null` */
+  readonly firstDay: DayKey | null;
+}
+
+/** 차트 재료를 한 번에 읽는다. 🔴 계산은 `charts.ts` 가 하고 여기서는 날짜로 접기만 한다 */
+export function loadChartSource(): ChartSource {
+  const db = getDb();
+  const saves = saveTimesQuery();
+  const reviews = reviewMarksQuery();
+  const due = dueTimesQuery();
+
+  const saveRows = db.getAllSync<{ at: string }>(saves.text, saves.params as never);
+  const reviewRows = db.getAllSync<{ at: string; rating: string }>(reviews.text, reviews.params as never);
+  const dueRows = db.getAllSync<{ at: string }>(due.text, due.params as never);
+
+  const saveDays = countByDay(saveRows.map((r) => r.at));
+  const reviewDays = countByDay(reviewRows.map((r) => r.at));
+  const activityDays = mergeCounts(saveDays, reviewDays);
+
+  return {
+    saveDays,
+    reviewDays,
+    activityDays,
+    marks: reviewRows.map((r) => ({ day: localDayKey(r.at), again: r.rating === 'again' })),
+    dueDays: dueRows.map((r) => localDayKey(r.at)),
+    firstDay: [...activityDays.keys()].sort()[0] ?? null,
+  };
+}
+
+export interface BookSlice {
+  readonly id: string;
+  readonly name: string;
+  readonly n: number;
+}
+
+/** 책별. 🔴 하나도 없으면 빈 배열이고 화면은 그 절을 안 그린다 */
+export function loadBookDistribution(limit = 5): BookSlice[] {
+  const sql = bookDistributionQuery(limit);
+  return getDb().getAllSync<BookSlice>(sql.text, sql.params as never);
 }

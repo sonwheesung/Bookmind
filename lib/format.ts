@@ -24,3 +24,23 @@ export function formatMonth(month: string, lang: string): string {
   const [y, m] = month.split('-').map(Number);
   return new Date(y ?? Number.NaN, (m ?? Number.NaN) - 1, 1).toLocaleDateString(lang, { year: 'numeric', month: 'long' });
 }
+
+/** 짧은 날짜(`9월 14일` · `Sep 14`). 🔴 로케일은 기기 로케일이다 */
+export function formatDayShort(day: string, lang: string): string {
+  const [y, m, d] = day.split('-').map(Number);
+  return new Date(y ?? Number.NaN, (m ?? Number.NaN) - 1, d ?? Number.NaN).toLocaleDateString(lang, {
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+/** 짧은 달 이름(`9월` · `Sep`). 🔴 로케일은 기기 로케일이다 */
+export function formatMonthShort(month: string, lang: string): string {
+  const [y, m] = month.split('-').map(Number);
+  return new Date(y ?? Number.NaN, (m ?? Number.NaN) - 1, 1).toLocaleDateString(lang, { month: 'short' });
+}
+
+/** 해(`2026년` · `2026`). 🔴 로케일은 기기 로케일이다 */
+export function formatYear(year: string, lang: string): string {
+  return new Date(Number(year), 0, 1).toLocaleDateString(lang, { year: 'numeric' });
+}
