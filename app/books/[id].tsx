@@ -29,6 +29,7 @@ import { useTheme } from '@/theme';
  * 🔴 삭제 확인 문구에 "문장 N개는 그대로 남습니다"를 **반드시** 넣는다(§4.3).
  *    캐스케이드 삭제가 아니라는 사실을 사용자가 누르기 전에 알아야 한다.
  * 🔄 2026-09-14 수정 · 삭제 · 저장 · 취소를 위 오른쪽 아이콘으로 옮기고 표지 자리를 지웠다(사용자 지시 · 선택).
+ * 🔄 2026-09-15 읽기 상태는 **수정 모드에서만** 바꾼다. 보기에서는 글자 한 줄이다(사용자 지적 · §4.1).
  */
 export default function BookDetail() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -41,6 +42,7 @@ export default function BookDetail() {
   const [draftAuthor, setDraftAuthor] = useState('');
   const [draftTotal, setDraftTotal] = useState('');
   const [draftRead, setDraftRead] = useState('');
+  const [draftStatus, setDraftStatus] = useState<BookStatus>('reading');
 
   const { data, reload } = useDbQuery(() => {
     const row = getBook(id);
@@ -73,13 +75,9 @@ export default function BookDetail() {
       },
     });
 
-  const change = (status: BookStatus) => {
-    setBookStatus(id, status);
-    reload();
-  };
-
   const startEdit = () => {
     setDraftTitle(row.title);
+    setDraftStatus(row.status);
     setDraftAuthor(row.author ?? '');
     setDraftTotal(row.total_pages === null ? '' : String(row.total_pages));
     setDraftRead(row.read_pages === null ? '' : String(row.read_pages));
@@ -96,6 +94,8 @@ export default function BookDetail() {
       totalPages: parsePages(draftTotal),
       readPages: parsePages(draftRead),
     });
+    // ⚠ 상태 전이를 자동화하지 않는다 — 사용자가 고르고 ✓ 를 누른 것만 바뀐다(§4.1)
+    if (draftStatus !== row.status) setBookStatus(id, draftStatus);
     setEditing(false);
     reload();
   };
@@ -142,21 +142,28 @@ export default function BookDetail() {
             onChangeText={setDraftRead}
             keyboardType="number-pad"
           />
+          <AppText variant="label" tone="muted" style={{ marginBottom: spacing.xs }}>
+            {t('books.field.status')}
+          </AppText>
+          {/* 🔄 상태는 수정 모드에서만 고른다. ✓ 를 눌러야 반영되고 × 로 나가면 안 바뀐다(§4.1 · 2026-09-15) */}
+          <ChipRow style={{ marginBottom: spacing.xl }}>
+            {BOOK_STATUSES.map((s) => (
+              <Chip
+                key={s}
+                label={t(`books.status.${s}`)}
+                active={s === draftStatus}
+                onPress={() => setDraftStatus(s)}
+              />
+            ))}
+          </ChipRow>
         </>
       ) : (
-        row.author !== null && (
-          <AppText tone="muted" style={{ marginBottom: spacing.lg }}>
-            {row.author}
-          </AppText>
-        )
+        /* 🔴 보기에서는 누를 수 없는 글자 한 줄이다(`저자 · 읽는 중` · §4.2).
+              칩으로 두면 태그처럼 보이고, 누르면 저장 없이 바로 바뀌었다(2026-09-15 사용자 지적) */
+        <AppText tone="muted" style={{ marginBottom: spacing.xl }}>
+          {joinMeta([row.author, t(`books.status.${row.status}`)])}
+        </AppText>
       )}
-
-      {/* ⚠ 상태 전이를 자동화하지 않는다 — 사용자가 누른 것만 바뀐다(§4.1) */}
-      <ChipRow style={{ marginBottom: spacing.xl }}>
-        {BOOK_STATUSES.map((s) => (
-          <Chip key={s} label={t(`books.status.${s}`)} active={s === row.status} onPress={() => change(s)} />
-        ))}
-      </ChipRow>
 
       {/* 🔴 모르면 아예 안 그린다 — 0% 는 "안 읽었다"이지 "모른다"가 아니다(§4.4) */}
       {percent !== null && (
