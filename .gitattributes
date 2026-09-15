@@ -1,0 +1,2 @@
+# git 훅은 sh 가 읽는다. CRLF 로 체크아웃되면 줄 끝의 CR 때문에 훅이 깨진다(CLAUDE.md §13 · scripts/check-public.mjs)
+.githooks/* text eol=lf
