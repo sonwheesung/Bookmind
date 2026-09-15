@@ -72,8 +72,10 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: palette.bg,
           borderTopColor: palette.border,
-          // 🔄 2026-09-15 위아래 8 · 좌우 4 → 칸 높이 48(64 − 16). 선택 배경이 바를 꽉 채우지 않는다(`DESIGN_REVIEW.md` §3)
-          height: BAR_HEIGHT + insets.bottom,
+          // 🔄 2026-09-15 위아래 8 · 좌우 4 로 선택 배경이 바를 꽉 채우지 않게 한다(`DESIGN_REVIEW.md` §3).
+          // 🔴 칸 높이는 **56** 이다. 검수 권고 48(바 64 안에서 위아래 8)은 에뮬레이터에서 **탭 글자 아래가 잘렸다**(아이콘 24 + 글자 18 + 라이브러리 여백).
+          //    그래서 바를 8 키워 72 + 아래 인셋으로 둔다
+          height: BAR_HEIGHT + spacing.sm + insets.bottom,
           paddingTop: spacing.sm,
           paddingBottom: insets.bottom + spacing.sm,
           paddingHorizontal: spacing.xs,
