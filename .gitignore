@@ -64,3 +64,5 @@ Thumbs.db
 
 expo-env.d.ts
 # @end expo-cli
+# ---- /check 스킬 (common/FIX_REQUESTS.md §7.1 · 읽은 결과와 지난 기록은 커밋하지 않는다) ----
+.claude/skills/check/*.json

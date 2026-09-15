@@ -18,6 +18,7 @@
 | `doc-consistency` | 문서 여러 개 갱신 후 · Phase 를 닫을 때 | common 그대로 |
 | `gap-hunt` | 새 시스템·사건 추가 후 "빠진 반응 없나" | common 그대로 |
 | `devils-advocate` | 🔴 **Phase 0 착수 전** · 큰 기획 결정 전 | common 그대로 |
+| `check` | `/check` · "수정사항 확인" · 작업을 시작할 때 | `common/FIX_REQUESTS.md` §7.2 · §7.3 원본 복사(2026-09-15). **탭 이름만 `bookmind`** 로 바꿨다. 읽고 알려 주기만 한다 |
 
 ⚠ 셋(`reload-docs`·`doc-consistency`·`gap-hunt`)은 2026-09-08 common 현재본과 **byte 동일**이다.
 갱신은 재복사로 한다 — 여기서 고치지 않는다.
