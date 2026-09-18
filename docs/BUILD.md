@@ -512,7 +512,7 @@ vc5 를 굽고 뒷정리를 하자 **같은 파일에서 또 멈췄다.** 이번
 | versionCode | 6 → **7** |
 | version | 0.6.0 → **0.7.0** |
 | runtimeVersion | `1.0.0` 고정 |
-| 네이티브 변경 | 🔴 **있다.** `react-native-svg` 15.12.1(아이콘 탭 커밋 `013b522` 에서 들어갔고 이번이 첫 AAB). 권한 수가 28 에서 달라지는지 `check:aab` 로 본다 |
+| 네이티브 변경 | 🔴 **있다.** `react-native-svg` 15.12.1(아이콘 탭 커밋 `178491c` 에서 들어갔고 이번이 첫 AAB). 권한 수가 28 에서 달라지는지 `check:aab` 로 본다 |
 | JS 변경 | 하단 탭 아이콘 · 위 오른쪽 아이콘(`IconButton`) · 책 표지 자리 제거 · 문장 등록순/책별 · 실천 기록 달력(`MonthCalendar`) · 홈 버튼 높이 · 구분선 |
 | 보관 | `D:\builds\Bookmind\reread-vc7.aab` |
 | 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc7.aab --non-interactive` |
@@ -550,7 +550,7 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 | version | 0.7.0 → **0.1.8** · 🔄 결정 #27 의 첫 빌드(테스트 동안 `0.1.<versionCode>`). 이름 숫자가 작아져 보이는 것은 이번 한 번이다 |
 | runtimeVersion | `1.0.0` → 🔴 **`native-2`**(결정 #27). 지난 빌드(vc7) 뒤 **네이티브 모듈 변경 없음**. 범프 이유는 vc2 · vc7 에서 빠뜨린 것을 이번에 바로잡는 것이다. vc7 이하는 앞으로 OTA 를 못 받는다 |
 | 네이티브 변경 | 없다. 권한은 **28 그대로**여야 한다 |
-| JS 변경 | 통계 차트(`e0353cc` 책 상태 · `44a327c` 차트) · 한국어 문구 12키(`5ac2d45`) · 버전 규칙(`2a93040`) |
+| JS 변경 | 통계 차트(`a40eb3b` 책 상태 · `4aa34ac` 차트) · 한국어 문구 12키(`0ce746c`) · 버전 규칙(`451d74c`) |
 | 보관 | `D:\builds\Bookmind\reread-vc8.aab` |
 | 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc8.aab --non-interactive` |
 
@@ -585,7 +585,7 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 | version | 0.1.8 → **0.1.9**(결정 #27 · `0.1.<versionCode>`) |
 | runtimeVersion | **`native-2` 그대로**. 🔴 네이티브 모듈 변경이 없다(칩 · 카드 · 탭 바 전부 JS) |
 | 네이티브 변경 | 없다. 권한은 **28 그대로**여야 한다 |
-| JS 변경 | `d8e8a90` 수정사항 #1~#4(책 정렬 · 오늘의 실천 카드와 `기록 보기 ›` · 탭 칸 전체 배경) · `d09b428` 탭 칸 높이 48 → 56 |
+| JS 변경 | `a7b43e6` 수정사항 #1~#4(책 정렬 · 오늘의 실천 카드와 `기록 보기 ›` · 탭 칸 전체 배경) · `967428c` 탭 칸 높이 48 → 56 |
 | 보관 | `D:\builds\Bookmind\reread-vc9.aab` |
 | 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc9.aab --non-interactive` |
 
@@ -629,7 +629,7 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 | version | 0.1.9 → **0.1.10**(결정 #27 · `0.1.<versionCode>`) |
 | runtimeVersion | **`native-2` 그대로**. 🔴 네이티브 모듈 변경이 없다(`Select` 는 RN 기본 `Modal` 만 쓴다) |
 | 네이티브 변경 | 없다. 권한은 **28 그대로**여야 한다 |
-| JS 변경 | `59cd30f` 실천 시작일 이전 체크(`PRACTICE_SYSTEM.md` §3.2) · 설정 언어 셀렉트 · 통계 차트 문턱 7일 → 1일 |
+| JS 변경 | `4157c72` 실천 시작일 이전 체크(`PRACTICE_SYSTEM.md` §3.2) · 설정 언어 셀렉트 · 통계 차트 문턱 7일 → 1일 |
 | 보관 | `D:\builds\Bookmind\reread-vc10.aab` |
 | 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc10.aab --non-interactive` |
 
