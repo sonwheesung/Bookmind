@@ -26,8 +26,10 @@ import {
   previousDayKey,
 } from '../lib/day.ts';
 import {
+  CALENDAR_BACK_MONTHS,
   calendarBounds,
   canCheck,
+  firstDay,
   isScheduled,
   parseRepeat,
   practiceState,
@@ -79,8 +81,8 @@ function selfTest() {
   }
 
   // ④ 🔴 양성 대조 — 연속일이 **0 도 낼 수 있는가**
-  if (practiceStreak('daily', [], THU, '2026-01-01') !== 0) fail('빈 기록에 0 을 안 준다');
-  if (practiceStreak('daily', [THU], THU, '2026-01-01') !== 1) fail('오늘 하루를 1 로 안 센다');
+  if (practiceStreak('daily', [], THU) !== 0) fail('빈 기록에 0 을 안 준다');
+  if (practiceStreak('daily', [THU], THU) !== 1) fail('오늘 하루를 1 로 안 센다');
 
   // ⑤ 날짜가 앞뒤로 움직이나
   if (previousDayKey('2026-03-01') !== '2026-02-28') fail('달 경계를 못 넘는다');
@@ -166,14 +168,14 @@ check(isScheduled('weekly:1,3,5', '2026-09-16'), '① weekly:1,3,5 가 수요일
 const wd = newPractice(driver, { repeat_rule: 'weekdays', started_at: '2026-09-07' });
 for (const d of ['2026-09-07', '2026-09-08', '2026-09-09', THU, FRI]) check3(driver, wd, d);
 // 월요일 아침, 아직 오늘 체크 전
-const wdStreak = practiceStreak('weekdays', doneOf(db, wd), MON, '2026-09-07');
+const wdStreak = practiceStreak('weekdays', doneOf(db, wd), MON);
 check(
   wdStreak === 5,
   `② 🔴 금요일까지 이어온 weekdays 실천이 월요일에 ${wdStreak}일로 나온다(기대 5). 주말을 끊김으로 셌다`,
 );
 // 같은 기록을 daily 로 보면 주말이 비어 있으므로 0 이어야 한다(대조군)
 check(
-  practiceStreak('daily', doneOf(db, wd), MON, '2026-09-07') === 0,
+  practiceStreak('daily', doneOf(db, wd), MON) === 0,
   '② 대조군이 안 맞는다. daily 로 보면 주말이 비어 끊겨야 한다',
 );
 
@@ -181,23 +183,28 @@ check(
 const daily = newPractice(driver, { started_at: '2026-09-01' });
 for (const d of ['2026-09-08', '2026-09-09']) check3(driver, daily, d);
 check(
-  practiceStreak('daily', doneOf(db, daily), THU, '2026-09-01') === 2,
+  practiceStreak('daily', doneOf(db, daily), THU) === 2,
   '③ 🔴 오늘 활동이 없다고 어제까지의 연속이 무너졌다',
 );
 check3(driver, daily, THU);
 check(
-  practiceStreak('daily', doneOf(db, daily), THU, '2026-09-01') === 3,
+  practiceStreak('daily', doneOf(db, daily), THU) === 3,
   '③ 오늘 체크가 연속일에 안 들어간다',
 );
 check(
-  practiceStreak('daily', doneOf(db, daily), SAT, '2026-09-01') === 0,
+  practiceStreak('daily', doneOf(db, daily), SAT) === 0,
   '③ 이틀을 건너뛰었는데 연속이 남았다',
 );
 
-// ── ④ 시작일 이전으로 안 간다 ──
+// ── ④ 시작일 이전 기록 (§3.2 · 🔄 2026-09-18 ~~시작일 이전으로 안 간다~~) ──
+// 🔴 등록(09-09) 전부터 해 온 기록을 잇는다. 옛 규칙(시작일에서 멈춤)이면 2 가 나온다
 const late = newPractice(driver, { started_at: '2026-09-09' });
-for (const d of ['2026-09-08', '2026-09-09', THU]) check3(driver, late, d);
-check(practiceStreak('daily', doneOf(db, late), THU, '2026-09-09') === 2, '④ 시작일 이전 기록까지 세었다');
+for (const d of ['2026-09-07', '2026-09-08', '2026-09-09', THU]) check3(driver, late, d);
+const lateStreak = practiceStreak('daily', doneOf(db, late), THU);
+check(lateStreak === 4, `④ 🔴 시작일 이전 기록을 연속일에 안 넣었다: ${lateStreak}(기대 4)`);
+// 기록이 없으면 0 · 가장 이른 날 계산
+check(firstDay([]) === null, '④ 기록이 없는데 가장 이른 날이 있다');
+check(firstDay(['2026-09-08', '2026-09-01', '2026-09-05']) === '2026-09-01', '④ 🔴 가장 이른 기록을 못 고른다');
 
 // ── ⑤ 오늘의 실천 질의 넷 ──
 const gone = newPractice(driver, { title: '지워진 실천' });
@@ -389,10 +396,22 @@ const monCells = weekCells('weekdays', doneOf(db, wd), MON, {
 });
 check(monCells[0]?.day === MON, `월요일에 본 주가 ${monCells[0]?.day} 에서 시작한다`);
 
-// 시작일 이전은 못 누른다
+// 🔄 2026-09-18 시작일 이전도 누른다(§3.2). 🔴 시작일보다 **한참** 앞도 된다
 check(
-  !canCheck('2026-09-06', THU, { startedDay: '2026-09-07', endedDay: null, active: true }),
-  '시작일 이전을 누를 수 있다',
+  canCheck('2026-09-06', THU, { startedDay: '2026-09-07', endedDay: null, active: true }) &&
+    canCheck('2025-01-01', THU, { startedDay: '2026-09-07', endedDay: null, active: true }),
+  '🔴 시작일 이전을 누를 수 없다. 이미 하던 실천을 뒤늦게 등록한 사람이 지난 기록을 못 남긴다(§3.2)',
+);
+// 🔴 종료일 뒤는 여전히 막는다. 시작일을 풀면서 같이 풀리면 안 된다
+check(
+  !canCheck('2026-09-09', THU, { startedDay: '2026-09-01', endedDay: '2026-09-08', active: true }),
+  '🔴 종료일 뒤를 누를 수 있다',
+);
+// 🔴 주 칸도 같은 판정을 거친다 — 시작일(목) 앞의 월·화·수가 눌려야 한다
+const startWeek = weekCells('daily', new Set(), THU, { startedDay: THU, endedDay: null, active: true });
+check(
+  startWeek.slice(0, 3).every((c) => c.checkable),
+  `🔴 주 칸에서 시작일 이전을 못 누른다: ${startWeek.map((c) => (c.checkable ? 'o' : 'x')).join('')}`,
 );
 check(
   !canCheck(FRI, THU, { startedDay: '2026-09-01', endedDay: null, active: true }),
@@ -438,7 +457,7 @@ check(
   check(calByDay.get('2026-09-08')?.done === true, '⑨ 한 날이 달력에 안 비친다');
   check(calByDay.get('2026-09-09')?.done === false, '⑨ 안 한 날이 한 날로 보인다');
   check(calByDay.get('2026-09-08')?.checkable === true, '⑨ 🔴 지난 날을 달력에서 못 누른다(사용자 선택: 지난 날도 체크)');
-  check(calByDay.get('2026-09-06')?.checkable === false, '⑨ 🔴 시작일 이전을 달력에서 누를 수 있다');
+  check(calByDay.get('2026-09-06')?.checkable === true, '⑨ 🔴 시작일 이전을 달력에서 못 누른다(§3.2 · 2026-09-18)');
   check(calByDay.get(MON)?.checkable === true, '⑨ 오늘을 달력에서 못 누른다');
   check(calByDay.get('2026-09-15')?.checkable === false, '⑨ 🔴 미래를 달력에서 누를 수 있다');
   for (const c of calSep) {
@@ -482,21 +501,38 @@ check(
     check(threw, `⑨ 🔴 달 수 ${badN} 를 조용히 받는다`);
   }
 
-  // 달 넘기기 범위
-  const b1 = calendarBounds('2026-07-20', null, MON);
-  check(b1.first === '2026-07' && b1.last === '2026-09', `⑨ 달 범위: ${JSON.stringify(b1)}`);
-  const b2 = calendarBounds('2026-07-20', '2026-08-10', MON);
+  // 달 넘기기 범위 — 🔄 2026-09-18 앞쪽은 이번 달 포함 12개월 · 더 이른 시작일이나 기록이 있으면 그 달(§3.2)
+  // MON 은 2026-09 이라 12개월 창의 첫 달은 2025-10 이다
+  check(CALENDAR_BACK_MONTHS === 12, `⑨ 앞쪽 달 수가 ${CALENDAR_BACK_MONTHS} 다(12)`);
+  const b1 = calendarBounds('2026-07-20', null, MON, null);
+  check(b1.first === '2025-10' && b1.last === '2026-09', `⑨ 🔴 달 범위가 앞쪽 12개월 · 이번 달이 아니다: ${JSON.stringify(b1)}`);
+  const b2 = calendarBounds('2026-07-20', '2026-08-10', MON, null);
   check(b2.last === '2026-08', `⑨ 🔴 종료한 실천이 종료 뒤 달로 넘어간다: ${JSON.stringify(b2)}`);
-  const b3 = calendarBounds('2026-10-01', null, MON);
-  check(b3.first === '2026-10' && b3.last === '2026-10', `⑨ 🔴 시작 전 실천의 달 범위가 뒤집혔다: ${JSON.stringify(b3)}`);
-  const b4 = calendarBounds('2026-07-20', '2026-12-31', MON);
+  const b3 = calendarBounds('2026-10-01', null, MON, null);
+  check(b3.first === '2025-10' && b3.last === '2026-10', `⑨ 🔴 시작 전 실천의 달 범위가 틀렸다: ${JSON.stringify(b3)}`);
+  const b4 = calendarBounds('2026-07-20', '2026-12-31', MON, null);
   check(b4.last === '2026-09', `⑨ 🔴 종료일이 미래인데 미래 달로 넘어간다: ${JSON.stringify(b4)}`);
+  // 🔴 창보다 이른 시작일 · 기록이면 그 달까지 간다. 기록한 달이 안 보이면 그 체크를 풀 길이 없다
+  const b5 = calendarBounds('2024-03-05', null, MON, null);
+  check(b5.first === '2024-03', `⑨ 🔴 창보다 이른 시작일의 달로 못 간다: ${JSON.stringify(b5)}`);
+  const b6 = calendarBounds('2026-09-01', null, MON, '2025-02-10');
+  check(b6.first === '2025-02', `⑨ 🔴 창보다 이른 기록의 달로 못 간다: ${JSON.stringify(b6)}`);
+  // 창 안의 기록 · 시작일은 범위를 줄이지 않는다(옛 규칙은 시작한 달에서 막았다)
+  const b7 = calendarBounds('2026-09-01', null, MON, '2026-09-02');
+  check(b7.first === '2025-10', `⑨ 🔴 창 안의 시작일이 앞쪽 범위를 줄였다: ${JSON.stringify(b7)}`);
+  for (const b of [b1, b2, b3, b4, b5, b6, b7]) {
+    check(b.first <= b.last, `⑨ 🔴 달 범위가 뒤집혔다(화살표가 끝없이 열린다): ${JSON.stringify(b)}`);
+  }
 
   // 🔴 상세 화면이 달력을 그리나
   const detail = readFileSync(join(dirname(fileURLToPath(import.meta.url)), '..', 'app', 'practice', '[id].tsx'), 'utf8');
   check(
     detail.includes('<MonthCalendar') && detail.includes('calendarBounds(') && detail.includes('practiceMonth('),
     '⑨ 🔴 실천 상세가 달력을 안 그린다',
+  );
+  check(
+    /calendarBounds\([^)]*firstDoneDay\s*\)/.test(detail),
+    '⑨ 🔴 실천 상세가 가장 이른 기록을 달 범위에 안 넘긴다(창보다 이른 기록의 달이 안 보인다)',
   );
 }
 

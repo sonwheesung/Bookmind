@@ -9,6 +9,7 @@ import { Chip } from '@/components/Chip';
 import { ChipRow } from '@/components/ChipRow';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
+import { Select } from '@/components/Select';
 import { useBackupStore } from '@/features/backup/store';
 import { REMINDER_TIMES } from '@/features/review/notify';
 import { syncReminders } from '@/features/review/reminder';
@@ -84,16 +85,13 @@ export default function Settings() {
 
       {group(t('settings.language.title'), true)}
 
-      {SUPPORTED.map((lang) => (
-        <Row key={lang} onPress={() => setLanguage(lang)}>
-          <AppText>{LANGUAGE_NAMES[lang]}</AppText>
-          {lang === language && (
-            <AppText tone="accent" accessibilityLabel="selected">
-              ✓
-            </AppText>
-          )}
-        </Row>
-      ))}
+      {/* 🔄 2026-09-18 카드 목록 → 셀렉트(사용자 지시 · `I18N_SYSTEM.md` §2.1). 이름은 그 언어 자신의 표기다(§2.2) */}
+      <Select
+        title={t('settings.language.title')}
+        value={language}
+        options={SUPPORTED.map((lang) => ({ value: lang, label: LANGUAGE_NAMES[lang] }))}
+        onChange={setLanguage}
+      />
 
       <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
         {t('settings.language.hint')}

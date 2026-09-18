@@ -94,8 +94,12 @@ export function clampPeriod(kind: StatsPeriod, wanted: DayKey | null, bounds: Pe
 
 // ── 🔴 차트가 뜨는 조건 ──────────────────────────────────────────────
 
-/** 활동한 날이 이만큼 모이기 전에는 차트를 안 그린다. 텅 빈 차트는 미완성으로 보인다(§4.2) */
-export const MIN_ACTIVE_DAYS = 7;
+/**
+ * 활동한 날이 이만큼 모이기 전에는 차트를 안 그린다(§4.2).
+ * 🔄 2026-09-18 7 → **1**(사용자 선택). 7일 문턱 뒤에 숨은 세로 막대 · 활동 달력이 **없는 차트로 읽혔다.**
+ *    차트마다 그 기간 합이 0 이면 그 차트만 안 그리는 규칙은 화면에 그대로 있다.
+ */
+export const MIN_ACTIVE_DAYS = 1;
 
 export function chartsReady(activeDayCount: number): boolean {
   return Number.isFinite(activeDayCount) && activeDayCount >= MIN_ACTIVE_DAYS;

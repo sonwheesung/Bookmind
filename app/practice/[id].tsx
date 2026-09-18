@@ -63,8 +63,8 @@ export default function PracticeDetail() {
   }
 
   const today = todayKey();
-  // 🔴 달 넘기기 범위는 `calendarBounds` 한 곳이다. 시작한 달보다 앞, 마지막 달보다 뒤로 안 간다(§3.1)
-  const bounds = calendarBounds(p.startedDay, p.endedDay, today);
+  // 🔴 달 넘기기 범위는 `calendarBounds` 한 곳이다. 앞쪽 12개월(더 이른 기록이 있으면 그 달) · 마지막 달보다 뒤로 안 간다(§3.1 · §3.2)
+  const bounds = calendarBounds(p.startedDay, p.endedDay, today, p.firstDoneDay);
   const shown = month === null || month < bounds.first || month > bounds.last ? bounds.last : month;
   const cells = practiceMonth(id, shown, today);
 

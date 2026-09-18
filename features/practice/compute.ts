@@ -8,6 +8,7 @@
  */
 // 🔴 상대 경로다. `@/` 별칭은 Metro·tsc 만 알고 node 는 모른다(가드가 이 파일을 직접 import 한다).
 import {
+  addMonths,
   daysOfMonth,
   isoWeekday,
   mondayOf,
@@ -100,22 +101,21 @@ export function practiceState(w: PracticeWindow, today: DayKey): PracticeState {
  * 1. 오늘 체크했으면 오늘부터, 아니면 어제부터 거슬러 센다
  * 2. 예정일이 아닌 날은 건너뛴다(끊김도 아니고 세지도 않는다)
  * 3. 예정일인데 기록이 없으면 멈춘다
- * 4. 시작일 이전으로는 안 간다
+ * 4. 가장 이른 기록보다 앞으로는 안 간다
  * ```
  *
  * 🔴 1번은 학습 연속일과 **같은 규칙**이다(`STATS_SYSTEM.md` §3.3).
  *    두 곳에서 규칙이 다르면 사용자가 한 화면에서 서로 다른 셈법을 본다.
  * 🔴 2번이 `weekdays` 의 급소다. 금요일까지 한 사람이 월요일에 `0일` 을 보면 안 된다.
+ * 🔄 2026-09-18 4번의 끝을 시작일에서 **가장 이른 기록**으로 옮겼다(§3.2). 시작일 이전 기록도 센다.
+ *    등록 전부터 매일 해 온 사람이 등록한 날 `1일 연속` 을 보면 사실이 아니다.
  */
-export function practiceStreak(
-  rule: string,
-  doneDays: Iterable<DayKey>,
-  today: DayKey,
-  startedDay: DayKey,
-): number {
+export function practiceStreak(rule: string, doneDays: Iterable<DayKey>, today: DayKey): number {
   const done = doneDays instanceof Set ? doneDays : new Set(doneDays);
   const repeat = parseRepeat(rule);
   const onSchedule = (d: DayKey): boolean => repeat.days.includes(isoWeekday(d));
+  const earliest = firstDay(done);
+  if (earliest === null) return 0;
 
   // 오늘이 아직 안 끝났으므로, 오늘 기록이 없으면 어제부터 본다
   let cursor = done.has(today) ? today : previousDayKey(today);
@@ -123,7 +123,7 @@ export function practiceStreak(
   let n = 0;
   // 🔴 상한을 둔다. 커서가 안 줄면 여기서 영원히 돈다(`EDGE_CASES.md` §12 에서 실제로 겪었다)
   for (let i = 0; i < 3660; i += 1) {
-    if (cursor < startedDay) break;
+    if (cursor < earliest) break;
     if (onSchedule(cursor)) {
       if (!done.has(cursor)) break;
       n += 1;
@@ -135,12 +135,19 @@ export function practiceStreak(
   return n;
 }
 
+/** 기록 가운데 가장 이른 날. 기록이 없으면 `null` */
+export function firstDay(days: Iterable<DayKey>): DayKey | null {
+  let first: DayKey | null = null;
+  for (const d of days) if (first === null || d < first) first = d;
+  return first;
+}
+
 export interface WeekCell {
   readonly day: DayKey;
   /** 이 실천의 예정일인가 */
   readonly scheduled: boolean;
   readonly done: boolean;
-  /** 🔴 미래와 시작일 이전은 누를 수 없다(§8) */
+  /** 🔴 미래와 종료일 뒤는 누를 수 없다(§8). 🔄 2026-09-18 시작일 이전은 누를 수 있다(§3.2) */
   readonly checkable: boolean;
 }
 
@@ -163,10 +170,12 @@ export function weekCells(
   return cells;
 }
 
-/** 체크를 허용할 날인가(§3). 🔴 미래와 시작일 이전은 막는다 */
+/**
+ * 체크를 허용할 날인가(§3). 🔴 미래와 종료일 뒤만 막는다.
+ * 🔄 2026-09-18 ~~시작일 이전도 막는다~~ → 막지 않는다(§3.2). 이미 하던 실천을 뒤늦게 등록한 사람이 지난 기록을 남긴다.
+ */
 export function canCheck(day: DayKey, today: DayKey, window: PracticeWindow): boolean {
   if (day > today) return false;
-  if (day < window.startedDay) return false;
   if (window.endedDay !== null && day > window.endedDay) return false;
   return true;
 }
@@ -211,19 +220,33 @@ export function monthCells(
   return cells;
 }
 
+/** 달력이 앞쪽으로 보여 주는 달 수. 이번 달을 포함한다(§3.2) */
+export const CALENDAR_BACK_MONTHS = 12;
+
 /**
- * 달 넘기기 범위(§3.1).
+ * 달 넘기기 범위(§3.1 · §3.2).
  *
- * 🔴 시작한 달보다 앞, 이번 달(종료했으면 종료한 달)보다 뒤로 안 간다. 빈 달을 넘기게 하지 않는다.
- * 🔴 시작 전 실천은 시작하는 달 하나다. 범위가 뒤집히면 화살표가 둘 다 열려 끝없이 넘어간다.
+ * 🔄 2026-09-18 앞쪽: ~~시작한 달~~ → **이번 달 포함 12개월**, 그보다 이른 시작일이나 기록이 있으면 그 달.
+ *    시작일 이전도 체크하므로(§3.2) 시작한 달에서 막으면 그 기록을 남길 달이 안 보인다.
+ * 🔴 뒤쪽: 이번 달(종료했으면 종료한 달)보다 뒤로 안 간다. 시작 전 실천은 시작하는 달까지다.
+ * 🔴 범위가 뒤집히면 화살표가 둘 다 열려 끝없이 넘어간다. `first ≤ last` 를 지킨다.
  */
 export function calendarBounds(
   startedDay: DayKey,
   endedDay: DayKey | null,
   today: DayKey,
+  earliestDoneDay: DayKey | null,
 ): { first: MonthKey; last: MonthKey } {
-  const first = monthOf(startedDay);
+  const candidates: MonthKey[] = [
+    monthOf(startedDay),
+    addMonths(monthOf(today), -(CALENDAR_BACK_MONTHS - 1)),
+  ];
+  if (earliestDoneDay !== null) candidates.push(monthOf(earliestDoneDay));
+  const first = candidates.reduce((a, b) => (b < a ? b : a));
+
   const lastDay = endedDay !== null && endedDay < today ? endedDay : today;
-  const last = monthOf(lastDay);
+  const startMonth = monthOf(startedDay);
+  const lastMonth = monthOf(lastDay);
+  const last = startMonth > lastMonth ? startMonth : lastMonth;
   return { first, last: last < first ? first : last };
 }

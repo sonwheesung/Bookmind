@@ -17,6 +17,7 @@ import { fromDate, type DayKey, type MonthKey } from '@/lib/day';
 
 import {
   canCheck,
+  firstDay,
   isRunning,
   monthCells,
   practiceState,
@@ -47,6 +48,8 @@ export interface PracticeCard {
   readonly streak: number;
   readonly doneToday: boolean;
   readonly cells: readonly WeekCell[];
+  /** 가장 이른 체크한 날. 달력이 그 달까지 거슬러 가게 한다(§3.2). 기록이 없으면 `null` */
+  readonly firstDoneDay: DayKey | null;
 }
 
 export function todayKey(now: Date = new Date()): DayKey {
@@ -74,9 +77,10 @@ function toCard(r: PracticeRow, today: DayKey): PracticeCard {
     startedDay: r.started_at,
     endedDay: r.ended_at,
     state: practiceState(w, today),
-    streak: practiceStreak(r.repeat_rule, done, today, r.started_at),
+    streak: practiceStreak(r.repeat_rule, done, today),
     doneToday: done.has(today),
     cells: weekCells(r.repeat_rule, done, today, w),
+    firstDoneDay: firstDay(done),
   };
 }
 

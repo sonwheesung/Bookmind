@@ -16,7 +16,7 @@ type Props = {
  *
  * 🚫 **못 한 날은 그냥 빈 동그라미다.** 붉은색도 느낌표도 없다(§4 · 기둥 5).
  * 🚫 예정일이 아닌 날(`weekdays` 의 주말)은 **흐리게 둘 뿐 실패로 보이지 않게** 한다.
- * 🔴 미래와 시작일 이전은 **누를 수 없다.** 판정은 `compute.ts` 가 하고 여기서는 그리기만 한다.
+ * 🔴 미래와 종료일 뒤는 **누를 수 없다**(🔄 2026-09-18 시작일 이전은 누를 수 있다 · `PRACTICE_SYSTEM.md` §3.2). 판정은 `compute.ts` 가 하고 여기서는 그리기만 한다.
  */
 export function WeekRow({ cells, onToggle }: Props) {
   const { t } = useTranslation();

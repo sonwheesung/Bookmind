@@ -430,7 +430,8 @@ check(db.prepare(capped.text).all(...capped.params).length === 0, '⑦ limit 이
   check(monthGrid('2026-09').length % 7 === 0, '⑪ 달력 칸 수가 7 의 배수가 아니다');
 
   // ── ⑫ 뜨는 조건 · 책별 · 배선 ──
-  check(!chartsReady(6) && chartsReady(7), `⑫ 🔴 차트 문턱이 ${MIN_ACTIVE_DAYS}(활동 6일 숨김 · 7일 표시)이 아니다`);
+  // 🔄 2026-09-18 문턱 7 → 1(사용자 선택 · §4.2). 숨긴 차트가 없는 차트로 읽혔다
+  check(!chartsReady(0) && chartsReady(1), `⑫ 🔴 차트 문턱이 ${MIN_ACTIVE_DAYS}(활동 0일 숨김 · 1일 표시)이 아니다`);
   check(!chartsReady(0) && !chartsReady(Number.NaN), '⑫ 활동 0 · NaN 에 차트를 그린다');
 
   const bLive = addRow(driver, 'books', { title: '명상록', status: 'reading' }, localIso(2026, 9, 1));
@@ -477,6 +478,6 @@ if (bad.length > 0) {
 console.log(
   `\ncheck:stats OK — tombstone · 기억률(🔴 분모 0 → null) · 지운 지식의 복습 ·` +
     `\n  🔴 연속일 경계(오늘이 비어도 유지) · 끊김 4종 · 로컬 자정 · 태그 분포` +
-    `\n  ⑧기간(월요일 · 월말 · 윤년 · 해 넘김 · 범위) ⑨일별 집계(🔴 년은 그 해만) 🔴⑩다가올 복습(밀린 것 오늘로 · 상한 넘김) ⑪축·칸 경계 ⑫뜨는 조건 7일 · 책별 · 배선` +
+    `\n  ⑧기간(월요일 · 월말 · 윤년 · 해 넘김 · 범위) ⑨일별 집계(🔴 년은 그 해만) 🔴⑩다가올 복습(밀린 것 오늘로 · 상한 넘김) ⑪축·칸 경계 ⑫뜨는 조건 1일 · 책별 · 배선` +
     `\n  SELF-TEST 통과(기억률·연속일 양성 대조 포함)\n`,
 );
