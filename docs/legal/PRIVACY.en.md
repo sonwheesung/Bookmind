@@ -236,8 +236,8 @@ before the version containing it is released** — not afterwards:
 
 | Planned | What it would add |
 |---|---|
-| Accounts and sign-in with Google | An identity, and a route to delete it |
-| Inquiries, notices | Message content sent to a server |
+| Accounts and sign-in with Google (together with cloud backup) | An identity, and a route to delete it |
+| Inquiries, notices | Message content and a random device identifier created by the app, sent to and kept on a server; no name or email address |
 | Ads, and a purchase to remove them | An advertising SDK would send the advertising ID and device information to the ad provider (Google); in some regions we would ask for consent first. Buying ad removal would create purchase records handled by the store |
 | Encrypted cloud backup | Ciphertext held on a server |
 

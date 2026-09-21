@@ -14,7 +14,7 @@
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **29건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **5건**(세는 법: `grep -c "^\| [A-Z] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **30건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **4건**(세는 법: `grep -c "^\| [A-Z] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · ~~AI 프록시~~(결정 #28) · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 **v5**(expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-10 |
@@ -236,7 +236,7 @@ vc2 매니페스트에는 권한 **30개**가 들어 있었다(2026-09-11). 설�
 
 ```bash
 # Phase 8부터
-npm run check:shared           # 앱 ⇄ 서버 공유 타입 드리프트 (🔄 ~~AI 스키마~~ · 서버를 두면 백업 금고 스키마 · ⚠ 미결정 J)
+npm run check:shared           # 앱 ⇄ 서버 공유 타입 드리프트 (🔄 ~~AI 스키마~~ · v1.1 백업 금고 스키마 · 결정 #30)
 # Phase 10부터
 npm run check:release-env      # 🔴 로컬 릴리스 빌드에 개발용 env 가 박히는 것 방지
 ```
@@ -484,7 +484,7 @@ grep -c "Failed to start watch mode" <metro 로그>
   (`../CLAUDE.md` 기둥 2 · `ARCHITECTURE.md` §8).
 - 🔴 **어떤 서버에도 지식을 저장하지 않는다.** 나가는 것은 bootstrap 조회 · 하트비트 · 문의 본문 ·
   로그인 토큰이 전부다(`ARCHITECTURE.md` §5.3 · 🔄 ~~AI 분석 요청~~ 은 결정 #28 로 없어졌다). 광고를 넣으면 광고 요청이 Google 로 간다(결정 #29).
-- **공통 기능(계정·문의·공지)은 common_server, Re:Read 전용 `server/` 에는 (v1.1) 백업 금고만 남는다**(🔄 AI 폐기 · 결정 #28 · 둘지는 ⚠ 미결정 J).
+- **공통 기능(계정·문의·공지)은 common_server, Re:Read 전용 `server/` 에는 (v1.1) 백업 금고만 남는다**(🔄 AI 폐기 · 결정 #28 · v1.1 에 로그인과 함께 · 결정 #30). v1.0 문의는 로그인 없이 기기 subject 다.
   🔴 조각 서버에 편입하지 않는 근거는 `ARCHITECTURE.md` §3.
 - 의존 방향: `app/`(라우트) → `features/` → `db/`·`lib/`·`theme/`. **역방향 import 금지.**
 - 🔴 **화면을 그리기 전에 [`UI_GUIDE.md`](./UI_GUIDE.md) §2 를 본다.** 있는 부품을 다시 그리지 않는다. 새 부품은 그 표에 적는 것까지가 완료다.
