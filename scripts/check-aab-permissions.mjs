@@ -56,6 +56,10 @@ const ALLOWED = new Set([
   'android.permission.ACCESS_ADSERVICES_ATTRIBUTION',
   'android.permission.ACCESS_ADSERVICES_TOPICS',
   'com.android.vending.BILLING', // 광고 제거 구매(expo-iap · Play 결제)
+  // 2026-09-21 vc11 실측: 광고 SDK 가 끌어오는 `androidx.work:work-runtime:2.7.0` 이 선언한다(manifest-merger 보고서).
+  // 일반(normal) 권한이라 사용자 권한 목록에 안 보이고, Android 14 의 유형별 FGS 권한(FOREGROUND_SERVICE_*)이 아니라 콘솔 신고 대상도 아니다.
+  // ⚠ 막지 않는다. WorkManager 를 부르는 코드가 있으면 막는 순간 SecurityException 으로 죽는다.
+  'android.permission.FOREGROUND_SERVICE',
 ]);
 
 /**
