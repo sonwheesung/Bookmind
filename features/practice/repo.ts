@@ -31,7 +31,6 @@ import {
   allPracticesQuery,
   doneDaysQuery,
   runningPracticesQuery,
-  shouldSuggestQuery,
   type PracticeRow,
 } from './sql';
 
@@ -194,24 +193,6 @@ export function practiceMonth(id: string, month: MonthKey, today: DayKey = today
   const row = selectOne<PracticeRow>('practices', { where: 'id = ?', params: [id] });
   if (row === undefined) return [];
   return monthCells(row.repeat_rule, doneDays(id), today, windowOf(row), month);
-}
-
-// ── 실천 제안 (§1 · §1.1) ────────────────────────────────────────────
-
-/** 이 카드에 제안 배너를 띄울까. 🔴 [넘어가기] 뒤에는 영원히 `false` 다 */
-export function shouldSuggest(knowledgeId: string): boolean {
-  const sql = shouldSuggestQuery(knowledgeId);
-  const row = getDb().getFirstSync<{ n: number }>(sql.text, sql.params as never);
-  return (row?.n ?? 0) > 0;
-}
-
-/** [넘어가기]. 🔴 **영구적이다.** 같은 카드에 다시 묻지 않는다(§1.1) */
-export function skipSuggestion(knowledgeId: string): void {
-  getDb().runSync('UPDATE knowledge SET practice_skipped_at = ?, updated_at = ? WHERE id = ?', [
-    new Date().toISOString(),
-    new Date().toISOString(),
-    knowledgeId,
-  ] as never);
 }
 
 export { isRunning };

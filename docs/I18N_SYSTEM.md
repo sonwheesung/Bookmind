@@ -128,7 +128,7 @@ ai.notice.proxy          ← 🔴 backup.notice.* 와 절대 재사용 금지
 settings.language.title
 ```
 
-- 🔄 2026-09-21 `ai.notice.proxy` 는 결정 #28 로 쓸 곳이 없어졌다. 키와 `check:i18n` 의 PLANNED 예외를 코드 정리 때 뺀다(`PLAN.md` Phase 8). 아래 분리 규칙은 기록이다.
+- 🔄 2026-09-21 `ai.notice.proxy` 는 결정 #28 로 쓸 곳이 없어졌다. ✅ 2026-09-21 키와 `check:i18n` 의 PLANNED 예외를 뺐다(`PLAN.md` Phase 8 · 예정 키 0). 아래 분리 규칙은 기록이다.
 - 🔴 **`ai.notice.*` 와 `backup.notice.*`(v1.1)를 분리한다.** 두 고지는 **정반대**다:
   AI는 "저장하지 않습니다"(참) / 백업은 "읽지 못합니다"(참).
   키를 재사용하면 **한쪽이 거짓말이 된다**(조각 실증 · `ARCHITECTURE.md` §6.2).

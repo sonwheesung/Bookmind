@@ -383,8 +383,8 @@ OTA(production)   JS 결함을 재빌드 없이 고친다 → 🔴 관찰을 끊
 ## Phase 8 — ~~Re:Read 서버 + AI~~ 🚫 폐기 (결정 #28 · 2026-09-21)
 
 > 사용자 결정 *"이 앱 그냥 ai 안 붙일래"*. 아래 옛 계획은 기록으로 남긴다. 🔴 대신 할 **코드 정리 셋**:
-> - [ ] 실천 제안 배너(`shouldSuggestQuery` · `app/knowledge/[id].tsx`)를 걷어낸다. 표가 늘 비어 **이미 한 번도 안 뜬다**
-> - [ ] 문구 키 `ai.notice.proxy` 와 `check:i18n` 의 PLANNED 예외를 뺀다
+> - [x] 실천 제안 배너(`shouldSuggestQuery` · `app/knowledge/[id].tsx`)를 걷어낸다. 표가 늘 비어 **이미 한 번도 안 뜬다** — ✅ 2026-09-21(문구 `practice.suggest.*` · 가드 ⑧ 함께)
+> - [x] 문구 키 `ai.notice.proxy` 와 `check:i18n` 의 PLANNED 예외를 뺀다 — ✅ 2026-09-21(예정 키 0)
 > - [ ] 빈 표 `ai_analyses` · `recall_questions` 는 **지우지 않는다**(`DATABASE.md` §1 · 백업 형식이 들고 있다)
 
 - `server/` 생성 — 조각 `server/`를 **템플릿으로 복사** · Supabase(`project_id=reread`) · Vercel

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * check:practice — 실천 여덟 축을 **실물 SQLite 로** 잰다(`docs/PRACTICE_SYSTEM.md` §9).
+ * check:practice — 실천 축을 **실물 SQLite 로** 잰다(`docs/PRACTICE_SYSTEM.md` §9).
  *
  * 🔴 왜 가드로 두나: `weekdays` 실천의 주말을 끊김으로 세면 **금요일까지 성실했던 사람이
  *    월요일 아침에 `0일` 을 본다.** 화면은 멀쩡하고 숫자만 틀린다. 이 프로젝트가 여섯 번 만난 모양이다.
@@ -37,7 +37,7 @@ import {
   monthCells,
   weekCells,
 } from '../features/practice/compute.ts';
-import { doneDaysQuery, runningPracticesQuery, shouldSuggestQuery } from '../features/practice/sql.ts';
+import { doneDaysQuery, runningPracticesQuery } from '../features/practice/sql.ts';
 
 // 🔴 2026-09-10 은 목요일이다. 아래 날짜 셈이 전부 이 사실 위에 서 있다
 const THU = '2026-09-10';
@@ -91,7 +91,6 @@ function selfTest() {
   // ⑥ 질의가 무언가를 담고 있는가(빈 문자열을 돌려주는 함수가 아닌가)
   if (!runningPracticesQuery(THU).text.includes('active')) fail('오늘의 실천 질의가 비었다');
   if (runningPracticesQuery(THU).params.length !== 2) fail('오늘 날짜가 질의에 안 실린다');
-  if (!shouldSuggestQuery('x').text.includes('practice_skipped_at')) fail('제안 질의가 넘어가기를 안 본다');
 }
 
 // ── 실물 SQLite ──────────────────────────────────────────────────────
@@ -280,86 +279,6 @@ const survivor = db.prepare('SELECT knowledge_id, deleted_at FROM practices WHER
 check(survivor.deleted_at === null, '⑦ 🔴 지식을 지웠더니 실천까지 죽었다');
 check(survivor.knowledge_id === null, '⑦ 연결이 안 끊겼다');
 
-// ── 🔴 ⑧ 넘어가기 ──
-const k2 = addRow(driver, 'knowledge', {
-  book_id: null,
-  content: '실천 제안이 붙을 카드',
-  page: null,
-  source_type: 'manual',
-  lang: null,
-});
-addRow(driver, 'ai_analyses', {
-  knowledge_id: k2,
-  content_type: 'ACTION',
-  summary: '요약',
-  key_concept: null,
-  topics: null,
-  author_claim: null,
-  thought_relation: null,
-  actionability: 'high',
-  lang: 'ko',
-  model: null,
-  prompt_ver: null,
-  revision: 1,
-});
-const ask = (id) => {
-  const sql = shouldSuggestQuery(id);
-  return db.prepare(sql.text).get(...sql.params).n > 0;
-};
-check(ask(k2), '⑧ 대조군이 0이다. actionability=high 카드에 제안이 안 뜬다');
-
-driver.run('UPDATE knowledge SET practice_skipped_at = ? WHERE id = ?', [NOW, k2]);
-check(!ask(k2), '⑧ 🔴 [넘어가기] 뒤에 제안이 또 뜬다. 그건 제안이 아니라 압박이다');
-
-// 실천을 만든 카드에도 다시 안 묻는다
-const k3 = addRow(driver, 'knowledge', {
-  book_id: null,
-  content: '이미 실천을 만든 카드',
-  page: null,
-  source_type: 'manual',
-  lang: null,
-});
-addRow(driver, 'ai_analyses', {
-  knowledge_id: k3,
-  content_type: 'ACTION',
-  summary: '요약',
-  key_concept: null,
-  topics: null,
-  author_claim: null,
-  thought_relation: null,
-  actionability: 'high',
-  lang: 'ko',
-  model: null,
-  prompt_ver: null,
-  revision: 1,
-});
-check(ask(k3), '⑧ 대조군이 0이다(k3)');
-newPractice(driver, { knowledge_id: k3, title: 'k3 의 실천' });
-check(!ask(k3), '⑧ 실천을 이미 만든 카드에 또 제안한다');
-
-// actionability 가 high 가 아니면 아예 안 묻는다
-const k4 = addRow(driver, 'knowledge', {
-  book_id: null,
-  content: '실천할 것이 없는 카드',
-  page: null,
-  source_type: 'manual',
-  lang: null,
-});
-addRow(driver, 'ai_analyses', {
-  knowledge_id: k4,
-  content_type: 'FACT',
-  summary: '요약',
-  key_concept: null,
-  topics: null,
-  author_claim: null,
-  thought_relation: null,
-  actionability: 'none',
-  lang: 'ko',
-  model: null,
-  prompt_ver: null,
-  revision: 1,
-});
-check(!ask(k4), '⑧ actionability 가 none 인데 제안한다');
 
 // ── 화면이 그리는 일곱 칸 ──
 //
@@ -548,6 +467,6 @@ if (bad.length > 0) {
 }
 console.log(
   `\ncheck:practice OK — 반복 3종 · 🔴 weekdays 주말 · 연속일 경계 · 시작일 ·` +
-    `\n  오늘의 실천 4조건 · 하루 1건과 되살리기 · 지식 삭제 · 🔴 넘어가기 3갈래 · 주 7칸 · ⑨ 기록 달력(요일 칸 · 7 의 배수 · canCheck 일치 · 달 범위)` +
+    `\n  오늘의 실천 4조건 · 하루 1건과 되살리기 · 지식 삭제 · 주 7칸(🔄 ⑧ 넘어가기는 AI 실천 제안과 함께 뺐다 · 결정 #28) · ⑨ 기록 달력(요일 칸 · 7 의 배수 · canCheck 일치 · 달 범위)` +
     `\n  SELF-TEST 통과(요일·반복 규칙 양성 대조 포함)\n`,
 );

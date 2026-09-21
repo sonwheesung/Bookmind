@@ -66,7 +66,8 @@ const T_TPL = /\bt\(\s*`([A-Za-z0-9_.]*)\$\{/g;
  * 🔴 이 목록은 스스로 썩지 않는다: 여기 적힌 키가 실제로 쓰이기 시작하거나 리소스에서 사라지면
  *    가드가 *"목록에서 빼라"* 로 FAIL 한다. 예외를 적어 두고 잊는 흔한 사고를 그렇게 막는다.
  */
-const PLANNED = new Map([['ai.notice.proxy', 'AI 고지문 — Phase 8 에서 화면에 붙는다(결정 #14 의 대가)']]);
+// 🔄 2026-09-21 `ai.notice.proxy` 를 뺐다(결정 #28 · AI 를 붙이지 않는다). 지금 예정 키는 없다
+const PLANNED = new Map();
 
 const SRC_DIRS = ['app', 'components', 'features', 'lib', 'hooks'];
 

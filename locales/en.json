@@ -146,11 +146,6 @@
     },
     "backup": "Backup"
   },
-  "ai": {
-    "notice": {
-      "proxy": "For AI analysis, the passage, your thought, book title, page and language are sent through the Re:Read server to the AI provider. Re:Read does not store this content; only usage counts are retained."
-    }
-  },
   "backup": {
     "title": "Backup",
     "intro": "Your passages and thoughts live only on this device. Export a file and you can bring them back on a new one.",
@@ -288,11 +283,6 @@
       "fri": "Fri",
       "sat": "Sat",
       "sun": "Sun"
-    },
-    "suggest": {
-      "body": "You could try this one in daily life.",
-      "accept": "Try it",
-      "skip": "Skip"
     },
     "calendar": {
       "prev": "Previous month",

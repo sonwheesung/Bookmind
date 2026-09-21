@@ -57,26 +57,3 @@ export function doneDaysQuery(practiceId: string): Sql {
     params: [practiceId],
   };
 }
-
-/**
- * 실천 제안을 띄울 카드인가(§1.1).
- *
- * 🔴 **[넘어가기] 를 누른 카드는 다시 안 묻는다.** `practice_skipped_at IS NULL` 이 그 조건이다.
- * 🔴 이미 그 카드로 실천을 만들었으면 그것도 안 묻는다.
- */
-export function shouldSuggestQuery(knowledgeId: string): Sql {
-  return {
-    text: `SELECT COUNT(*) AS n
-           FROM knowledge k
-           JOIN ai_analyses a
-             ON a.knowledge_id = k.id AND a.deleted_at IS NULL AND a.actionability = 'high'
-           WHERE k.id = ?
-             AND k.deleted_at IS NULL
-             AND k.practice_skipped_at IS NULL
-             AND NOT EXISTS (
-               SELECT 1 FROM practices p
-               WHERE p.knowledge_id = k.id AND p.deleted_at IS NULL
-             )`,
-    params: [knowledgeId],
-  };
-}

@@ -7,7 +7,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/AppText';
 import { BookSelect } from '@/components/BookSelect';
 import { Button } from '@/components/Button';
-import { ButtonRow } from '@/components/ButtonRow';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
 import { ChipRow } from '@/components/ChipRow';
@@ -28,7 +27,6 @@ import {
   removeThought,
   thoughtsOf,
 } from '@/features/knowledge/repo';
-import { shouldSuggest, skipSuggestion } from '@/features/practice/repo';
 import { tagsOf } from '@/features/tags/repo';
 import { useDbQuery } from '@/hooks/useDbQuery';
 import { confirmDestructive } from '@/lib/confirm';
@@ -59,7 +57,6 @@ export default function KnowledgeDetail() {
       thoughts: row === undefined ? [] : thoughtsOf(id),
       tags: row === undefined ? [] : tagsOf(id),
       books: listBooks(),
-      suggest: row === undefined ? false : shouldSuggest(id),
     };
   });
 
@@ -286,30 +283,8 @@ export default function KnowledgeDetail() {
       />
 
       {/* ── 실천 (`docs/PRACTICE_SYSTEM.md` §1) ────────────────────────
-          🔴 배너는 AI 가 `actionability='high'` 로 본 카드에만 뜬다. [넘어가기] 를 누르면
-             **영구적**이라 같은 카드에 다시 안 뜬다(§1.1). 반복하면 제안이 아니라 압박이다.
-          🚫 아래 [이 문장으로 실천 만들기] 는 배너가 아니라 **도구**다. 조용한 글자 하나이고
-             권유 문구를 붙이지 않는다(§4 "실천 생성을 유도하는 반복 배너" 금지). */}
-      {data.suggest && (
-        <Card>
-          <AppText variant="thought">{t('practice.suggest.body')}</AppText>
-          <ButtonRow gap="sm" style={{ marginTop: spacing.md }}>
-            <Button
-              label={t('practice.suggest.accept')}
-              onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
-            />
-            <Button
-              label={t('practice.suggest.skip')}
-              variant="ghost"
-              onPress={() => {
-                skipSuggestion(id);
-                reload();
-              }}
-            />
-          </ButtonRow>
-        </Card>
-      )}
-
+          🔄 2026-09-21 AI 실천 제안 배너를 걷어냈다(결정 #28). AI 가 없어 한 번도 안 떴다.
+          🚫 아래 [이 문장으로 실천 만들기] 는 **도구**다. 조용한 글자 하나이고 권유 문구를 붙이지 않는다(§4). */}
       <Pressable
         accessibilityRole="button"
         onPress={() => router.push(`/practice/new?knowledgeId=${id}`)}
