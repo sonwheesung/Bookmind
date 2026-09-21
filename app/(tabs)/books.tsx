@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 
+import { AdBanner } from '@/components/AdBanner';
 import { AppText } from '@/components/AppText';
 import { BookLine } from '@/components/BookLine';
 import { Card } from '@/components/Card';
@@ -22,7 +23,7 @@ export default function BookList() {
   const { data } = useDbQuery(() => listBooks());
 
   return (
-    <Screen scroll tab>
+    <Screen scroll tab footer={<AdBanner />}>
       <Header
         title={t('books.list.title')}
         right={<IconButton icon={Plus} label={t('books.new.title')} onPress={() => router.push('/books/new')} />}

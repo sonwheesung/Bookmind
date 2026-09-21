@@ -1,8 +1,9 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
+import { AdBanner } from '@/components/AdBanner';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Card } from '@/components/Card';
@@ -10,9 +11,11 @@ import { Field } from '@/components/Field';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { Spacer } from '@/components/Spacer';
+import { INTERSTITIAL_DELAY_MS, shouldShowReviewInterstitial } from '@/features/ads/compute';
 import { rate, todayQueue } from '@/features/review/repo';
 import { RATINGS, type ReviewRating } from '@/features/review/schedule';
 import { useDbQuery } from '@/hooks/useDbQuery';
+import { useInterstitialAd } from '@/hooks/useInterstitialAd';
 import { formatDate } from '@/lib/format';
 import { deviceLocale } from '@/lib/i18n';
 import { useTheme } from '@/theme';
@@ -36,10 +39,26 @@ export default function Review() {
   const [answer, setAnswer] = useState('');
 
   const card = queue[index];
+  const finished = card === undefined;
+
+  /*
+   * 🔴 전면 광고는 **복습을 마친 끝 화면에서만** 한 번 뜬다(`docs/MONETIZATION_SYSTEM.md` §A.3 · 결정 #31).
+   *    `index` 가 이번에 넘긴 장 수다. 빈 큐로 들어와 본 끝 화면은 복습을 마친 게 아니다.
+   * 🚫 복습 **시작 전**에는 띄우지 않는다(기둥 7).
+   */
+  const { show: showInterstitial } = useInterstitialAd();
+  const shownRef = useRef(false);
+  useEffect(() => {
+    if (!finished || !shouldShowReviewInterstitial(index, shownRef.current)) return;
+    const timer = setTimeout(() => {
+      if (showInterstitial()) shownRef.current = true;
+    }, INTERSTITIAL_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [finished, index, showInterstitial]);
 
   if (card === undefined) {
     return (
-      <Screen>
+      <Screen footer={<AdBanner />}>
         <Header title={t('review.title')} back />
         <AppText tone="muted" style={{ marginBottom: spacing.xl }}>
           {queue.length === 0 ? t('review.empty') : t('review.done')}

@@ -14,6 +14,11 @@ type Props = {
   /** 하단 탭 화면. 아래 인셋은 탭 바가 먹으므로 여기서 더하지 않는다(결정 #26) */
   tab?: boolean;
   style?: ViewStyle;
+  /**
+   * 스크롤 밖 **맨 아래에 고정되는 자리**. 지금은 하단 배너만 쓴다(`docs/MONETIZATION_SYSTEM.md` §A.3).
+   * 탭 화면에서는 탭 바 바로 위, 그 밖의 화면에서는 홈 인디케이터 위에 선다.
+   */
+  footer?: ReactNode;
 };
 
 /** 포커스된 입력창과 키보드 사이에 남길 여유 */
@@ -32,7 +37,7 @@ const FOCUS_MARGIN = 16;
  *    "처리했다"고 착각하기 딱 좋은 코드였고, 실제로 대표님 폰에서 입력창이 가려졌다.
  *    조각·Idea Repository 가 같은 버그를 겪고 푼 방식을 승계한다.
  */
-export function Screen({ children, scroll = false, hasHeader = false, tab = false, style }: Props) {
+export function Screen({ children, scroll = false, hasHeader = false, tab = false, style, footer }: Props) {
   const insets = useSafeAreaInsets();
   const { palette, spacing } = useTheme();
   const keyboard = useKeyboard();
@@ -90,7 +95,8 @@ export function Screen({ children, scroll = false, hasHeader = false, tab = fals
   const pad: ViewStyle = {
     // 🔴 위 여백 = 인셋 + 16(2026-09-14 사용자 지시 "윗 쪽 여백 쫌 줘야할 것 같아 전체적으로"). 좌우와 같은 값이다
     paddingTop: hasHeader ? 0 : insets.top + spacing.lg,
-    paddingBottom: tab ? 0 : insets.bottom,
+    // 발판이 있으면 아래 인셋은 발판이 먹는다
+    paddingBottom: tab || footer !== undefined ? 0 : insets.bottom,
     paddingLeft: Math.max(insets.left, spacing.lg),
     paddingRight: Math.max(insets.right, spacing.lg),
   };
@@ -116,6 +122,10 @@ export function Screen({ children, scroll = false, hasHeader = false, tab = fals
         </ScrollView>
       ) : (
         <View style={[styles.fill, pad, style, { marginBottom: overlap }]}>{children}</View>
+      )}
+      {/* 🔴 키보드가 떠 있으면 발판을 내린다. 입력창과 키보드 사이에 광고가 끼지 않게 한다 */}
+      {footer !== undefined && keyboard.height === 0 && (
+        <View style={{ paddingBottom: tab ? 0 : insets.bottom }}>{footer}</View>
       )}
     </View>
   );

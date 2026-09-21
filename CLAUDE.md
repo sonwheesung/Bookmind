@@ -323,8 +323,8 @@ AI 를 빼면서(결정 #28) Premium 의 중심(AI 분석 · AI 회상 질문 ·
 | 알림 | expo-notifications `~0.32.17` | 🔨 Phase 4(2026-09-09) — 🟢 **Expo Go 에서 로컬 알림 도달 확인**. 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) — 그 축은 미확인 |
 | **OTA** | expo-updates `~29.0.20` | ✅ Phase 4(2026-09-10) · 결정 #18 — 배선·가드·게시까지 끝났다. 🔴 **네이티브 모듈이라 OTA 로 켤 수 없어서** 내부 테스트 첫 빌드에 실었다. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 가드 `check:ota`([`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md)). ⏸ 첫 페이로드 발행은 **사용자 지시 대기** |
 | 서명 | 업로드 키스토어 (`secrets/reread-upload.jks`) | ✅ 2026-09-10 — vc1·vc2 둘 다 **업로드 키로 서명된 것을 SHA1 로 확인**했다. 🔴 `prebuild` 가 지우므로 **config plugin** 으로 배선한다([`docs/BUILD.md`](./docs/BUILD.md) §5) |
-| 광고 | Google Mobile Ads(AdMob) · 동의 UMP | ❌ · 결정 #29 · 🔴 네이티브 모듈이라 새 AAB · 배치는 결정 #31 |
-| 광고 제거 결제 | `expo-iap`(Play 결제 직접 · 비소비성 `remove_ads` · My Word 승계) | ❌ · 결정 #31 · 가격 ⚠ 미결정 B · 🔄 ~~구독 · RevenueCat~~ |
+| 광고 | `react-native-google-mobile-ads` `^16.3.0`(AdMob) · 동의 UMP | 🔨 코드 2026-09-21 · 결정 #29 · 배치는 결정 #31 · 가드 `check:ads` · 🔴 **테스트 광고 ID** 로 돈다(AdMob 단위 ❌) · 네이티브 모듈이라 새 AAB 전에는 실기기에서 못 본다([`docs/MONETIZATION_SYSTEM.md`](./docs/MONETIZATION_SYSTEM.md) §A) |
+| 광고 제거 결제 | `expo-iap` `^5.3.1`(Play 결제 직접 · 비소비성 `remove_ads` · My Word 승계) | 🔨 코드 2026-09-21 · 결정 #31 · 가격 ⚠ 미결정 B · Play 콘솔 상품 ❌ · 🔄 ~~구독 · RevenueCat~~ |
 | 로그인 | @react-native-google-signin/google-signin | ❌ · 🔄 v1.1 클라우드 백업과 함께(결정 #30) |
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID · 🔴 v1.0 문의(결정 #30)에서 들어온다 · 네이티브 모듈이라 새 AAB |
 | 다국어 | i18next · react-i18next · expo-localization | ✅ Phase 0 — `en`/`ko` · 언어 설정 화면 · 가드 6축([`docs/I18N_SYSTEM.md`](./docs/I18N_SYSTEM.md) §5) |

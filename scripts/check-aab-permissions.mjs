@@ -48,6 +48,14 @@ const ALLOWED = new Set([
   // AndroidX core 가 자동으로 만드는 **서명 권한**. 동적 리시버를 같은 앱만 부르게 막는 안전 장치다.
   // 값이 패키지명으로 시작하므로 패키지를 바꾸면 이 문자열도 바뀐다.
   'com.vivacegames.reread.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION',
+  // 🔄 2026-09-21 광고 · 광고 제거(결정 #29 · #31 · `MONETIZATION_SYSTEM.md` §A).
+  // ⚠ 아래 넷은 **예상 목록**이다. 광고 SDK(Play services ads)와 결제 라이브러리가 선언하는 것으로 알려진 값이고,
+  //   광고를 실은 첫 AAB 에서 이 가드로 실측해 고친다. 모르는 권한이 나오면 여기서 실패한다.
+  'com.google.android.gms.permission.AD_ID', // 광고 식별자 · Play 콘솔 "광고 ID 사용" 선언과 짝이다
+  'android.permission.ACCESS_ADSERVICES_AD_ID', // Android 광고 서비스(Privacy Sandbox)
+  'android.permission.ACCESS_ADSERVICES_ATTRIBUTION',
+  'android.permission.ACCESS_ADSERVICES_TOPICS',
+  'com.android.vending.BILLING', // 광고 제거 구매(expo-iap · Play 결제)
 ]);
 
 /**
@@ -67,10 +75,8 @@ const ALLOWED_PATTERNS = [
 const FORBIDDEN = new Map([
   ['android.permission.RECORD_AUDIO', '독서 앱이 마이크를 요구한다. 걷어낸 적이 있으니 되돌아온 것이다'],
   ['android.permission.SYSTEM_ALERT_WINDOW', 'Expo bare 템플릿 기본값이고 우리는 쓰지 않는다'],
-  [
-    'com.google.android.gms.permission.AD_ID',
-    '광고 ID. 결정 #10 과 데이터 보안 선언을 동시에 거짓으로 만든다',
-  ],
+  // 🔄 2026-09-21 `AD_ID` 를 금지에서 허용으로 옮겼다. 결정 #10(광고 없음)이 #29 로 뒤집혀 광고 SDK 가 쓴다.
+  //    대가: Play 콘솔 "광고 ID 사용" 선언을 "예"로 바꾸고 데이터 보안에 광고 식별자를 적어야 한다(`STORE_LISTING.md` §8.7.2)
   ['android.permission.ACCESS_FINE_LOCATION', '위치를 쓰지 않는다'],
   ['android.permission.ACCESS_COARSE_LOCATION', '위치를 쓰지 않는다'],
   ['android.permission.READ_CONTACTS', '연락처를 쓰지 않는다'],

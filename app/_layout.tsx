@@ -9,8 +9,10 @@ import '@/lib/i18n';
 //    import 만으로 스토어가 만들어지고 onRehydrateStorage 가 i18n 에 적용한다.
 import '@/features/settings/language';
 import { AgeGate } from '@/components/AgeGate';
+import { startAds } from '@/features/ads/store';
 import { bootGateDecision } from '@/features/auth/age-store';
 import { requestAgeVerification } from '@/features/auth/gate-store';
+import { startPurchases } from '@/features/purchase/store';
 import { useReminderSync } from '@/hooks/useReminderSync';
 import { ThemeProvider, useTheme } from '@/theme';
 
@@ -37,10 +39,14 @@ function Nav() {
    * ⏭ Phase 7: 통과했을 때만 기기 세션을 만든다(조각 `ensureDeviceSession`). 지금은 만들 식별자가 없다.
    */
   useEffect(() => {
+    // 광고 제거 캐시를 먼저 읽는다. 산 사람에게 광고가 번쩍이지 않게 한다(MONETIZATION §A.5)
+    void startPurchases();
     void (async () => {
       const decision = await bootGateDecision();
       // 'verified'(통과) · 'blocked'(미달 유예 안) 둘 다 묻지 않는다
       if (decision === 'ask') await requestAgeVerification();
+      // 🔴 광고는 연령 확인이 **끝난 뒤에만** 부팅한다. 닫아도 끝이다(MONETIZATION §A.1 · 모르면 비맞춤)
+      await startAds();
     })();
   }, []);
   return (

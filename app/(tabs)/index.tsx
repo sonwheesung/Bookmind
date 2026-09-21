@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { AdBanner } from '@/components/AdBanner';
 import { AppText } from '@/components/AppText';
 import { Button } from '@/components/Button';
 import { Divider } from '@/components/Divider';
@@ -39,7 +40,7 @@ export default function Home() {
   const hasDue = data.due > 0;
 
   return (
-    <Screen scroll tab>
+    <Screen scroll tab footer={<AdBanner />}>
       {/* ── Today ─────────────────────────────────────────────────────
           🚫 태그라인·저장 힌트를 여기 두지 않는다. 둘 다 처음 한 번 읽으면 끝인데
              매일 가장 좋은 자리를 먹고 있었다(저장 힌트는 저장 화면에 그대로 있다). */}

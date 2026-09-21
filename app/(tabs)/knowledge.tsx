@@ -3,6 +3,7 @@ import { ChartColumn, Plus, Search } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
+import { AdBanner } from '@/components/AdBanner';
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
 import { Chip } from '@/components/Chip';
@@ -59,7 +60,7 @@ export default function KnowledgeList() {
   };
 
   return (
-    <Screen scroll tab>
+    <Screen scroll tab footer={<AdBanner />}>
       <Header
         title={t('knowledge.list.title')}
         right={

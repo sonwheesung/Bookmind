@@ -1,6 +1,6 @@
 # Re:Read — Privacy Policy
 
-**Effective date: 14 September 2026** · Version 1.1
+**Effective date: 21 September 2026** · Version 1.2
 
 This English text is the **canonical version**. A Korean translation is available at
 [`PRIVACY.ko.md`](./PRIVACY.ko.md); if the two ever disagree, this version governs.
@@ -31,12 +31,14 @@ We are the data controller for the limited processing described below.
 ## 2. The short version
 
 - **There is no account.** You cannot sign up, and we do not know who you are.
-- **There are no ads and no analytics.** The app contains no advertising, analytics, attribution
-  or crash-reporting SDK of any kind.
+- **The app shows ads.** Google AdMob ads appear at the bottom of a few screens and once after you
+  finish a review session (section 4.2). If you buy ad removal, the advertising SDK is never started.
+  There is no analytics, attribution or crash-reporting SDK.
 - **What you save never leaves your phone.** Books, passages, your own thoughts, tags, review
   schedules and practices are written to a database on the device and nowhere else.
-- **The app makes exactly one kind of network request**: it asks whether a newer version of its
-  own code exists. That request is described in full in section 4.
+- **The only request the app itself makes is the update check.** Ads are requested by Google's
+  advertising SDK, and the ad-removal purchase is handled by Google Play. Everything that leaves
+  is listed in section 4. **Your saved passages go into none of these.**
 - **Photos are read on the device.** Text recognition runs locally; no image is ever uploaded.
 
 ---
@@ -73,7 +75,7 @@ choice and the app does not follow it.
 
 ## 4. What leaves your device
 
-### 4.1 The update check (this is the only one)
+### 4.1 The update check
 
 Re:Read can update its own application code without a new store release, so that we can fix
 problems quickly. **Each time you open the app**, it asks Expo's update service (Expo, Inc., United
@@ -85,7 +87,7 @@ The request contains only the following:
 | Sent | What it is |
 |---|---|
 | Platform | The literal value `android` |
-| Runtime version | Which native version of the app you have (currently `1.0.0`) |
+| Runtime version | Which native version of the app you have (currently `native-2`) |
 | Update channel | The literal value `production` |
 | Protocol and API version | Fixed technical values used by the update service |
 | Update token (`EAS-Client-ID`) | A **random identifier generated on your device** the first time the app runs, stored only in the app's own storage. It lets the service tell whether a device has already downloaded a given update |
@@ -103,7 +105,46 @@ deliver code, not to measure anything.
 The update token is random and is **not** derived from your hardware. It is erased when you
 uninstall the app or clear its data, and a new one is generated if you install the app again.
 
-### 4.2 Nothing else leaves
+### 4.2 Ads (Google AdMob)
+
+Unless you have bought ad removal, Google's advertising SDK (Google AdMob) loads ads. Ads appear as a
+banner at the bottom of the home, passages and books screens, and as one full-screen ad after you
+finish reviewing at least one card. No ad appears while you are saving a passage or in the middle of
+a review.
+
+To choose ads, prevent fraud and measure ad performance, the SDK sends the following to Google:
+
+| Sent | What it is |
+|---|---|
+| Advertising ID | The advertising identifier provided by the operating system. You can reset or delete it in your device settings |
+| Device information | Values such as device model, OS version, language and screen size |
+| IP address | May be used to estimate your approximate region |
+| App information and ad interactions | App name and version, and which ads were shown or tapped |
+| Ad consent status | What you chose in the consent step below |
+
+**None of your books, passages or thoughts are sent.** The only things the app itself adds to an ad
+request are these two signals:
+
+- **Personalised ads are enabled only if you passed the age check** (section 9). If you did not
+  answer, or the threshold was not met, only non-personalised ads are requested; when the threshold
+  was not met, the request is also tagged as under the age of consent.
+- **In regions where consent is required, such as the EEA and the UK,** the app asks through
+  Google's consent tool (User Messaging Platform) before any ad is loaded. You can change your
+  choice at any time under **Ad privacy settings** in the app's settings.
+
+- **Purpose**: paying for a free app through advertising.
+- **Legal basis (GDPR)**: consent for personalised ads and for storing or accessing information on
+  the device; legitimate interest for non-personalised ads.
+- **Retention**: by Google under its own policy: <https://policies.google.com/technologies/ads>.
+
+### 4.3 Buying ad removal
+
+Ad removal is a one-time purchase, and **payment is handled by Google Play.** We never receive your
+card number or payment method. The app only asks Google Play whether this item has been bought, and
+keeps the answer (bought or not) on the device. We have no server that stores purchase records. On a
+new device, use **Restore purchase** in the settings.
+
+### 4.4 Nothing else leaves
 
 To be concrete, none of the following is sent anywhere:
 
@@ -128,7 +169,9 @@ To be concrete, none of the following is sent anywhere:
 | Notifications | To show review reminders, if you turn them on |
 | Run at startup | To restore your scheduled reminders after the phone restarts |
 | Vibrate, keep awake | Used by the reminder itself |
-| Internet, network state | For the update check in section 4.1 |
+| Internet, network state | For the update check in section 4.1 and the ads in section 4.2 |
+| Advertising ID | Used by the advertising SDK in section 4.2 to choose ads |
+| Billing (Google Play) | For the ad-removal purchase in section 4.3 |
 
 > ⚠ **An honest note about version 0.2.0.** The build currently on Google Play also declares two
 > permissions the app does not use: microphone (`RECORD_AUDIO`) and display over other apps
@@ -140,10 +183,13 @@ To be concrete, none of the following is sent anywhere:
 
 ## 6. What we do not do
 
-- The app shows no ads today. Before we release any version with ads, we will revise and republish this policy.
 - We do not use analytics, attribution or crash-reporting services.
-- We do not track you across apps or websites, and the app requests no advertising ID.
-- We do not sell or share personal information, and we do not profile you.
+- We do not ourselves track you across apps or websites. The advertising ID is used only by the
+  advertising SDK in section 4.2.
+- We do not sell personal information, and we do not profile you ourselves. Personalised ads may,
+  however, count as "sharing" under some laws such as California's. You can opt out through Ad
+  privacy settings or by deleting your device's advertising ID, and buying ad removal stops the
+  advertising SDK from starting at all.
 - We do not read your library, because we do not have it.
 
 ---
@@ -153,14 +199,17 @@ To be concrete, none of the following is sent anywhere:
 | Recipient | Role | Data | Location |
 |---|---|---|---|
 | Expo, Inc. (EAS Update) | Delivers updates to the app's own code | Platform, runtime version, update channel, random update token; IP address transiently | United States |
+| Google LLC (AdMob, User Messaging Platform) | Serves ads and manages ad consent | Advertising ID, device information, IP address, app information and ad interactions, ad consent status | United States |
 
 This is the complete list. Where data is transferred outside your jurisdiction we rely on the
 recipient's standard contractual clauses or equivalent safeguards. Expo's own policy applies to its
-processing: <https://expo.dev/privacy>.
+processing: <https://expo.dev/privacy>. Google's own policy applies to its advertising processing:
+<https://policies.google.com/privacy>.
 
 Google Play distributes the app and processes your download and any device information under
 [its own policy](https://policies.google.com/privacy); that relationship is between you and Google,
-and we receive only aggregate, non-identifying store statistics.
+and we receive only aggregate, non-identifying store statistics. The ad-removal payment (section 4.3)
+is also processed by Google Play, and we receive no payment information.
 
 Our Google Play Data Safety declaration mirrors this policy.
 
@@ -181,6 +230,9 @@ We want to be straightforward about what these mean here, because **we hold almo
 - **The update token.** This is the only identifier connected with you, it is random, and it is not
   linked to your name or account. You can erase it by clearing the app's data or uninstalling. If
   you want it handled by the recipient, write to us and we will pass the request to Expo.
+- **Ads.** You can change your ad consent under Ad privacy settings, and reset or delete the
+  advertising ID in your device settings. Requests about advertising data held by Google can be made
+  to Google directly; write to us and we will point you to the right place.
 - **Complaints.** Write to `support@vivace-games.com`. In Korea you may also contact the Personal
   Information Protection Commission (privacy.go.kr, 국번없이 182). In the EEA or UK you may complain
   to your local supervisory authority.
@@ -200,7 +252,10 @@ result on your phone: when the check happened, the age threshold that applied, a
 rule. The threshold follows the region set on your device: 16 in the European Economic Area, the United
 Kingdom and Switzerland, 14 in the Republic of Korea, 13 elsewhere, and 16 if the region cannot be read.
 If the threshold is not met, features that need an account are not available; saving passages, reviewing
-and practice keep working. The app asks again after one year. Closing the question without answering
+and practice keep working. The app asks again after one year. **Ads follow this result too:**
+personalised ads are enabled only if you passed; if not, non-personalised ads are requested and
+tagged as under the age of consent; and if you closed the question, personalised ads stay off
+(section 4.2). Closing the question without answering
 saves nothing, so it is asked again the next time the app opens.
 
 Because the app has no account and sends no profile, this result never reaches us. If you believe a child
@@ -238,7 +293,6 @@ before the version containing it is released** — not afterwards:
 |---|---|
 | Accounts and sign-in with Google (together with cloud backup) | An identity, and a route to delete it |
 | Inquiries, notices | Message content and a random device identifier created by the app, sent to and kept on a server; no name or email address |
-| Ads, and a purchase to remove them | An advertising SDK would send the advertising ID and device information to the ad provider (Google); in some regions we would ask for consent first. Buying ad removal would create purchase records handled by the store |
 | Encrypted cloud backup | Ciphertext held on a server |
 
 If we make a change that materially affects how we handle your data, we will update the effective

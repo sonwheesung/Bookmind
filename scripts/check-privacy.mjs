@@ -88,6 +88,26 @@ export function remoteHosts(appJsonText, files) {
   return [...hosts].sort();
 }
 
+/**
+ * 광고·분석 SDK 마다 방침이 반드시 적어야 하는 말(2026-09-21 · 결정 #29 · #31).
+ * 🔴 **표에 없는 SDK 는 곧 실패다.** 새 광고·분석 SDK 를 넣으면 여기와 방침을 함께 고쳐야 통과한다.
+ */
+export const SDK_DISCLOSURES = {
+  'react-native-google-mobile-ads': {
+    en: ['Google LLC (AdMob', 'Advertising ID', 'User Messaging Platform', 'non-personalised'],
+    ko: ['Google LLC (AdMob', '광고 식별자', 'User Messaging Platform', '맞춤이 아닌 광고'],
+  },
+};
+
+/** 의존성에 있는데 방침이 필요한 말을 안 적은 SDK. 표에 없는 SDK 는 전부 여기로 떨어진다 */
+export function undisclosedSdks(tracking, en, ko) {
+  return tracking.filter((dep) => {
+    const need = SDK_DISCLOSURES[dep];
+    if (need === undefined) return true;
+    return need.en.some((w) => !en.includes(w)) || need.ko.some((w) => !ko.includes(w));
+  });
+}
+
 /** 두 언어의 `## ` 헤딩 수 */
 export function sectionCount(md) {
   return (md.match(/^## /gm) ?? []).length;
@@ -109,6 +129,13 @@ function selfTest() {
   if (trackingDeps({ react: '1' }).length !== 0) fail('깨끗한 의존성을 오탐했다');
   if (trackingDeps({ '@sentry/react-native': '1' }).length !== 1) fail('sentry 를 안 잡았다');
   if (trackingDeps({ 'react-native-google-mobile-ads': '1' }).length !== 1) fail('광고 SDK 를 안 잡았다');
+  // 🔴 표에 없는 SDK 와 말이 빠진 방침을 **각각** 잡는가. 둘 다 지나가게 해야 두 경로가 지켜진다
+  const ads = 'react-native-google-mobile-ads';
+  const full = (lang) => SDK_DISCLOSURES[ads][lang].join(' ');
+  if (undisclosedSdks([ads], full('en'), full('ko')).length !== 0) fail('다 적은 방침을 오탐했다');
+  if (undisclosedSdks([ads], full('en'), '').length !== 1) fail('ko 에 빠진 고지를 안 잡았다');
+  if (undisclosedSdks([ads], '', full('ko')).length !== 1) fail('en 에 빠진 고지를 안 잡았다');
+  if (undisclosedSdks(['@sentry/react-native'], full('en'), full('ko')).length !== 1) fail('표에 없는 SDK 를 통과시켰다');
 
   if (networkCallSites([F('a.ts', 'const x = 1;')]).length !== 0) fail('네트워크 없는 파일을 오탐했다');
   if (networkCallSites([F('a.ts', 'await fetch(url)')]).length !== 1) fail('fetch 를 안 잡았다');
@@ -152,13 +179,23 @@ const files = sourceFiles().map((p) => ({ path: p, text: read(p) }));
 
 const problems = [];
 
-// ① 광고·분석 SDK 가 없다고 적었으면 실제로 없어야 한다
+// ① 광고·분석 SDK 가 있으면 방침이 그것을 적었어야 한다
+//    🔄 2026-09-21 광고를 넣었다(결정 #29). 그전에는 "없어야 한다"였다. 이제는 **적었어야 한다**이고,
+//    표(SDK_DISCLOSURES)에 없는 SDK 는 적었는지 잴 수 없으므로 실패다.
 const tracking = trackingDeps({ ...pkg.dependencies, ...pkg.devDependencies });
-if (tracking.length > 0) {
+const undisclosed1 = undisclosedSdks(tracking, en, ko);
+if (undisclosed1.length > 0) {
   problems.push(
-    `① 방침은 광고·분석 SDK 가 없다고 적었는데 의존성에 있다: ${tracking.join(', ')}\n` +
-      '    방침 §6(하지 않는 것)과 §7(수탁자)을 먼저 고친다.',
+    `① 의존성의 광고·분석 SDK 를 방침이 적지 않았다: ${undisclosed1.join(', ')}\n` +
+      '    방침 §4(나가는 것) · §7(수탁자)을 먼저 고치고 SDK_DISCLOSURES 에 필요한 말을 적는다.',
   );
+}
+
+// ①-b 광고 제거 결제(expo-iap)가 있으면 방침이 Google Play 결제를 적었어야 한다
+if ('expo-iap' in (pkg.dependencies ?? {})) {
+  if (!en.includes('payment is handled by Google Play') || !ko.includes('결제는 **Google Play 가 처리합니다.**')) {
+    problems.push('①-b 인앱 결제(expo-iap)를 쓰는데 방침에 Google Play 결제 고지(§4.3)가 없다.');
+  }
 }
 
 // ② 앱 코드가 직접 거는 네트워크 호출은 0건이어야 한다
@@ -219,5 +256,5 @@ if (problems.length > 0) {
 
 console.log(
   `check:privacy OK — 7축 · 접속처 ${hosts.length}곳(${hosts.join(' · ')}) · ` +
-    `광고/분석 SDK 0 · 네트워크 호출 0 · 절 ${sectionCount(en)}개 대칭 · SELF-TEST 통과`,
+    `광고/분석 SDK ${tracking.length}(고지됨) · 네트워크 호출 0 · 절 ${sectionCount(en)}개 대칭 · SELF-TEST 통과`,
 );

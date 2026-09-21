@@ -10,7 +10,9 @@ import { ChipRow } from '@/components/ChipRow';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { Select } from '@/components/Select';
+import { openAdPrivacyOptions, useAds } from '@/features/ads/store';
 import { useBackupStore } from '@/features/backup/store';
+import { buyRemoveAds, restoreRemoveAds, usePurchase, type PurchaseOutcome } from '@/features/purchase/store';
 import { REMINDER_TIMES } from '@/features/review/notify';
 import { syncReminders } from '@/features/review/reminder';
 import { LANGUAGE_NAMES, useLanguageStore } from '@/features/settings/language';
@@ -45,6 +47,41 @@ export default function Settings() {
   const setEnabled = useReminderStore((s) => s.setEnabled);
   const setTime = useReminderStore((s) => s.setTime);
   const [denied, setDenied] = useState(false);
+  const adFree = usePurchase((s) => s.adFree);
+  const price = usePurchase((s) => s.price);
+  const busy = usePurchase((s) => s.busy);
+  const privacyOptionsRequired = useAds((s) => s.privacyOptionsRequired);
+  const [adMessage, setAdMessage] = useState<string | null>(null);
+
+  /**
+   * 구매·복원 결과를 한 줄로 알린다(MONETIZATION §A.6).
+   * 🔴 구매 성공은 여기서 말하지 않는다. 결제창이 닫힌 것과 결제가 끝난 것은 다르다. 줄이 "광고가 제거되었습니다"로 바뀌는 것이 답이다.
+   */
+  function adResult(r: PurchaseOutcome, restoring: boolean): string | null {
+    if (r.ok) return restoring ? t('ads.result.restored') : null;
+    switch (r.reason) {
+      case 'cancelled':
+        return null;
+      case 'already-owned':
+        return t('ads.result.alreadyOwned');
+      case 'not-found':
+        return t('ads.result.notFound');
+      case 'unavailable':
+        return t('ads.result.unavailable');
+      case 'error':
+        return restoring ? t('ads.result.restoreFailed') : t('ads.result.failed');
+    }
+  }
+
+  async function buy() {
+    if (busy) return;
+    setAdMessage(adResult(await buyRemoveAds(), false));
+  }
+
+  async function restore() {
+    if (busy) return;
+    setAdMessage(adResult(await restoreRemoveAds(), true));
+  }
 
   const copy = { title: t('reminder.notify.title'), body: t('reminder.notify.body') };
 
@@ -132,6 +169,40 @@ export default function Settings() {
           {lastExportedAt === null ? t('backup.never') : formatDate(lastExportedAt, deviceLocale())}
         </AppText>
       </Row>
+
+      {/* 광고 제거는 평생 한 번 결제다(결정 #31 · MONETIZATION §A.6). 🚫 다른 화면에서 권하지 않는다 */}
+      {group(t('ads.title'))}
+      {adFree ? (
+        <AppText tone="muted">{t('ads.removed')}</AppText>
+      ) : (
+        <>
+          <Row onPress={() => void buy()}>
+            <AppText>{t('ads.remove')}</AppText>
+            {/* 가격은 스토어가 준 지역 통화 표시다. 못 받았으면 비워 둔다 */}
+            {price !== null && <AppText tone="muted">{price}</AppText>}
+          </Row>
+          <View style={{ height: spacing.sm }} />
+          <Row onPress={() => void restore()}>
+            <AppText>{t('ads.restore')}</AppText>
+          </Row>
+          <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
+            {t('ads.removeHint')}
+          </AppText>
+        </>
+      )}
+      {privacyOptionsRequired && !adFree && (
+        <>
+          <View style={{ height: spacing.sm }} />
+          <Row onPress={() => void openAdPrivacyOptions()}>
+            <AppText>{t('ads.privacy')}</AppText>
+          </Row>
+        </>
+      )}
+      {adMessage !== null && (
+        <AppText variant="caption" tone="muted" style={{ marginTop: spacing.md }}>
+          {adMessage}
+        </AppText>
+      )}
     </Screen>
   );
 }

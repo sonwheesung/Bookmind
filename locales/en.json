@@ -146,6 +146,22 @@
     },
     "backup": "Backup"
   },
+  "ads": {
+    "title": "Ads",
+    "remove": "Remove ads",
+    "removeHint": "Pay once and ads won't come back. On a new device, use Restore purchase.",
+    "restore": "Restore purchase",
+    "privacy": "Ad privacy settings",
+    "removed": "Ads are removed.",
+    "result": {
+      "restored": "Ad removal restored.",
+      "notFound": "No purchase found to restore.",
+      "alreadyOwned": "You already own this. Tap Restore purchase.",
+      "failed": "Couldn't complete the purchase. Please try again shortly.",
+      "restoreFailed": "Couldn't restore. Please try again shortly.",
+      "unavailable": "Purchases aren't available on this device."
+    }
+  },
   "backup": {
     "title": "Backup",
     "intro": "Your passages and thoughts live only on this device. Export a file and you can bring them back on a new one.",

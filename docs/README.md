@@ -126,7 +126,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 **19개**를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **20개**를 순서대로 돌린다
                       #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
@@ -150,6 +150,7 @@ npm run check:privacy # 🔴 처리방침 ⇄ 배포본 — 방침이 "요청은
 npm run check:ui      # 🔴 화면이 공통 부품을 우회했나 — typography 직접 조립 · 색 코드 · 확인창 · 날짜 · 태그 나누기
                       #   + 부품 목록 ⇄ UI_GUIDE §2 표 · 헬퍼 경계(UI_GUIDE §6)
 npm run check:age-gate # 🔴 연령 게이트 — 지역 × 출생연도 경계 전수 · 보수 판정식 · 생년 미저장 · 부팅 배선(AUTH_SYSTEM §1.8)
+npm run check:ads   # 🔴 광고 · 광고 제거 — 맞춤 판정(모르면 끈다) · 배치 화면 대조 · 복습 끝 전면(한 장 이상 · 한 번) · ID 짝 · pending 미지급 · finishTransaction · 부팅 순서(MONETIZATION §A)
 npm run check:public # 🔴 공개되면 안 되는 것 — 비밀 키 · 서비스 계정 · 개인 메일 · 내부 링크 · 전화 · 주민번호 · 사업자번호(처리방침 밖) · 비밀 파일 이름 · 훅 꺼짐
                       #   커밋(`.githooks/pre-commit` · 올릴 내용)과 push(`.githooks/pre-push`)에서도 돈다 · 값은 `.private/LINKS.md`(CLAUDE §13)
 
