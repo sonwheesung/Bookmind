@@ -140,7 +140,7 @@ To be concrete, none of the following is sent anywhere:
 
 ## 6. What we do not do
 
-- We do not show ads, and we do not plan to.
+- The app shows no ads today. Before we release any version with ads, we will revise and republish this policy.
 - We do not use analytics, attribution or crash-reporting services.
 - We do not track you across apps or websites, and the app requests no advertising ID.
 - We do not sell or share personal information, and we do not profile you.
@@ -238,8 +238,7 @@ before the version containing it is released** — not afterwards:
 |---|---|
 | Accounts and sign-in with Google | An identity, and a route to delete it |
 | Inquiries, notices | Message content sent to a server |
-| AI analysis of a saved passage | The passage, your thought, the book title, the page and the language would pass through our server to an AI provider. The exact wording required for that disclosure is already fixed in our design documents |
-| Subscription | Purchase records handled by the store and a subscription service |
+| Ads, and a purchase to remove them | An advertising SDK would send the advertising ID and device information to the ad provider (Google); in some regions we would ask for consent first. Buying ad removal would create purchase records handled by the store |
 | Encrypted cloud backup | Ciphertext held on a server |
 
 If we make a change that materially affects how we handle your data, we will update the effective
