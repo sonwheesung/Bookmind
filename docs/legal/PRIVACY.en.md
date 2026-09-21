@@ -142,7 +142,7 @@ request are these two signals:
 Ad removal is a one-time purchase, and **payment is handled by Google Play.** We never receive your
 card number or payment method. The app only asks Google Play whether this item has been bought, and
 keeps the answer (bought or not) on the device. We have no server that stores purchase records. On a
-new device, use **Restore purchase** in the settings.
+new device, use **Restore Purchases** in the settings.
 
 ### 4.4 Nothing else leaves
 

@@ -149,14 +149,14 @@
   "ads": {
     "title": "Ads",
     "remove": "Remove ads",
-    "removeHint": "Pay once and ads won't come back. On a new device, use Restore purchase.",
-    "restore": "Restore purchase",
+    "removeHint": "Pay once to remove ads permanently. On a new device, use Restore Purchases.",
+    "restore": "Restore Purchases",
     "privacy": "Ad privacy settings",
-    "removed": "Ads are removed.",
+    "removed": "Ads have been removed.",
     "result": {
-      "restored": "Ad removal restored.",
-      "notFound": "No purchase found to restore.",
-      "alreadyOwned": "You already own this. Tap Restore purchase.",
+      "restored": "Ad removal has been restored.",
+      "notFound": "No purchase to restore.",
+      "alreadyOwned": "You already own this. Tap Restore Purchases.",
       "failed": "Couldn't complete the purchase. Please try again shortly.",
       "restoreFailed": "Couldn't restore. Please try again shortly.",
       "unavailable": "Purchases aren't available on this device."
