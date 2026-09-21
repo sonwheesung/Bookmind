@@ -652,6 +652,23 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 ⚠ 출시 노트는 이번에도 비어 있다(`eas submit`).
 🔴 **이 빌드부터 OTA 짝이 `native-2` 다.** vc7 이하가 깔린 기기는 Play 업데이트로 vc8 을 받기 전까지 OTA 를 못 받는다.
 
+## 6.10 vc11 — 광고 · 광고 제거 모듈(광고는 꺼 둔 채) · AI 흔적 정리 (2026-09-21)
+
+사용자 지시 *"다 수정했으면 빌드하고 업로드까지 진행하고"* · *"출시 전까지 광고는 On 하지말고"*.
+
+| 무엇 | 값 |
+|---|---|
+| versionCode | 10 → **11** |
+| version | 0.1.10 → **0.1.11**(결정 #27) |
+| runtimeVersion | `native-2` → 🔴 **`native-3`**. 네이티브 모듈 둘이 새로 들어왔다(`react-native-google-mobile-ads` · `expo-iap`) |
+| 네이티브 변경 | 광고 SDK · Play 결제. 🔴 권한이 **늘어난다**(결제 · 광고 서비스). `AD_ID` 는 `blockedPermissions` 로 막았다(`MONETIZATION_SYSTEM.md` §A.6.1) |
+| JS 변경 | AI 흔적 정리(`9099f7b`) · 광고 · 광고 제거(`bb879f0` · `6d29845`) · 비공개 테스트 동안 광고 끔(`ADS_LIVE = false` · 배너 자리는 빈 영역) |
+| 보관 | `D:\builds\Bookmind\reread-vc11.aab` |
+| 업로드 | `npx eas-cli submit --platform android --profile closed --path D:/builds/Bookmind/reread-vc11.aab --non-interactive` |
+
+🔴 **올리기 전에 `check:aab` 로 권한을 잰다.** 허용 목록의 광고 · 결제 권한은 예상 목록이다(§A.7). `AD_ID` 가 보이면 막음이 안 먹은 것이라 올리지 않는다(콘솔 광고 ID 선언이 "아니요"다).
+⏸ 화면을 확인하지 않고 올린다(에뮬레이터 작업 중단). 설치 뒤 **홈 · 문장 · 책 · 복습 끝 아래의 빈 영역**과 설정에 광고 구역이 **없는** 것을 본다.
+
 ## 7. 내부 테스트 업로드
 
 ### 7.0.1 🔴 거짓 초록을 **두 번째로** 확인했다 (2026-09-10 저녁)

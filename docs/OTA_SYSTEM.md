@@ -27,6 +27,7 @@
 | **OTA 가 닿을 기기가 생겼나** | ✅ 🔴 **이제 OTA 가 실제로 존재한다**(§1). 폰에 설치되는 순간부터 유효하다 |
 | 첫 페이로드 발행 | ✅ **2026-09-11** · 사용자 지시. 그룹 `b667a089` · runtime 1.0.0 · android · 커밋 `e3d54e6` |
 | runtimeVersion `1.0.0` → **`native-2`** | 🔄 2026-09-15 · 결정 #27 · vc8 부터 적용(§3.1) |
+| runtimeVersion `native-2` → **`native-3`** | 🔄 2026-09-21 · vc11 · 광고 SDK · `expo-iap` 두 네이티브 모듈이 들어왔다. vc10 이하는 이 빌드의 OTA 를 못 받는다 |
 | 기기 전달 확인 | ⏸ 🔴 **아직 눈으로 못 봤다.** 채널 매핑까지는 확인했다(§7.2) |
 | 처리방침에 Expo 수탁자 행 | ❌ Phase 11 (§8) |
 
@@ -82,7 +83,7 @@ OTA 는 **JS 번들과 에셋만** 바꾼다. 아래는 전부 **AAB 재빌드**
 ## 3. 🔴 `runtimeVersion` 은 **고정 문자열**이다 (fingerprint 정책 금지)
 
 ```jsonc
-"runtimeVersion": "native-2"
+"runtimeVersion": "native-3"
 ```
 
 배구명가가 `fingerprint` 정책으로 **두 번** 데였다(LinkMemo `OTA_UPDATE.md` §2 승계).

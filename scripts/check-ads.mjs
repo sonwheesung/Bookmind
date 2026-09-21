@@ -12,6 +12,7 @@
  *   ④ 앱 ID 와 광고 단위 ID 의 테스트/실제 짝이 섞이는 것.
  *   ⑤ 결제 대기(pending)를 지급하는 것 · finishTransaction 누락(3일 뒤 자동 환불).
  *   ⑥ 광고 제거를 산 사람에게 광고를 요청하는 것 · 연령 확인 전에 광고를 부팅하는 것.
+ *   ⑦ 🔴 비공개 테스트 동안(ADS_LIVE = false) SDK 가 깨어나는 것 · 스위치와 AD_ID 권한의 짝이 어긋나는 것(§A.6.1).
  *
  * 🔴 SELF-TEST 가 먼저다(exit 2). 검사 실패는 exit 1.
  */
@@ -25,8 +26,9 @@ import {
   decideAdRequest,
   shouldLoadAds,
   shouldShowReviewInterstitial,
+  adSlot,
 } from '../features/ads/compute.ts';
-import { RELEASE_IDS, TEST_IDS, adUnitIds, isTestId } from '../features/ads/config.ts';
+import { ADS_LIVE, RELEASE_APP_ID, RELEASE_IDS, TEST_IDS, adUnitIds, isTestId } from '../features/ads/config.ts';
 import { AGE_GATE_VERSION, makeBlockRecord, makeRecord } from '../features/auth/age-gate.ts';
 import {
   REMOVE_ADS_PRODUCT_ID,
@@ -240,11 +242,35 @@ for (const f of ['app/knowledge/new.tsx', 'app/(tabs)/settings.tsx', 'app/backup
     `⑦ 🔴 미성년 표시가 동의·요청 설정 두 곳에 그대로 안 실린다(${tags.join(' / ')})`,
   );
 
+  const gate = { 'components/AdBanner.tsx': 'adSlot({ live: ADS_LIVE, ready, adFree })', 'hooks/useInterstitialAd.ts': 'shouldLoadAds({ ready, adFree })' };
   for (const f of ['components/AdBanner.tsx', 'hooks/useInterstitialAd.ts']) {
     const c = code(read(f));
-    ok(c.includes('shouldLoadAds({ ready, adFree })'), `⑦ 🔴 ${f} 가 산 사람·준비 전 판정을 안 거친다`);
+    ok(c.includes(gate[f]), `⑦ 🔴 ${f} 가 산 사람·준비 전 판정을 안 거친다`);
     ok(/requestNonPersonalizedAdsOnly:\s*!(request\.)?personalized/.test(c), `⑦ 🔴 ${f} 가 비맞춤 표시를 요청에 안 싣는다`);
   }
+}
+
+// ── ⑧ 비공개 테스트 동안 광고 끔(§A.6.1) ────────────────────────────────────
+{
+  const same = (x, y) => x === y;
+  ok(same(adSlot({ live: false, ready: false, adFree: false }), 'placeholder'), '⑧ 🔴 스위치가 꺼졌는데 빈 영역을 안 그린다');
+  ok(same(adSlot({ live: false, ready: true, adFree: false }), 'placeholder'), '⑧ 🔴 스위치가 꺼졌는데 준비됐다고 광고를 그린다');
+  ok(same(adSlot({ live: false, ready: false, adFree: true }), 'none'), '⑧ 광고 제거를 샀는데 빈 영역을 그린다');
+  ok(same(adSlot({ live: true, ready: true, adFree: false }), 'ad'), '⑧ 켜졌고 준비됐는데 광고가 아니다');
+  ok(same(adSlot({ live: true, ready: false, adFree: false }), 'none'), '⑧ 준비 전에 광고 자리를 그린다');
+  ok(same(adSlot({ live: true, ready: true, adFree: true }), 'none'), '⑧ 🔴 광고 제거를 샀는데 광고를 그린다');
+
+  const app = JSON.parse(read('app.json'));
+  const blocked = (app.expo.android?.blockedPermissions ?? []).includes('com.google.android.gms.permission.AD_ID');
+  ok(ADS_LIVE ? !blocked : blocked, `⑧ 🔴 스위치(${ADS_LIVE})와 AD_ID 막음(${blocked})의 짝이 어긋났다. 꺼져 있으면 막고, 켜져 있으면 풀어야 한다`);
+  const plugin = app.expo.plugins.find((x) => Array.isArray(x) && x[0] === 'react-native-google-mobile-ads');
+  ok(plugin?.[1]?.androidAppId === RELEASE_APP_ID, '⑧ app.json androidAppId 가 config 의 RELEASE_APP_ID 와 다르다');
+
+  const store = code(read('features/ads/store.ts'));
+  const off = store.indexOf('if (!ADS_LIVE) return;');
+  ok(off >= 0 && off < store.indexOf('await startPurchases()') && off < store.indexOf('.initialize()'), '⑧ 🔴 스위치가 꺼졌는데 광고 부팅이 SDK 까지 간다');
+  const settings = code(read('app/(tabs)/settings.tsx'));
+  ok(/ADS_LIVE && group\(t\('ads\.title'\)\)/.test(settings), '⑧ 스위치가 꺼졌는데 설정에 광고 구역이 보인다');
 }
 
 // ── 결과 ────────────────────────────────────────────────────────────────────

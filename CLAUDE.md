@@ -251,6 +251,7 @@ AI 를 빼면서(결정 #28) Premium 의 중심(AI 분석 · AI 회상 질문 ·
 - **배치**(결정 #31 · 단어 앱 My Word 와 같게, 복습 시작 전 전면만 뺀다): 하단 고정 배너 = 홈 · 문장 목록 · 책 목록 · 복습 끝 /
   전면 = 복습 끝 진입 0.5초 뒤 한 번 / 그 밖의 화면에는 광고가 없다.
 - **광고 제거는 평생 일회성 구매**(결정 #31 · 비소비성 `remove_ads` · `expo-iap` 로 Play 결제 직접 · 서버 없음). 가격은 ⚠ 미결정 B.
+- 🔴 **비공개 테스트 동안 광고는 꺼 둔다**(2026-09-21 사용자 지시 *"출시 전까지 광고는 On 하지말고"*). 광고 자리는 빈 영역만 그리고, SDK 는 깨우지 않고, `AD_ID` 권한을 막는다. 출시 빌드에서 한 커밋에 켠다([`docs/MONETIZATION_SYSTEM.md`](./docs/MONETIZATION_SYSTEM.md) §A.6.1).
 - **무료 한도는 없다**(결정 #31).
 - 🔴 **넣기 전에 할 일**: AdMob 계정 · 앱 등록 · `app-ads.txt`(Play 개발자 웹사이트 루트 · `vivace-games.com` 은 배구 쪽이 올린다) ·
   광고 동의(EEA · 영국 · UMP) · 연령 게이트 미달 사용자는 맞춤 광고를 끈다(결정 #25) · 처리방침 · Play 데이터 보안(광고 식별자 · 수집 있음) ·
@@ -323,7 +324,7 @@ AI 를 빼면서(결정 #28) Premium 의 중심(AI 분석 · AI 회상 질문 ·
 | 알림 | expo-notifications `~0.32.17` | 🔨 Phase 4(2026-09-09) — 🟢 **Expo Go 에서 로컬 알림 도달 확인**. 🔴 `prebuild` 안 하면 아이콘 리소스가 안 생긴다(My Word 함정) — 그 축은 미확인 |
 | **OTA** | expo-updates `~29.0.20` | ✅ Phase 4(2026-09-10) · 결정 #18 — 배선·가드·게시까지 끝났다. 🔴 **네이티브 모듈이라 OTA 로 켤 수 없어서** 내부 테스트 첫 빌드에 실었다. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 가드 `check:ota`([`docs/OTA_SYSTEM.md`](./docs/OTA_SYSTEM.md)). ⏸ 첫 페이로드 발행은 **사용자 지시 대기** |
 | 서명 | 업로드 키스토어 (`secrets/reread-upload.jks`) | ✅ 2026-09-10 — vc1·vc2 둘 다 **업로드 키로 서명된 것을 SHA1 로 확인**했다. 🔴 `prebuild` 가 지우므로 **config plugin** 으로 배선한다([`docs/BUILD.md`](./docs/BUILD.md) §5) |
-| 광고 | `react-native-google-mobile-ads` `^16.3.0`(AdMob) · 동의 UMP | 🔨 코드 2026-09-21 · 결정 #29 · 배치는 결정 #31 · 가드 `check:ads` · 🔴 **테스트 광고 ID** 로 돈다(AdMob 단위 ❌) · 네이티브 모듈이라 새 AAB 전에는 실기기에서 못 본다([`docs/MONETIZATION_SYSTEM.md`](./docs/MONETIZATION_SYSTEM.md) §A) |
+| 광고 | `react-native-google-mobile-ads` `^16.3.0`(AdMob) · 동의 UMP | 🔨 코드 2026-09-21 · 결정 #29 · 배치는 결정 #31 · 가드 `check:ads` · 🔴 **비공개 테스트 동안 꺼 둔다**(`ADS_LIVE = false` · 자리만 그린다 · §A.6.1) · AdMob 앱 · 광고 단위 ✅ 2026-09-21 · 네이티브 모듈이라 새 AAB 전에는 실기기에서 못 본다([`docs/MONETIZATION_SYSTEM.md`](./docs/MONETIZATION_SYSTEM.md) §A) |
 | 광고 제거 결제 | `expo-iap` `^5.3.1`(Play 결제 직접 · 비소비성 `remove_ads` · My Word 승계) | 🔨 코드 2026-09-21 · 결정 #31 · 가격 ⚠ 미결정 B · Play 콘솔 상품 ❌ · 🔄 ~~구독 · RevenueCat~~ |
 | 로그인 | @react-native-google-signin/google-signin | ❌ · 🔄 v1.1 클라우드 백업과 함께(결정 #30) |
 | 보안 저장 | expo-secure-store | ❌ — 세션·기기 UUID · 🔴 v1.0 문의(결정 #30)에서 들어온다 · 네이티브 모듈이라 새 AAB |
@@ -717,7 +718,7 @@ OTA 는 Play 트랙에 새 버전을 만들지 않는다. 그래서 업체가 �
 | Vercel 프로젝트(Re:Read 서버) | ❌ | |
 | ~~Anthropic API 키~~ | 🚫 **불필요** | 결정 #28(2026-09-21) — AI 를 붙이지 않는다 |
 | 광고 제거 상품 `remove_ads`(비소비성 · Play 콘솔) | ❌ | 결정 #31 · 가격 ⚠ 미결정 B · 🔄 ~~RevenueCat 월간/연간 2종~~ |
-| AdMob 계정 · 앱 등록 · 광고 단위 | ❌ | 결정 #29 · 🔴 테스트는 테스트 광고 ID 로만 |
+| AdMob 계정 · 앱 등록 · 광고 단위 | ✅ **2026-09-21** | 앱 `Re:Read`(스토어 미연결 · 출시 뒤 연결) · 배너 · 전면 두 단위 · GDPR 메시지는 **임시저장**(출시 때 게시) · 🔴 개발 빌드는 테스트 광고 ID 로만 |
 | `app-ads.txt` | ❌ | Play 등록정보의 개발자 웹사이트 **루트**에 둔다. `vivace-games.com` 이면 배구 쪽이 올린다(2026-09-18 배구 세션 안내 · 겹치게 올리지 말고 확인만) |
 | Play 데이터 보안 · 광고 선언 갱신 | ❌ | 광고 SDK 를 넣는 빌드 전에. 지금 선언은 "수집 없음 · 광고 없음" 이다 |
 | Google Sign-In OAuth 클라이언트 | ❌ | 🔄 v1.1(결정 #30) · Play 서명 키 SHA-1 필요 |

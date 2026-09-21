@@ -10,6 +10,7 @@ import { ChipRow } from '@/components/ChipRow';
 import { Header } from '@/components/Header';
 import { Screen } from '@/components/Screen';
 import { Select } from '@/components/Select';
+import { ADS_LIVE } from '@/features/ads/config';
 import { openAdPrivacyOptions, useAds } from '@/features/ads/store';
 import { useBackupStore } from '@/features/backup/store';
 import { buyRemoveAds, restoreRemoveAds, usePurchase, type PurchaseOutcome } from '@/features/purchase/store';
@@ -170,9 +171,10 @@ export default function Settings() {
         </AppText>
       </Row>
 
-      {/* 광고 제거는 평생 한 번 결제다(결정 #31 · MONETIZATION §A.6). 🚫 다른 화면에서 권하지 않는다 */}
-      {group(t('ads.title'))}
-      {adFree ? (
+      {/* 광고 제거는 평생 한 번 결제다(결정 #31 · MONETIZATION §A.6). 🚫 다른 화면에서 권하지 않는다
+          🔴 비공개 테스트 동안(ADS_LIVE = false)은 구역을 통째로 숨긴다. 살 것이 없다(§A.6.1) */}
+      {ADS_LIVE && group(t('ads.title'))}
+      {!ADS_LIVE ? null : adFree ? (
         <AppText tone="muted">{t('ads.removed')}</AppText>
       ) : (
         <>
@@ -190,7 +192,7 @@ export default function Settings() {
           </AppText>
         </>
       )}
-      {privacyOptionsRequired && !adFree && (
+      {ADS_LIVE && privacyOptionsRequired && !adFree && (
         <>
           <View style={{ height: spacing.sm }} />
           <Row onPress={() => void openAdPrivacyOptions()}>

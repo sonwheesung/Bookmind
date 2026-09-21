@@ -37,6 +37,22 @@ export function shouldLoadAds(state: { readonly ready: boolean; readonly adFree:
   return state.ready && !state.adFree;
 }
 
+/** 광고 자리에 무엇을 그릴까(§A.6.1). `placeholder` 는 비공개 테스트 동안의 빈 영역이다 */
+export type AdSlot = 'ad' | 'placeholder' | 'none';
+
+/**
+ * 🔴 광고 제거를 샀으면 아무것도 안 그린다. 스위치가 꺼져 있으면 **빈 영역**이다(요청하지 않는다).
+ *    켜져 있으면 준비된 뒤에만 광고다. 준비 전에는 비워 둔다.
+ */
+export function adSlot(state: { readonly live: boolean; readonly ready: boolean; readonly adFree: boolean }): AdSlot {
+  if (state.adFree) return 'none';
+  if (!state.live) return 'placeholder';
+  return state.ready ? 'ad' : 'none';
+}
+
+/** 배너 자리의 높이. 적응형 배너가 폰에서 차지하는 높이(My Word `AD_BANNER_HEIGHT` 와 같다) */
+export const AD_BANNER_HEIGHT = 60;
+
 /** 복습 끝 전면 광고의 지연(§A.3) */
 export const INTERSTITIAL_DELAY_MS = 500;
 

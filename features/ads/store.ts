@@ -4,6 +4,7 @@ import { deviceThreshold, loadAgeBlock, loadAgePass } from '@/features/auth/age-
 import { startPurchases, usePurchase } from '@/features/purchase/store';
 
 import { decideAdRequest, type AdRequestDecision } from './compute';
+import { ADS_LIVE } from './config';
 import { adsSdk } from './sdk';
 
 /**
@@ -36,6 +37,8 @@ let started = false;
 export async function startAds(): Promise<void> {
   if (started) return;
   started = true;
+  // 🔴 비공개 테스트 동안은 SDK 를 깨우지 않는다. UMP 도 부르지 않는다(`MONETIZATION_SYSTEM.md` §A.6.1)
+  if (!ADS_LIVE) return;
 
   // 광고 제거 여부를 Play 에 물은 뒤에 정한다. 산 사람의 기기에서 SDK 를 깨우지 않는다
   await startPurchases();

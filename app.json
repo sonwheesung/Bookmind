@@ -2,8 +2,8 @@
   "expo": {
     "name": "Re:Read",
     "slug": "reread",
-    "version": "0.1.10",
-    "runtimeVersion": "native-2",
+    "version": "0.1.11",
+    "runtimeVersion": "native-3",
     "updates": {
       "url": "https://u.expo.dev/8785afeb-e523-40c5-9b42-20593214aba6",
       "checkAutomatically": "ON_LOAD",
@@ -17,11 +17,12 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.vivacegames.reread",
-      "versionCode": 10,
+      "versionCode": 11,
       "edgeToEdgeEnabled": true,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.SYSTEM_ALERT_WINDOW"
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "com.google.android.gms.permission.AD_ID"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/re-read-foreground.png",
@@ -57,7 +58,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+          "androidAppId": "ca-app-pub-2731473780180274~9518651929",
+          "delayAppMeasurementInit": true
         }
       ],
       "expo-iap",
