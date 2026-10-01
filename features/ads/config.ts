@@ -10,11 +10,16 @@
  */
 
 /**
- * 🔴 광고 스위치. 출시 전까지 `false` 다(사용자 지시 *"출시 전까지 광고는 On 하지말고"*).
- * 꺼져 있으면 SDK 를 깨우지 않고 배너 자리에 빈 영역만 그린다.
- * 켤 때는 `app.json` 의 `blockedPermissions` 에서 `AD_ID` 를 **같은 커밋에** 뺀다(가드 `check:ads` ⑧).
+ * 🔴 광고 스위치.
+ *
+ * ✅ **2026-10-01 켰다** — 비공개 테스트 승인이 나서 정식 출시(`1.0.0` · vc12)로 간다(결정 #32).
+ *    ~~비공개 테스트 동안은 `false`~~(2026-09-21~09-30 · 사용자 지시 *"출시 전까지 광고는 On 하지말고"*).
+ *
+ * 꺼면 SDK 를 깨우지 않고 배너 자리에 빈 영역만 그린다.
+ * 🔴 끄거나 켤 때는 `app.json` 의 `blockedPermissions` 의 `AD_ID` 를 **같은 커밋에** 반대로 바꾼다.
+ *    가드 `check:ads` ⑧ 이 그 짝을 재고, 어긋나면 멈춘다. 권한은 네이티브라 새 AAB 가 든다.
  */
-export const ADS_LIVE = false;
+export const ADS_LIVE = true;
 
 /** 실제 AdMob 앱 ID. `app.json` 의 `androidAppId` 와 같아야 한다 */
 export const RELEASE_APP_ID = 'ca-app-pub-2731473780180274~9518651929';

@@ -332,5 +332,16 @@
   },
   "tabs": {
     "home": "홈"
+  },
+  "legal": {
+    "title": "법적 고지",
+    "privacy": "개인정보 처리방침",
+    "terms": "이용약관",
+    "oss": "오픈소스 라이선스",
+    "ossIntro": "Re:Read 는 아래 오픈소스 패키지로 만들었습니다. 고지는 각 저작자가 준 그대로 싣습니다.",
+    "ossSource": "모든 패키지는 고치지 않고 그대로 싣습니다. 각 패키지의 소스는 npm 페이지(npmjs.com/package/<이름>)에서 받을 수 있습니다.",
+    "ossPackages": "패키지 {{count}}개",
+    "ossNoCopyright": "저작권 줄을 싣지 않은 패키지가 있습니다. 지어내지 않고 비워 둡니다.",
+    "ossTexts": "라이선스 전문"
   }
 }

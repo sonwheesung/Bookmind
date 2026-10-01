@@ -52,7 +52,17 @@ export const RULES = [
     what: '개인 메일 주소',
     re: /[A-Za-z0-9._%+-]+@(gmail|naver|daum|hanmail|kakao|nate|outlook|hotmail|icloud|yahoo)\.(com|net|co\.kr)/i,
     probes: [j('someone', '@', 'gmail.com'), j('user.name', '@', 'naver.com')],
-    allow: [],
+    /*
+     * 🔴 **오픈소스 저작권 줄에 저작자의 메일이 들어 있다**(2026-10-01 실측 — 이 가드가 커밋을 막았다).
+     *    MIT·ISC·BSD 는 저작권 고지를 **사본에 그대로 포함하라**고 요구한다. 지우면 고지가 아니게 되고,
+     *    고지의 거짓은 라이선스 위반이다. 그 주소는 **그 저작자가 npm 에 이미 공개한 값**이고 우리 것이 아니다.
+     *
+     * 🟢 **이 예외가 넓지 않은 이유는 다른 가드가 같은 파일을 묶어 두기 때문이다.**
+     *    `check:licenses` 가 이 파일을 **생성기 출력과 바이트로** 대조한다(`docs/OPEN_SOURCE_NOTICE.md` §2).
+     *    즉 사람이 이 파일에 무언가를 손으로 끼워 넣으면 **그쪽이 멈춘다.** 예외의 안전은 이 쌍에서 온다.
+     *    🔴 그래서 `check:licenses` 를 `verify` 에서 빼면 이 예외도 근거를 잃는다.
+     */
+    allow: ['features/legal/credits.json'],
   },
   {
     id: '④',
@@ -110,7 +120,10 @@ export function scanText(path, text) {
   const hits = [];
   const lines = text.split(/\r?\n/);
   for (const r of RULES) {
-    if (r.allow.some((a) => path.startsWith(a))) continue;
+    // 🔴 **허용 항목이 파일이면 정확히 그 파일만**이다. `startsWith` 하나로 두면
+    //    `features/legal/credits.json.ts` 처럼 **접두사만 같은 파일**까지 통과한다(2026-10-01 자체 검사가 잡았다).
+    //    `/` 로 끝나는 항목만 디렉터리 접두사로 쓴다. ★ 예외가 한 칸 넓으면 그건 예외가 아니라 구멍이다.
+    if (r.allow.some((a) => (a.endsWith('/') ? path.startsWith(a) : path === a))) continue;
     lines.forEach((line, i) => {
       const m = line.match(r.re);
       if (m) hits.push(`${r.id} ${r.what}: ${path}:${i + 1}  ${mask(m[0])}`);
@@ -154,6 +167,11 @@ function selfTest() {
   const biz = RULES.find((r) => r.id === '⑦');
   if (scanText('docs/legal/PRIVACY.ko.md', biz.probes[0]).length !== 0) fail('처리방침의 사업자번호를 막는다');
   if (scanText('docs/STORE_LISTING.md', biz.probes[0]).length !== 1) fail('🔴 처리방침 밖의 사업자번호를 못 잡는다');
+  // 🔴 오픈소스 고지의 예외도 **그 한 파일에서만** 먹는다. 옆 파일로 새면 예외가 아니라 구멍이다
+  const mailProbe = RULES.find((r) => r.id === '③').probes[0];
+  if (scanText('features/legal/credits.json', mailProbe).length !== 0) fail('오픈소스 고지의 저작자 메일을 막는다');
+  if (scanText('features/legal/urls.ts', mailProbe).length !== 1) fail('🔴 고지 밖(같은 폴더)의 개인 메일을 못 잡는다');
+  if (scanText('features/legal/credits.json.ts', mailProbe).length !== 1) fail('🔴 접두사만 같은 파일까지 허용한다');
   // 🔴 출력에 원래 값이 남지 않는다
   const out = scanText('docs/x.md', RULES[2].probes[0]).join('');
   if (out.includes(RULES[2].probes[0])) fail('🔴 걸린 값을 가리지 않고 출력한다');

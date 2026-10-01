@@ -332,5 +332,16 @@
   },
   "tabs": {
     "home": "Home"
+  },
+  "legal": {
+    "title": "Legal",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "oss": "Open-source licenses",
+    "ossIntro": "Re:Read is built with the open-source packages below. Their notices are reproduced as the authors provided them.",
+    "ossSource": "Every package is included unmodified. The source of each one is available on its npm page (npmjs.com/package/<name>).",
+    "ossPackages": "Packages ({{count}})",
+    "ossNoCopyright": "Some packages ship no copyright line. We leave it blank rather than invent one.",
+    "ossTexts": "License texts"
   }
 }

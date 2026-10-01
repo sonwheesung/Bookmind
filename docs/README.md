@@ -10,11 +10,11 @@
 
 ## 1. 문서 목록
 
-**21개** (세는 법: `ls docs/*.md | wc -l`)
+**22개** (세는 법: `ls docs/*.md | wc -l`)
 
 | 문서 | 범위 | 상태 |
 |---|---|---|
-| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **31건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **2건**(세는 법: `grep -c "^\| [A-Z] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
+| [`../CLAUDE.md`](../CLAUDE.md) | 설계 정본 — 기둥 7개 · MVP 범위 · 서버 경계 · 스택 · 결정 로그 **32건**(세는 법: `grep -c "^\*\*#" CLAUDE.md`) · 미결정 **2건**(세는 법: `grep -c "^\| [A-Z] \|" CLAUDE.md` — 닫힌 것은 `~~F~~` 로 취소선 처리되어 자동으로 빠진다) | ✅ 2026-09-08 |
 | [`PLAN.md`](./PLAN.md) | 착수 순서 Phase 0~12 · 완료 기준 · 진행 현황 | ✅ 2026-09-08 |
 | [`ARCHITECTURE.md`](./ARCHITECTURE.md) | 서버 경계 — 3분할 구조 · common_server 계약 · ~~AI 프록시~~(결정 #28) · **조각 서버 편입을 기각한 근거** | ✅ 2026-09-08 |
 | [`DATABASE.md`](./DATABASE.md) | 로컬 스키마 **v5**(expo-sqlite **12테이블**) · UUID/tombstone 규약 · 삭제 규칙 · 조회 패턴 · 구현 위치(§6) | ✅ 2026-09-10 |
@@ -32,6 +32,8 @@
 | [`OTA_SYSTEM.md`](./OTA_SYSTEM.md) | 🔴 **결정 #18.** JS 무선 업데이트. `runtimeVersion` 고정 문자열 · 채널 `production` 하나 · 버전 문자열 오염 · 가드 **7축**. 형제 셋의 함정 넷을 처음부터 피한다 | ✅ 2026-09-10 |
 | [`STORE_LISTING.md`](./STORE_LISTING.md) | 🔴 **비공개 테스트의 관문** — 앱 설정 **11항목**의 답 · 데이터 보안 실측 근거 · 등록정보 문구(en·ko) · 권한 결함(§4) · 막고 있는 것과 누가 하나(§9) | ✅ 2026-09-11 |
 | [`legal/PRIVACY.en.md`](./legal/PRIVACY.en.md) · [`.ko.md`](./legal/PRIVACY.ko.md) | 🔴 **개인정보 처리방침 정본**(영문이 정본) — 웹 게시본은 이 파일의 사본이다. 가드 `check:privacy` 가 배포본과 대조한다 | ✅ 2026-09-11 |
+| [`legal/TERMS.en.md`](./legal/TERMS.en.md) · [`.ko.md`](./legal/TERMS.ko.md) | 🔴 **이용약관 정본**(영문이 정본 · 한국어판에 전자상거래법 판매자 정보) — 광고 제거 결제 · 청약철회 · 환불 · 미성년자 · 복습 알림의 한계. 🔴 **게시가 결제 빌드보다 먼저다** | ✅ 2026-10-01 |
+| [`OPEN_SOURCE_NOTICE.md`](./OPEN_SOURCE_NOTICE.md) | 🔴 **오픈소스 고지** — 생성기 · 드리프트 가드 · 화면. 전이 의존 **657개** · 종류 16 · 카피레프트 0 · 🟡 약한 1. 폰트는 결정 #13 로 해당 없음 | ✅ 2026-10-01 |
 | [`AUTH_SYSTEM.md`](./AUTH_SYSTEM.md) | 🔴 **신원과 연령** — 연령 게이트(결정 #25 · 조각 방식 · 부팅에 서되 벽이 아니다 · 생년 미저장) · 구글 로그인·탈퇴(Phase 7) · 가드 `check:age-gate` | ✅ 2026-09-14 |
 | [`UI_GUIDE.md`](./UI_GUIDE.md) | 🔴 **화면을 만드는 법** — 토큰 · 공통 부품 **17개** · 공통 헬퍼 · **UI 금지 목록** · 가드 `check:ui` 8축. 같은 모양을 두 화면이 따로 그리지 않는다 | ✅ 2026-09-13 |
 | [`DOC_DISCIPLINE.md`](./DOC_DISCIPLINE.md) | 문서 작업법 (`common/DOC_SYSTEM.md` 의 프로젝트판) | ✅ 2026-09-08 |
@@ -84,7 +86,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 | 구글 로그인 · 탈퇴 | ❌ | 🔄 **v1.1 클라우드 백업과 함께**(결정 #30) · ~~Phase 7~~. 🔴 같은 커밋에 |
 | ~~AI 분석 · 회상 질문~~ | 🚫 | 결정 #28(2026-09-21) — 붙이지 않는다 |
 | 실천 | ✅ | **2026-09-10.** 🔴 사용자가 직접 쓰는 실천은 **무료**다(결정 #16). 🔄 결정 #28 · #29 로 실천은 전부 무료이고 AI 제안은 폐기됐다 |
-| 광고 · 광고 제거 결제 | 🔨 | 2026-09-21 코드 ✅ · 🔴 **비공개 테스트 동안 꺼 둔다**(`ADS_LIVE = false` · 자리만 그린다) · 가드 `check:ads` · 결정 #29 · #31 · 가격 ⚠ 미결정 B · [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) §A |
+| 광고 · 광고 제거 결제 | 🔨 | 2026-09-21 코드 ✅ · ✅ **2026-10-01 광고를 켰다**(`ADS_LIVE = true` · `AD_ID` 해제 · 결정 #32) · 가격 **3,900원** · 가드 `check:ads` · ⏸ 실기기 미확인(vc12) · [`MONETIZATION_SYSTEM.md`](./MONETIZATION_SYSTEM.md) §A |
 | 백업 / 복원 | ❌ | Phase 12 (v1.1). 🔴 출시 직후 최우선 |
 | ~~광고 없음~~ | 🔄 | 결정 #29 로 광고를 넣는다(위 행) · ~~안 한다~~ |
 | ISBN 검색 · 음성 입력 | 🚫 | MVP 제외. 2차 |
@@ -128,7 +130,7 @@ Phase 정의는 [`PLAN.md`](./PLAN.md).
 
 ```bash
 npm install
-npm run verify        # ← 커밋 전 이것 하나. 아래 **20개**를 순서대로 돌린다
+npm run verify        # ← 커밋 전 이것 하나. 아래 **21개**를 순서대로 돌린다
                       #   세는 법: node -e "console.log(require('./package.json').scripts.verify.split('&&').length)"
 
 npm run typecheck     # tsc --noEmit · strict · noUncheckedIndexedAccess
@@ -153,6 +155,8 @@ npm run check:ui      # 🔴 화면이 공통 부품을 우회했나 — typogra
                       #   + 부품 목록 ⇄ UI_GUIDE §2 표 · 헬퍼 경계(UI_GUIDE §6)
 npm run check:age-gate # 🔴 연령 게이트 — 지역 × 출생연도 경계 전수 · 보수 판정식 · 생년 미저장 · 부팅 배선(AUTH_SYSTEM §1.8)
 npm run check:ads   # 🔴 광고 · 광고 제거 — 맞춤 판정(모르면 끈다) · 배치 화면 대조 · 복습 끝 전면(한 장 이상 · 한 번) · ID 짝 · pending 미지급 · finishTransaction · 부팅 순서(MONETIZATION §A)
+npm run check:licenses # 🔴 오픈소스 고지 ⇄ 지금 의존 트리 — 생성물을 **바이트로** 대조한다. 카피레프트 0 을 매 릴리스 다시 잰다
+                      #   🔴 생성기와 가드가 **같은 스크립트**다(선정 규칙을 베끼면 오경보가 난다 · PRE_LAUNCH_CHECK §2.1 ③)
 npm run check:public # 🔴 공개되면 안 되는 것 — 비밀 키 · 서비스 계정 · 개인 메일 · 내부 링크 · 전화 · 주민번호 · 사업자번호(처리방침 밖) · 비밀 파일 이름 · 훅 꺼짐
                       #   커밋(`.githooks/pre-commit` · 올릴 내용)과 push(`.githooks/pre-push`)에서도 돈다 · 값은 `.private/LINKS.md`(CLAUDE §13)
 

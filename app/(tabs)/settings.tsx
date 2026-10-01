@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/AppText';
 import { Card } from '@/components/Card';
@@ -13,6 +13,7 @@ import { Select } from '@/components/Select';
 import { ADS_LIVE } from '@/features/ads/config';
 import { openAdPrivacyOptions, useAds } from '@/features/ads/store';
 import { useBackupStore } from '@/features/backup/store';
+import { PRIVACY_URL, TERMS_URL } from '@/features/legal/urls';
 import { buyRemoveAds, restoreRemoveAds, usePurchase, type PurchaseOutcome } from '@/features/purchase/store';
 import { REMINDER_TIMES } from '@/features/review/notify';
 import { syncReminders } from '@/features/review/reminder';
@@ -205,6 +206,24 @@ export default function Settings() {
           {adMessage}
         </AppText>
       )}
+
+      {/* 🔴 법적 고지는 **스위치와 무관하게 늘 보인다.** 처리방침은 광고가 꺼져 있어도 설명해야 할 것이 있고
+          (업데이트 확인 · 기기 식별자), `GLOBAL_DATA_COMPLIANCE.md` §7 은 앱 안에서 닿게 하라고 적어 뒀다.
+          v1.0 에는 로그인 화면이 없으므로 그 자리는 여기 하나다(`features/legal/urls.ts`) */}
+      {group(t('legal.title'))}
+      <Row onPress={() => void Linking.openURL(PRIVACY_URL)}>
+        <AppText>{t('legal.privacy')}</AppText>
+        <AppText tone="muted">{'↗'}</AppText>
+      </Row>
+      <View style={{ height: spacing.sm }} />
+      <Row onPress={() => void Linking.openURL(TERMS_URL)}>
+        <AppText>{t('legal.terms')}</AppText>
+        <AppText tone="muted">{'↗'}</AppText>
+      </Row>
+      <View style={{ height: spacing.sm }} />
+      <Row onPress={() => router.push('/licenses')}>
+        <AppText>{t('legal.oss')}</AppText>
+      </Row>
     </Screen>
   );
 }

@@ -2,8 +2,8 @@
   "expo": {
     "name": "Re:Read",
     "slug": "reread",
-    "version": "0.1.11",
-    "runtimeVersion": "native-3",
+    "version": "1.0.0",
+    "runtimeVersion": "native-4",
     "updates": {
       "url": "https://u.expo.dev/8785afeb-e523-40c5-9b42-20593214aba6",
       "checkAutomatically": "ON_LOAD",
@@ -17,13 +17,9 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.vivacegames.reread",
-      "versionCode": 11,
+      "versionCode": 12,
       "edgeToEdgeEnabled": true,
-      "blockedPermissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.SYSTEM_ALERT_WINDOW",
-        "com.google.android.gms.permission.AD_ID"
-      ],
+      "blockedPermissions": ["android.permission.RECORD_AUDIO", "android.permission.SYSTEM_ALERT_WINDOW"],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icons/re-read-foreground.png",
         "monochromeImage": "./assets/icons/re-read-monochrome.png",

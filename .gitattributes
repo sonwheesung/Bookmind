@@ -1,2 +1,7 @@
 # git 훅은 sh 가 읽는다. CRLF 로 체크아웃되면 줄 끝의 CR 때문에 훅이 깨진다(CLAUDE.md §13 · scripts/check-public.mjs)
 .githooks/* text eol=lf
+
+# 🔴 오픈소스 고지 생성물은 LF 로 고정한다. `check:licenses` 가 바이트로 대조하므로
+# 체크아웃이 CRLF 로 바꾸면 새로 클론한 사람에게서만 FAIL 한다(docs/OPEN_SOURCE_NOTICE.md §2).
+# 생성기도 CRLF 를 접어서 비교하지만, 애초에 안 바뀌게 두는 쪽이 한 겹 더 안전하다.
+features/legal/credits.json text eol=lf

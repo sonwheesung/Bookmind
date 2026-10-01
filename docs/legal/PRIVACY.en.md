@@ -1,6 +1,6 @@
 # Re:Read — Privacy Policy
 
-**Effective date: 21 September 2026** · Version 1.2
+**Effective date: 1 October 2026** · Version 1.3
 
 This English text is the **canonical version**. A Korean translation is available at
 [`PRIVACY.ko.md`](./PRIVACY.ko.md); if the two ever disagree, this version governs.
@@ -87,7 +87,7 @@ The request contains only the following:
 | Sent | What it is |
 |---|---|
 | Platform | The literal value `android` |
-| Runtime version | Which native version of the app you have (currently `native-2`) |
+| Runtime version | Which native version of the app you have (currently `native-4`) |
 | Update channel | The literal value `production` |
 | Protocol and API version | Fixed technical values used by the update service |
 | Update token (`EAS-Client-ID`) | A **random identifier generated on your device** the first time the app runs, stored only in the app's own storage. It lets the service tell whether a device has already downloaded a given update |
@@ -173,11 +173,11 @@ To be concrete, none of the following is sent anywhere:
 | Advertising ID | Used by the advertising SDK in section 4.2 to choose ads |
 | Billing (Google Play) | For the ad-removal purchase in section 4.3 |
 
-> ⚠ **An honest note about version 0.2.0.** The build currently on Google Play also declares two
-> permissions the app does not use: microphone (`RECORD_AUDIO`) and display over other apps
-> (`SYSTEM_ALERT_WINDOW`). They came from the default project template we built on, not from any
-> feature. **The app contains no code that records audio or draws over other apps.** We found them
-> by auditing the build ourselves and they are removed in the next version.
+> 🟢 **A note on two permissions we removed.** Earlier test builds also declared the microphone
+> (`RECORD_AUDIO`) and display-over-other-apps (`SYSTEM_ALERT_WINDOW`) permissions. They came from
+> the default project template we built on, not from any feature, and we found them by auditing the
+> build ourselves. **They are gone from version 1.0.0**, and the app has never contained code that
+> records audio or draws over other apps.
 
 ---
 

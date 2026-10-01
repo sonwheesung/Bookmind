@@ -10,3 +10,7 @@ package-lock.json
 # diff 가 통째로 뒤집혀 "무엇이 바뀌었나"를 못 본다.
 # 문서 규율은 docs/DOC_DISCIPLINE.md 가, 정합은 check:docs 가 본다.
 *.md
+
+# 🔴 생성물이다 — `npm run licenses:build` 가 한 줄 JSON 으로 낸다.
+# prettier 가 다시 포매팅하면 `check:licenses` 의 바이트 비교가 거짓 실패를 낸다.
+features/legal/credits.json
