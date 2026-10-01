@@ -700,5 +700,56 @@ Android 13 이상을 타겟팅하는 앱은 광고 ID 사용 여부를 선언해
 
 ---
 
+### 10.3 출시명과 출시 노트 (vc12 `1.0.0`)
+
+**출시명**: `12 (1.0.0)` — 콘솔 추천값 그대로다(§8.7 의 `3 (0.3.0)` 과 같은 규칙). 내부용 이름이고 사용자에게 안 보인다.
+
+🔴 **닫는 태그는 자기 줄에 둔다.** 한 줄에 붙여 쓰면 *"2행: en-US의 태그가 닫히지 않았습니다"* 로 거부되고
+`다음` 버튼이 비활성이 된다(`BUILD.md` §7.3).
+
+```
+<en-US>
+Re:Read saves what you find in a book and brings it back when you are about to forget it.
+
+- Save a line by typing, pasting, or reading it off a photo
+- Add your own thought. The passage alone is enough
+- Meet it again on a spaced schedule, with a daily reminder
+- Turn a line into a practice you check off
+- Everything stays on your phone, and you can export a backup
+
+Every feature is free. Ads pay for the app, and one purchase removes them.
+</en-US>
+<ko-KR>
+Re:Read 는 책에서 건진 문장을 저장해 두었다가 잊을 때쯤 다시 보여 줍니다.
+
+- 직접 입력, 붙여넣기, 책장을 찍어 글자 읽기로 문장을 저장합니다
+- 내 생각을 함께 남깁니다. 원문 하나만 있어도 저장은 끝납니다
+- 간격을 두고 다시 만나고, 하루 한 번 알림을 받습니다
+- 문장 하나를 실천으로 만들어 체크합니다
+- 모든 기록은 휴대폰에만 남고, 백업 파일로 언제든 내보냅니다
+
+모든 기능이 무료입니다. 광고로 운영하고, 한 번 결제하면 광고가 사라집니다.
+</ko-KR>
+```
+
+| 검사 | 값 |
+|---|---|
+| 글자 수 | en-US **444자** · ko-KR **261자** (한도 언어당 500자) |
+| 전각 대시 | 0건 (`common/KOREAN_WRITING.md` 의 한국어 문장 규칙) |
+
+문안이 지키는 것:
+
+- 🔴 **기둥 1 을 첫 줄에 둔다** — *"저장은 원문 하나만 있으면 끝난다"* 를 *"원문 하나만 있어도 저장은 끝납니다"* 로 적었다.
+  스토어 문구가 앱의 약속과 다르면 설치한 사람이 먼저 안다.
+- 🔴 **광고를 숨기지 않는다.** 마지막 줄에 광고와 광고 제거를 함께 적었다. 설치 뒤에 알게 하는 것보다 낫고,
+  처리방침·데이터 보안 선언과도 한 방향이다(§10.2).
+- 🚫 **"기억력이 좋아집니다" 같은 효과를 약속하지 않는다.** 기둥 5(시험 앱이 아니다)와 부딪히고, 증명할 수도 없다.
+- 🚫 수치(복습률·기억률)를 쓰지 않는다. 같은 이유다.
+
+⏸ **한국어 문안은 ChatGPT 검수를 안 받았다**(§8.7 의 vc3 노트와 같은 상태 · `docs/DESIGN_REVIEW.md`).
+화면 문구가 아니라 스토어 문구라 그 창구의 대상이 아니었는데, **정식 출시 문구는 한 번 보는 것이 맞다.**
+
+---
+
 *최종 갱신: 2026-10-01 — 프로덕션 출시 절(§10) 신설. 국가 7개 · 선언 셋이 뒤집히는 표 · 법무 URL 셋의 상태를 갱신했다.
 ~~2026-09-11 신설. 콘솔 실측으로 관문이 앱 설정 11항목 전부임을 확인했고, vc2 AAB 에서 불필요한 권한 둘을 찾았다.~~*
