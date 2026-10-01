@@ -688,6 +688,60 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 ✅ **업로드 · `alpha` 트랙 · 2026-09-21** — API 로 다시 읽었다: `alpha` = `0.1.11` · `completed` · versionCode `11`. `production` 은 **비어 있다.**
 ⚠ 출시 노트는 이번에도 비어 있다(`eas submit`).
 
+## 6.11 vc12 — 🔴 정식 출시본. 광고를 켰다 (2026-10-01 · 결정 #32)
+
+사용자 지시 *"비공개 테스트 승인 났어 정식 출시 시작하자"*.
+
+| 무엇 | 값 |
+|---|---|
+| versionCode | 11 → **12** |
+| version | 0.1.11 → 🔴 **`1.0.0`**(결정 #27 의 정식 출시 이름 · §7.1). **이제 `0.x` 로 돌아갈 수 없다** |
+| runtimeVersion | `native-3` → **`native-4`** |
+| 네이티브 변경 | 🔴 **모듈은 안 늘었다. `blockedPermissions` 에서 `AD_ID` 를 뺐다.** 매니페스트가 바뀌면 네이티브가 바뀐 것이라 짝 번호를 올린다 |
+| JS 변경 | `ADS_LIVE = true`(광고 켬) · 오픈소스 라이선스 화면 · 설정의 법적 고지 셋(`8f16115`) |
+| 보관 | `D:uilds\Bookmind
+eread-vc12.aab` |
+
+🔴 **권한 게이트의 뜻이 vc11 과 반대다.** vc11 에서는 `AD_ID` 가 **없어야** 통과였고(콘솔 광고 ID 선언이 "아니요"였다),
+vc12 에서는 **있어야** 맞다. 같은 가드, 같은 허용 목록인데 **기대가 뒤집힌 것은 콘솔 선언이 바뀌기 때문이다**(`STORE_LISTING.md` §10.2).
+★ 가드가 재는 것은 "권한이 허용 목록 안인가"이고, **"그래서 콘솔 선언과 맞는가"는 사람이 본다.** 그 둘을 섞지 않는다.
+
+### 실측 (2026-10-01)
+
+| | vc11 | vc12 | |
+|---|---:|---:|---|
+| 빌드 시간 | Gradle 9m 44s | Gradle **7m 10s** | 🟢 더 빨랐다 — 네이티브가 안 늘었고 빌드 캐시가 살아 있었다 |
+| AAB 크기 | 85,324,453 B | **85,381,092 B** | +56,639 B(+0.07%). 🟢 **오픈소스 고지 173.9KB 를 실었는데 늘어난 것이 56KB 다** — JS 번들이 압축된다 |
+| 권한 수 | 33 | **34** | **+ `com.google.android.gms.permission.AD_ID`** 하나. 막음을 풀었으니 세 라이브러리의 선언이 이제 병합된다 |
+| versionCode · version | 11 · 0.1.11 | **12 · `1.0.0`** | |
+| runtimeVersion | `native-3` | **`native-4`** | `strings.xml` — 🟢 prebuild 가 `app.json` 에서 새로 만든다(손으로 맞춘 값이 아니다) |
+| 서명 | 업로드 키 | **업로드 키** | SHA1 `44:0E:B4:48:…:C4:1C` 일치 |
+| OTA 배선 | ✅ | **✅** | `expo-channel-name` · `https://u.expo.dev/8785afeb-…` |
+| 보관 | | `D:uilds\Bookmind
+eread-vc12.aab` | sha256 앞 16자 `7fb05dceca8edd0a` 원본과 일치 |
+
+🟢 **이번에는 빌드 뒤 게이트가 한 번에 통과했다.** vc11 에서 `FOREGROUND_SERVICE` 를 허용 목록에 근거와 함께 넣어 둔 것이 그대로 먹었다.
+
+⏸ 화면을 확인하지 않고 굽는다. 설치 뒤 볼 것: 배너 넷이 **실제 광고**로 차는가 · 복습을 마치면 전면이 뜨는가 ·
+설정에 **광고 제거 · 구매 복원 · 법적 고지 셋**이 보이는가 · 오픈소스 화면이 657개를 그리고 느려지지 않는가.
+
+### 🔴🔧 첫 업로드가 거부됐다 — 권한이 아니라 **선언**이었다
+
+```
+Google Api Error: Invalid request - This release includes the com.google.android.gms.permission.AD_ID
+permission but your declaration on Play Console says your app doesn't use advertising ID.
+```
+
+🟢 **거짓 초록의 반대 경우다.** §7.0.1 은 *"진단이 200 인데 `eas submit` 이 거부한다"* 를 적어 뒀는데,
+이번에는 **`eas submit` 이 Play API 까지 도달했고 거기서 내용으로 막혔다.** 권한은 멀쩡했다.
+★ 그래서 메시지를 끝까지 읽는 것이 값이었다. "submit 실패"로만 보면 또 권한을 의심했을 것이다.
+
+→ 콘솔에서 **광고 ID 선언을 "예"로 바꾼 뒤 같은 AAB 를 다시 올려** 통과했다(재빌드 없음).
+🔴 **`AD_ID` 가 든 번들은 선언이 먼저다.** 집행 순서는 `MONETIZATION_SYSTEM.md` §A.7.1 에 고쳐 적었다.
+
+✅ **업로드 · `alpha` 트랙 · 2026-10-01** — API 로 다시 읽었다: `alpha` = `1.0.0` · `completed` · versionCode `12`.
+`production` 은 **비어 있다.** `internal` 에는 옛 `0.3.0`(vc3)이 남아 있다.
+
 ## 7. 내부 테스트 업로드
 
 ### 7.0.1 🔴 거짓 초록을 **두 번째로** 확인했다 (2026-09-10 저녁)
