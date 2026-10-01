@@ -699,8 +699,7 @@ Gradle 자식 프로세스는 살아서 끝까지 갔지만 **스크립트의 �
 | runtimeVersion | `native-3` → **`native-4`** |
 | 네이티브 변경 | 🔴 **모듈은 안 늘었다. `blockedPermissions` 에서 `AD_ID` 를 뺐다.** 매니페스트가 바뀌면 네이티브가 바뀐 것이라 짝 번호를 올린다 |
 | JS 변경 | `ADS_LIVE = true`(광고 켬) · 오픈소스 라이선스 화면 · 설정의 법적 고지 셋(`8f16115`) |
-| 보관 | `D:uilds\Bookmind
-eread-vc12.aab` |
+| 보관 | `D:\builds\Bookmind\reread-vc12.aab` |
 
 🔴 **권한 게이트의 뜻이 vc11 과 반대다.** vc11 에서는 `AD_ID` 가 **없어야** 통과였고(콘솔 광고 ID 선언이 "아니요"였다),
 vc12 에서는 **있어야** 맞다. 같은 가드, 같은 허용 목록인데 **기대가 뒤집힌 것은 콘솔 선언이 바뀌기 때문이다**(`STORE_LISTING.md` §10.2).
@@ -717,8 +716,7 @@ vc12 에서는 **있어야** 맞다. 같은 가드, 같은 허용 목록인데 *
 | runtimeVersion | `native-3` | **`native-4`** | `strings.xml` — 🟢 prebuild 가 `app.json` 에서 새로 만든다(손으로 맞춘 값이 아니다) |
 | 서명 | 업로드 키 | **업로드 키** | SHA1 `44:0E:B4:48:…:C4:1C` 일치 |
 | OTA 배선 | ✅ | **✅** | `expo-channel-name` · `https://u.expo.dev/8785afeb-…` |
-| 보관 | | `D:uilds\Bookmind
-eread-vc12.aab` | sha256 앞 16자 `7fb05dceca8edd0a` 원본과 일치 |
+| 보관 | | `D:\builds\Bookmind\reread-vc12.aab` | sha256 앞 16자 `7fb05dceca8edd0a` 원본과 일치 |
 
 🟢 **이번에는 빌드 뒤 게이트가 한 번에 통과했다.** vc11 에서 `FOREGROUND_SERVICE` 를 허용 목록에 근거와 함께 넣어 둔 것이 그대로 먹었다.
 
